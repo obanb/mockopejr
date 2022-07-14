@@ -1,6 +1,9 @@
 import { routing } from '../src/routing.js';
+import { channel, ChannelOptions } from '../src/channel.js';
 
-describe('greeter function', () => {
+jest.useFakeTimers();
+
+describe('http & routing tests', () => {
   it("should test url path get from url string", () => {
     expect(routing.getUrlPath('http://localhost:8080/path1/path2')).toBe('/path1/path2');
     expect(routing.getUrlPath('http://localhost:8080/')).toBe('/');
@@ -21,33 +24,124 @@ describe('greeter function', () => {
     expect(routing.getQueryParamsPairs(queries[1])).toEqual({arg1:'2', arg2: '3'});
   })
 
-  it("bb",() => {
-    function* questionGenerator(): Generator<string, unknown, string> {
-      let state = 'idle';
-      const t = setInterval(() => {
-          console.log(state)
-          if (state === 'run') {
-              console.log('bezim')
-          }
-      }, 1000)
-      while (true) {
-        console.log('true')
-        if (state === 'stop') {
-          clearInterval(t)
-          break
-        }
-        state = yield state
-      }
-      return
-    }
-    const test = questionGenerator()
-    test.next()
-    test.next('run')
+  it("shoud test async generator with interval fn",async() => {
+    const totalTimeMs = 4000
+    const jestFn = jest.fn()
 
-    setInterval(() => {
-      test.next('stop')
-    }, 1)
+    const callbackFn = () => {
+      jestFn()
+      return Promise.resolve()
+    }
+
+    const opts: ChannelOptions = {
+      perSec: 1,
+      callbackFn
+    }
+
+    const chan = channel.new(opts)
+
+    const s1 = await chan.init
+    expect(s1.done).toBe(false)
+    expect(s1.value).toEqual({cmd:"idle"})
+
+    // generator has been initialized, but the callback has not yet run
+    expect(jestFn).not.toBeCalled();
+
+    // after the next call the next interval started
+    const s2 = await chan.next({cmd:'run', options: opts})
+
+    // w8 for intervals
+    jest.advanceTimersByTime(totalTimeMs);
+
+    expect(jestFn).toBeCalled();
+    expect(jestFn).toHaveBeenCalledTimes(totalTimeMs / (1000 * opts.perSec));
+
+    expect(s2.done).toBe(false)
+
+    const s3 = await chan.next({cmd:'kill'})
+
+    expect(s3.done).toBe(true)
+
+    expect(jestFn).toBeCalled();
+
 
     expect(1).toBe(1);
-  })
+  }),
+    it("shoud test two async generators with interval fns",async() => {
+      const totalTimeMs = 4000
+      const jestFnA = jest.fn()
+      const jestFnB = jest.fn()
+      const jestFnAB = jest.fn()
+      const jestFnBetween = jest.fn()
+
+
+      const callbackFnA = () => {
+        jestFnA()
+        jestFnAB()
+        return Promise.resolve()
+      }
+
+      const callbackFnB = () => {
+        jestFnB()
+        jestFnAB()
+        return Promise.resolve()
+      }
+
+      const optsA: ChannelOptions = {
+        perSec: 1,
+        callbackFn: callbackFnA
+      }
+
+      const optsB: ChannelOptions = {
+        perSec: 1,
+        callbackFn: callbackFnB
+      }
+
+      const chanA = channel.new(optsA)
+      const chanB = channel.new(optsB)
+
+      const s1A = await chanA.init
+      const s1b = await chanB.init
+
+      expect(s1A.done).toBe(false)
+      expect(s1A.done).toBe(false)
+      expect(s1b.value).toEqual({cmd:"idle"})
+      expect(s1b.value).toEqual({cmd:"idle"})
+
+      // generator has been initialized, but the callback has not yet run
+      expect(jestFnA).not.toBeCalled();
+      expect(jestFnB).not.toBeCalled();
+
+      // after the next call the next interval started
+      const s2A = await chanA.next({cmd:'run', options: optsA})
+      const s2B = await chanB.next({cmd:'run', options: optsB})
+
+      jestFnBetween()
+      // just in case
+      expect(jestFnBetween).toBeCalled();
+
+      // w8 for intervals
+      jest.advanceTimersByTime(totalTimeMs);
+
+      expect(jestFnA).toBeCalled();
+      expect(jestFnB).toBeCalled();
+      expect(jestFnAB).toBeCalled();
+      expect(jestFnA).toHaveBeenCalledTimes(totalTimeMs / (1000 * optsA.perSec));
+      expect(jestFnB).toHaveBeenCalledTimes(totalTimeMs / (1000 * optsB.perSec));
+
+      // 2x generator interval (4000ms / 1000) * generator interval callback call
+      expect(jestFnAB).toHaveBeenCalledTimes((totalTimeMs / (1000 * optsB.perSec)) * 2);
+
+
+      expect(s2A.done).toBe(false)
+      expect(s2B.done).toBe(false)
+
+
+
+      const s3A = await chanA.next({cmd:'kill'})
+      const s3B = await chanB.next({cmd:'kill'})
+
+      expect(s3A.done).toBe(true)
+      expect(s3B.done).toBe(true)
+    })
 });

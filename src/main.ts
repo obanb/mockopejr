@@ -7,17 +7,20 @@ const reqHolder = {
 }
 
 const createChannel = () => {
-  function* fn(): Generator<unknown,void,string> {
-    let txt = ''
+  function* fn(): Generator<any,any,any> {
+    let cmd = 'IDLE'
+
     const t = setInterval(() => {
-      if (txt === 'stop') {
+      if (cmd === 'STOP') {
         console.log('stopuju')
         clearInterval(t)
+      }else{
+        console.log("operace")
       }
-      console.log("operace")
     }, 1000)
-    while(txt !== 'stop'){
-      txt = yield
+
+    while(cmd !== 'stop'){
+      cmd = yield
     }
   }
   const s = fn()

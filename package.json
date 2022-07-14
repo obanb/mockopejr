@@ -36,7 +36,9 @@
   "author": "Ondřej Bašista",
   "license": "Apache-2.0",
   "dependencies": {
-    "tslib": "~2.4"
+    "tslib": "~2.4",
+    "uuid": "^8.3.2",
+    "uuidv4": "^6.2.13"
   },
   "volta": {
     "node": "16.13.0"
