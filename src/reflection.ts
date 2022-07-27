@@ -3,17 +3,23 @@ import { logr_expr_lang } from './logr_exp_lang.js';
 
 type JsonPrimitives = string | number | boolean | null;
 
-const reflectAndGenerate = (schema: Record<string, unknown>) => {
+const reflectAndGenerate = (schema: unknown) => {
   Object.entries(schema).map(([key, elem]) => {
-    if (logr_expr_lang.isExpr(elem)) {
-      const expr = logr_expr_lang.getExpr(elem);
-      schema[key] = logr_expr_lang.executeExpr(expr);
-    } else if (isNotEmptyPrimitiveArray(elem)) {
+    if (isNotEmptyPrimitiveArray(elem)) {
       return elem.map(generator.generateFromJsonPrimitive);
     } else if (isNotEmptyObjectArray(elem)) {
       return elem.forEach(reflectAndGenerate);
-    } else if (isPrimitive(elem)) {
-      schema[key] = generator.generateFromJsonPrimitive(elem);
+    } else if(isObject(elem)){
+        return reflectAndGenerate(elem)
+    }
+    else if (isPrimitive(elem)) {
+      if (logr_expr_lang.isExpr(elem)) {
+        const expr = logr_expr_lang.getExpr(elem);
+        schema[key] = logr_expr_lang.executeExpr(expr);
+      }
+      else {
+        schema[key] = generator.generateFromJsonPrimitive(elem);
+      }
     }
   });
   return schema;

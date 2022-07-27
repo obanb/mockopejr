@@ -3,6 +3,6 @@
     "b": "#ENUM[\"kockapes\", \"les\"]",
     "c": "#EXACT[\"pes\"]"
   },
-  "b": "#MAX[5]",
+  "b": 12,
   "c": "slovo"
 }
