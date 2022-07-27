@@ -1,63 +1,60 @@
 import { v4 as uuidv4 } from 'uuid';
 
 type PauseCommand = {
-  cmd: 'pause'
-}
+  cmd: 'pause';
+};
 
 type KillCommand = {
-  cmd: 'kill'
-}
+  cmd: 'kill';
+};
 
 type Idle = {
-  cmd: 'idle'
-}
+  cmd: 'idle';
+};
 
 type Run = {
-  cmd: 'run',
-  options: ChannelOptions
-}
+  cmd: 'run';
+  options: ChannelOptions;
+};
 
-
-export type ChannelCmd = PauseCommand | KillCommand | Idle | Run
+export type ChannelCmd = PauseCommand | KillCommand | Idle | Run;
 
 export type ChannelOptions = {
-  perSec: number,
-  callbackFn: () => Promise<unknown>
-}
-
+  perSec: number;
+  callbackFn: () => Promise<unknown>;
+};
 
 const createChannel = (opts: ChannelOptions) => {
-  const channelId = uuidv4()
-  console.log(`channel id: ${channelId} created`)
+  const channelId = uuidv4();
+  console.log(`channel id: ${channelId} created`);
 
-  async function* fn(): AsyncGenerator<ChannelCmd,void,ChannelCmd> {
+  async function* fn(): AsyncGenerator<ChannelCmd, void, ChannelCmd> {
     let cmd: ChannelCmd = {
-      cmd: 'idle'
-    }
+      cmd: 'idle',
+    };
 
-    const interval = setInterval(async() => {
+    const interval = setInterval(async () => {
       if (cmd.cmd === 'kill' || cmd.cmd === 'pause') {
-        clearInterval(interval)
-        console.log(`channel id: ${channelId} interval cleared`)
-      }else{
-        await opts.callbackFn()
+        clearInterval(interval);
+        console.log(`channel id: ${channelId} interval cleared`);
+      } else {
+        await opts.callbackFn();
       }
-    }, 1000 / opts.perSec)
+    }, 1000 / opts.perSec);
 
-    while(cmd.cmd !== 'kill'){
+    while (cmd.cmd !== 'kill') {
       // if the kill command is set, the while loop is aborted and followed by a return to done state
-      cmd = yield cmd
+      cmd = yield cmd;
     }
-    console.log(`channel id: ${channelId} generator released`)
-
+    console.log(`channel id: ${channelId} generator released`);
   }
-  const s = fn()
+  const s = fn();
   return {
     init: s.next(),
-    next: (x:ChannelCmd) => s.next(x),
-  }
-}
+    next: (x: ChannelCmd) => s.next(x),
+  };
+};
 
 export const channel = {
-  new: createChannel
-}
+  new: createChannel,
+};

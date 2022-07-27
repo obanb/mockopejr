@@ -1,0 +1,8 @@
+{
+  "a": {
+    "b": "#ENUM[\"kockapes\", \"les\"]",
+    "c": "#EXACT[\"pes\"]"
+  },
+  "b": "#MAX[5]",
+  "c": "slovo"
+}
