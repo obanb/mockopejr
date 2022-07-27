@@ -8,6 +8,7 @@ enum LogrKeyword {
   NRange = 'NRANGE',
   SRange = 'SRANGE',
   DRange = 'DRANGE',
+  Stringify = 'STR'
 }
 
 type ExpressionLiteral = `${KeywordLiteral}[${string}]`;
@@ -81,6 +82,9 @@ const executeExpr = (expr: ValueExpression): unknown => {
       return json;
     }
     case LogrKeyword.NRange: {
+      return json;
+    }
+    case LogrKeyword.Stringify: {
       return json;
     }
     default: {
