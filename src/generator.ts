@@ -1,7 +1,7 @@
 import { reflection } from './reflection.js';
 
 const generateFromJsonPrimitive = (value: unknown) => {
-  var specialsReg = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+  const specialsReg = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
   const vovelsReg = /[aeiou]/;
   const consonantsReg = /[bcdfghjklmnpqrstvwxyz]/;
   const upperCaseReg = /[A-Z]/;

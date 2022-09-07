@@ -1,38 +1,9 @@
-import { routing } from '../src/routing.js';
-import { channel, ChannelOptions } from '../src/channel.js';
+import { channel } from '../src/channel.js';
+import { ChannelOptions, CmdType } from '../src/types.js';
+
 jest.useFakeTimers();
 
-describe('http & routing tests', () => {
-  it('should test url path get from url string', () => {
-    expect(routing.getUrlPath('http://localhost:8080/path1/path2')).toBe(
-      '/path1/path2',
-    );
-    expect(routing.getUrlPath('http://localhost:8080/')).toBe('/');
-    expect(routing.getUrlPath('http://localhost:8080')).toBe('/');
-    expect(routing.getUrlPath('http://localhost:8080/path1?arg1=2')).toBe(
-      '/path1',
-    );
-  }),
-    it('should test url query params get from url path string', () => {
-      expect(
-        routing.getQueryParams('http://localhost:8080/path1?arg1=2')[0],
-      ).toBe('arg1=2');
-      expect(
-        routing.getQueryParams('http://localhost:8080/path1?arg1=2?arg2=3')[0],
-      ).toBe('arg1=2');
-      expect(
-        routing.getQueryParams('http://localhost:8080/path1?arg1=2?arg2=3')[1],
-      ).toBe('arg2=3');
-    }),
-    it('should test url query params convert to key/value pair map', () => {
-      const queries = [['arg1=2'], ['arg1=2', 'arg2=3']];
-      expect(routing.getQueryParamsPairs(queries[0])).toEqual({ arg1: '2' });
-      expect(routing.getQueryParamsPairs(queries[1])).toEqual({
-        arg1: '2',
-        arg2: '3',
-      });
-    });
-
+describe('channel tests', () => {
   it('shoud test async generator with interval fn', async () => {
     const totalTimeMs = 4000;
     const jestFn = jest.fn();
@@ -43,7 +14,6 @@ describe('http & routing tests', () => {
     };
 
     const opts: ChannelOptions = {
-      perSec: 1,
       callbackFn,
     };
 
@@ -51,23 +21,23 @@ describe('http & routing tests', () => {
 
     const s1 = await chan.init;
     expect(s1.done).toBe(false);
-    expect(s1.value).toEqual({ cmd: 'idle' });
+    expect(s1.value).toEqual({ type: CmdType.PAUSE });
 
     // generator has been initialized, but the callback has not yet run
     expect(jestFn).not.toBeCalled();
 
     // after the next call the next interval started
-    const s2 = await chan.next({ cmd: 'run', options: opts });
+    const s2 = await chan.next({  type: CmdType.RUN });
 
     // w8 for intervals
     jest.advanceTimersByTime(totalTimeMs);
 
     expect(jestFn).toBeCalled();
-    expect(jestFn).toHaveBeenCalledTimes(totalTimeMs / (1000 * opts.perSec));
+    expect(jestFn).toHaveBeenCalledTimes(totalTimeMs / (1000 ));
 
     expect(s2.done).toBe(false);
 
-    const s3 = await chan.next({ cmd: 'kill' });
+    const s3 = await chan.next({ type: CmdType.KILL });
 
     expect(s3.done).toBe(true);
 
@@ -95,12 +65,10 @@ describe('http & routing tests', () => {
       };
 
       const optsA: ChannelOptions = {
-        perSec: 1,
         callbackFn: callbackFnA,
       };
 
       const optsB: ChannelOptions = {
-        perSec: 1,
         callbackFn: callbackFnB,
       };
 
@@ -112,16 +80,24 @@ describe('http & routing tests', () => {
 
       expect(s1A.done).toBe(false);
       expect(s1A.done).toBe(false);
-      expect(s1b.value).toEqual({ cmd: 'idle' });
-      expect(s1b.value).toEqual({ cmd: 'idle' });
+      expect(s1b.value).toEqual({  type: CmdType.PAUSE });
+      expect(s1b.value).toEqual({ type: CmdType.PAUSE });
 
       // generator has been initialized, but the callback has not yet run
       expect(jestFnA).not.toBeCalled();
       expect(jestFnB).not.toBeCalled();
 
       // after the next call the next interval started
-      const s2A = await chanA.next({ cmd: 'run', options: optsA });
-      const s2B = await chanB.next({ cmd: 'run', options: optsB });
+      const s2A = await chanA.next({ type: CmdType.RUN, options: {
+        perSec: 1,
+          url: "effe",
+          buffer: 1
+        } });
+      const s2B = await chanB.next({ type: CmdType.RUN,  options: {
+          perSec: 1,
+          url: "effe",
+          buffer: 1
+        }});
 
       jestFnBetween();
       // just in case
@@ -134,25 +110,24 @@ describe('http & routing tests', () => {
       expect(jestFnB).toBeCalled();
       expect(jestFnAB).toBeCalled();
       expect(jestFnA).toHaveBeenCalledTimes(
-        totalTimeMs / (1000 * optsA.perSec),
+        totalTimeMs / (1000),
       );
       expect(jestFnB).toHaveBeenCalledTimes(
-        totalTimeMs / (1000 * optsB.perSec),
+        totalTimeMs / (1000),
       );
 
       // 2x generator interval (4000ms / 1000) * generator interval callback call
       expect(jestFnAB).toHaveBeenCalledTimes(
-        (totalTimeMs / (1000 * optsB.perSec)) * 2,
+        (totalTimeMs / (1000)) * 2,
       );
 
       expect(s2A.done).toBe(false);
       expect(s2B.done).toBe(false);
 
-      const s3A = await chanA.next({ cmd: 'kill' });
-      const s3B = await chanB.next({ cmd: 'kill' });
+      const s3A = await chanA.next({ type: CmdType.KILL });
+      const s3B = await chanB.next({ type: CmdType.KILL });
 
       expect(s3A.done).toBe(true);
       expect(s3B.done).toBe(true);
-    }),
-    it('txt', async () => {});
+    });
 });

@@ -9,15 +9,13 @@ const reflectAndGenerate = (schema: unknown) => {
       return elem.map(generator.generateFromJsonPrimitive);
     } else if (isNotEmptyObjectArray(elem)) {
       return elem.forEach(reflectAndGenerate);
-    } else if(isObject(elem)){
-        return reflectAndGenerate(elem)
-    }
-    else if (isPrimitive(elem)) {
+    } else if (isObject(elem)) {
+      return reflectAndGenerate(elem);
+    } else if (isPrimitive(elem)) {
       if (logr_expr_lang.isExpr(elem)) {
         const expr = logr_expr_lang.getExpr(elem);
         schema[key] = logr_expr_lang.executeExpr(expr);
-      }
-      else {
+      } else {
         schema[key] = generator.generateFromJsonPrimitive(elem);
       }
     }

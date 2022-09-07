@@ -1,75 +1,22 @@
-import { requestListener, routing } from './routing.js';
 import * as http from 'http';
+import { routing } from './routing.js';
+import { RouterTable } from './types.js';
 
-const reqHolder = {
-  mirror: null,
-  apply: null,
-};
-
-const createChannel = () => {
-  function* fn(): Generator<any, any, any> {
-    let cmd = 'IDLE';
-
-    const t = setInterval(() => {
-      if (cmd === 'STOP') {
-        console.log('stopuju');
-        clearInterval(t);
-      } else {
-        console.log('operace');
-      }
-    }, 1000);
-
-    while (cmd !== 'stop') {
-      cmd = yield;
-    }
-  }
-  const s = fn();
-  return (x?: string) => s.next(x);
-};
-
-const routeTable: Record<
-  string,
-  (
-    req: http.IncomingMessage,
-    res: http.ServerResponse,
-    args: unknown,
-  ) => unknown
-> = {
-  'get/info': (_, res) => {
-    res.writeHead(200);
-    res.end('ok');
-  },
-  'get/mirror': (_, res) => {
-    res.writeHead(200);
-    res.end(JSON.stringify(reqHolder.mirror.body));
-  },
-  'post/mirror': (req, res, args) => {
-    reqHolder.mirror = {};
-    reqHolder.mirror['request'] = req;
-    reqHolder.mirror['body'] = args;
-    const g = createChannel();
-
-    g('feef');
-    g('fefe');
-
-    setInterval(() => {
-      g('stop');
-    }, 10000);
-
-    res.writeHead(200);
-    res.end('ok');
-  },
-  'post/apply': (_, res) => {
-    res.writeHead(200);
-    res.end('ok');
-  },
-};
 
 export function main() {
-  const router = routing.createRouter(routeTable);
-  const listener = requestListener(router);
+  console.log('Logr started..')
+
+  runServer(8090, routing.appRouterTable, 'app')
+
+  runServer(8091, routing.proxyRouterTable, 'proxy')
+
+  runServer(8092, routing.chartRouterTable, 'chart')
+}
+
+export const runServer = (port: number, routerTable: RouterTable, desc = "") => {
+  const router = routing.createRouter(routerTable);
+  const listener = routing.requestListener(router);
   const server = http.createServer(listener);
-  const proxy = http.createServer(listener);
-  server.listen(8090);
-  proxy.listen(8091);
+  server.listen(port)
+  console.log(`${desc} server listening on port" ${port}`);
 }

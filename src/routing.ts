@@ -1,5 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import * as url from 'url';
+import { Chart, ChartType, isCmd, isRunCmd, RouterTable } from './types.js';
+import { json } from './json.js'
 
 const _HTTP_CONTENT_TYPE = 'application/json';
 const _HTTP_ENCODING = 'application/json';
@@ -28,7 +30,7 @@ const getQueryParams = (uri: string) => {
   return params;
 };
 
-export const getQueryParamsPairs = (params: string[]) => {
+const getQueryParamsPairs = (params: string[]) => {
   const pairs = params.reduce((acc, next) => {
     const [param, value] = next.split('=');
     acc[param] = value;
@@ -39,10 +41,7 @@ export const getQueryParamsPairs = (params: string[]) => {
 };
 
 const createRouter = (
-  routerTable: Record<
-    string,
-    (req: IncomingMessage, res: ServerResponse, args: unknown) => unknown
-  >,
+  routerTable: RouterTable,
 ) => {
   const routes = Object.keys(routerTable);
 
@@ -87,7 +86,7 @@ const createRouter = (
   };
 };
 
-export const requestListener =
+const requestListener =
   (router: { route: (req: IncomingMessage, res: ServerResponse) => void }) =>
   (req: IncomingMessage, res: ServerResponse) => {
     try {
@@ -99,6 +98,66 @@ export const requestListener =
     }
   };
 
+const appRouterTable: RouterTable = {
+  'get/info': (_, res) => {
+    res.writeHead(200);
+    res.end('ok');
+  },
+  'get/mirror': (_, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+  },
+  'post/mirror': async (req, res, args) => {
+    // reqHolder.mirror = {};
+    // reqHolder.mirror['request'] = req;
+    // reqHolder.mirror['body'] = args;
+
+    const date = new Date();
+    const fileName = `mirror_${date.getFullYear()}${
+      date.getMonth() + 1
+    }${date.getDate()}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
+
+    const chart: Chart = {
+      schema: args,
+      headers: req.headers,
+      type: ChartType.UNKNOWN,
+    };
+
+    await json.writeChart(fileName, chart);
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(""));
+  },
+  'post/cmd': (_, res, args) => {
+    if (isCmd(args)) {
+      if (isRunCmd(args)) {
+        console.log('shit')
+      }
+    }
+
+    res.writeHead(200);
+    res.end('ok');
+  },
+  'post/apply': (_, res) => {
+    res.writeHead(200);
+    res.end('ok');
+  },
+  'post/reload': (_, res) => {
+    res.writeHead(200);
+    res.end('ok');
+  },
+};
+
+
+const proxyRouterTable: RouterTable = {
+  'get/mirror': (_, res, args) => {
+    console.log(`mirroring body: ${JSON.stringify(args)}`);
+    res.writeHead(200);
+    res.end('ok');
+  },
+};
+
+const chartRouterTable: RouterTable = {}
+
 export const routing = {
   getUrlPath,
   getQueryParamsPairs,
@@ -106,4 +165,7 @@ export const routing = {
   httpGateKeeper,
   createRouter,
   requestListener,
+  appRouterTable,
+  proxyRouterTable,
+  chartRouterTable
 };

@@ -8,7 +8,7 @@ enum LogrKeyword {
   NRange = 'NRANGE',
   SRange = 'SRANGE',
   DRange = 'DRANGE',
-  Stringify = 'STR'
+  Stringify = 'STR',
 }
 
 type ExpressionLiteral = `${KeywordLiteral}[${string}]`;
@@ -68,8 +68,8 @@ const executeExpr = (expr: ValueExpression): unknown => {
     }
     case LogrKeyword.Exact: {
       if (Array.isArray(json) && json.length === 1) {
-        return json[0]
-      }else {
+        return json[0];
+      } else {
         throw new Error(
           `Logr expression ${expr.keyword} must be an array of one element. Example syntax: "#EXACT[\\"car\\"]"`,
         );
