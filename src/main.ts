@@ -1,7 +1,10 @@
 import * as http from 'http';
 import { routing } from './routing.js';
 import { RouterTable } from './types.js';
+import { plugableServer } from './plugableServer.js';
 
+
+export const chartServer = plugableServer.new({port: 8092, desc: 'chart'}, routing.chartRouterTable)
 
 export function main() {
   console.log('Logr started..')
@@ -10,7 +13,8 @@ export function main() {
 
   runServer(8091, routing.proxyRouterTable, 'proxy')
 
-  runServer(8092, routing.chartRouterTable, 'chart')
+  chartServer.run()
+
 }
 
 export const runServer = (port: number, routerTable: RouterTable, desc = "") => {
@@ -20,3 +24,5 @@ export const runServer = (port: number, routerTable: RouterTable, desc = "") => 
   server.listen(port)
   console.log(`${desc} server listening on port" ${port}`);
 }
+
+

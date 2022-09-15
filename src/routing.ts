@@ -57,7 +57,6 @@ const createRouter = (
           found = true;
 
           if (method === 'get') {
-            // TODO
             routerTable[key](req, res, {});
             break;
           } else if (method === 'post') {

@@ -4,16 +4,16 @@ import {
   ChartType,
   isGetChart,
   isPostChart,
-  RouterTable,
 } from './types.js';
 import { reflection } from './reflection.js';
+import { chartServer } from './main.js';
 
-const reload = async (routerTable: RouterTable, channels: any[]) => {
+const reload = async (channels: any[]) => {
   const charts = await json.readCharts();
 
   for (const chart of charts) {
     if (isGetChart(chart)) {
-      addGetChart(routerTable)(chart);
+      addGetChart(chart);
     } else if (isPostChart(chart)) {
       addPostChart(channels)(chart);
     }
@@ -23,21 +23,20 @@ const reload = async (routerTable: RouterTable, channels: any[]) => {
 };
 
 const addGetChart =
-  (routerTable: RouterTable) =>
   (chart: Chart<ChartType.GET>): void => {
-    routerTable['get/' + chart.options.url] = (_, res) => {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      if (chart.options.buffer > 1) {
-        const reflected = Array.from({length: chart.options.buffer}, () => reflection.reflectAndGenerate(chart.schema))
-        res.end(JSON.stringify(reflected));
-        return;
-      } else {
-        const reflected = reflection.reflectAndGenerate(chart.schema)
-        res.end(JSON.stringify(reflected));
-        return;
-      }
-    };
-  };
+  chartServer.plug('GET', 'get/' + chart.options.url,  (_, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    if (chart.options.buffer > 1) {
+      const reflected = Array.from({length: chart.options.buffer}, () => reflection.reflectAndGenerate(chart.schema))
+      res.end(JSON.stringify(reflected));
+      return;
+    } else {
+      const reflected = reflection.reflectAndGenerate(chart.schema)
+      res.end(JSON.stringify(reflected));
+      return;
+    }
+  })
+};
 
 const addPostChart =
   (channels: any[]) =>
