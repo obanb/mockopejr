@@ -23,6 +23,7 @@ export const runServer = (port: number, routerTable: RouterTable, desc = "") => 
   const server = http.createServer(listener);
   server.listen(port)
   console.log(`${desc} server listening on port" ${port}`);
+  return server
 }
 
 

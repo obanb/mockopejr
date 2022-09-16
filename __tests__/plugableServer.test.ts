@@ -1,25 +1,20 @@
-import { runServer } from '../src/main.js';
-import { routing } from '../src/routing.js';
-import { plugableServer } from '../src/plugableServer.js';
 import { httpUtils } from '../src/httpUtils.js';
+import { chartTestServer, testUtils } from '../src/testUtils.js';
+
+testUtils.useServers()
 
 describe('plugable server tests', () => {
   it('should test plug method', async() => {
 
-    // common app server for receiving commands
-    runServer(8090, routing.appRouterTable, 'app')
-
     // plugable chart server for online http handlers management
-    const chartServer = plugableServer.new({port: 8092, desc: 'chart'}, routing.chartRouterTable)
-
-    chartServer.run()
+    const chartServer = chartTestServer
 
     chartServer.plug('GET','hello', (_, res) => {
       res.writeHead(200);
       res.end(JSON.stringify({"hello":"hello"}))
     })
 
-    const res = await httpUtils.get('http://127.0.0.1:8092/hello')
+    const res = await httpUtils.get(`http://127.0.0.1:${testUtils.config.chart.port}/hello`)
 
     expect(
        res.status
@@ -30,20 +25,16 @@ describe('plugable server tests', () => {
   }),
     it('should test unplug method', async() => {
 
-      // common app server for receiving commands
-      runServer(8090, routing.appRouterTable, 'app')
-
       // plugable chart server for online http handlers management
-      const chartServer = plugableServer.new({port: 8092, desc: 'chart'}, routing.chartRouterTable)
+      const chartServer = chartTestServer
 
-      chartServer.run()
 
       chartServer.plug('GET','hello', (_, res) => {
         res.writeHead(200);
         res.end(JSON.stringify({"hello":"hello"}))
       })
 
-      const res = await httpUtils.get('http://127.0.0.1:8092/hello')
+      const res = await httpUtils.get(`http://127.0.0.1:${testUtils.config.chart.port}/hello`)
 
       expect(
         res.status
@@ -54,7 +45,7 @@ describe('plugable server tests', () => {
 
       chartServer.unplug('get/hello')
 
-      const failure = await httpUtils.get('http://127.0.0.1:8092/hello')
+      const failure = await httpUtils.get(`http://127.0.0.1:${testUtils.config.chart.port}/hello}`).catch(e => ({status: e.response.status}))
 
       expect(
         failure.status

@@ -3,7 +3,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath } from './routing.js';
 import * as http from 'http';
 
-const create = (options: {port: number, desc?: string}, routerTable: RouterTable) => {
+const _new = (options: {port: number, desc?: string}, routerTable: RouterTable) => {
   let serverStatus = 'IDLE'
 
   // just for clarity
@@ -66,7 +66,7 @@ const create = (options: {port: number, desc?: string}, routerTable: RouterTable
         console.log(`server cannot be started from the state: ${serverStatus}`)
       }
       srv.listen(options.port)
-      console.log(`plugable server ${options.desc} running on port: ${options.port}`)
+      console.log(`plugable server ${options.desc ?? ""}running on port: ${options.port}`)
     },
     close: () => srv.close(),
     plug: (method: 'POST' | 'GET', uri: string, httpHandler: (req: IncomingMessage, res: ServerResponse) => void) => {
@@ -88,5 +88,5 @@ const create = (options: {port: number, desc?: string}, routerTable: RouterTable
 }
 
 export const plugableServer = {
-  new: create
+  new: _new
 }
