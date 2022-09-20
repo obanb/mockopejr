@@ -1,7 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import * as url from 'url';
 import { Chart, ChartType, isCmd, isRunCmd, RouterTable } from './types.js';
-import { json } from './json.js'
+import { json } from './json.js';
+import { charts } from './charts.js';
 
 const _HTTP_CONTENT_TYPE = 'application/json';
 const _HTTP_ENCODING = 'application/json';
@@ -105,7 +106,7 @@ const appRouterTable: RouterTable = {
   'get/mirror': (_, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
   },
-  'post/mirror': async (req, res, args) => {
+  'post/mirror/get': async (req, res, args) => {
     const date = new Date();
     const fileName = `mirror_${date.getFullYear()}${
       date.getMonth() + 1
@@ -118,6 +119,24 @@ const appRouterTable: RouterTable = {
     };
 
     await json.writeChart(fileName, chart);
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(""));
+  },
+  'post/mirror/post': async (req, res, args) => {
+    await charts.fromRequest(req, args, ChartType.GET)
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(""));
+  },
+  'post/mirror/proxy/get': async (req, res, args) => {
+    await charts.fromRequest(req, args, ChartType.GET)
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(""));
+  },
+  'post/mirror/proxy/post': async (req, res, args) => {
+    await charts.fromRequest(req, args, ChartType.GET)
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(""));
