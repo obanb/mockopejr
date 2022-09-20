@@ -2,9 +2,12 @@ import * as http from 'http';
 import { routing } from './routing.js';
 import { RouterTable } from './types.js';
 import { plugableServer } from './plugableServer.js';
+import { channel } from './channel.js';
 
 
 export const chartServer = plugableServer.new({port: 8092, desc: 'chart'}, routing.chartRouterTable)
+
+export const channelGroup = channel.group()
 
 export function main() {
   console.log('Logr started..')

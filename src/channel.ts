@@ -29,7 +29,8 @@ const createChannel = (opts: ChannelOptions) => {
   }
   const s = fn();
   return {
-    init: s.next(),
+    id: () => channelId,
+    init: () => s.next(),
     next: (x: Cmd) => s.next(x),
   };
 };
@@ -38,15 +39,27 @@ const group = () => {
   let chans: Record<string, ReturnType<typeof createChannel>> = {};
 
   return {
-    add: (uid: string, chan: ReturnType<typeof createChannel>) => {
-      chans[uid] = chan;
+    add: (chan: ReturnType<typeof createChannel>) => {
+      chans[chan.id()] = chan;
     },
-    deleteByUid: (uid: string) => {
+    deleteByUid: async(uid: string, kill: boolean = true) => {
+      const chan = chans[uid]
+
+      if(kill){
+        await chan.next({type: CmdType.KILL })
+      }
+
       delete chans[uid];
     },
     getByUid: (uid: string) => chans[uid],
-    purge: () => (chans = {}),
+    purge: () => {
+      Object.entries(chans).forEach(async ([_, chan]) => {
+        await chan.next({type: CmdType.KILL })
+      })
+      chans = {}
+    },
     reload: () => (chans = {}),
+    list: () => chans
   };
 };
 

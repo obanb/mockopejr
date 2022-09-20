@@ -106,10 +106,6 @@ const appRouterTable: RouterTable = {
     res.writeHead(200, { 'Content-Type': 'application/json' });
   },
   'post/mirror': async (req, res, args) => {
-    // reqHolder.mirror = {};
-    // reqHolder.mirror['request'] = req;
-    // reqHolder.mirror['body'] = args;
-
     const date = new Date();
     const fileName = `mirror_${date.getFullYear()}${
       date.getMonth() + 1
@@ -148,7 +144,7 @@ const appRouterTable: RouterTable = {
 
 
 const proxyRouterTable: RouterTable = {
-  'get/mirror': (_, res, args) => {
+  'post/mirror': (_, res, args) => {
     console.log(`mirroring body: ${JSON.stringify(args)}`);
     res.writeHead(200);
     res.end('ok');

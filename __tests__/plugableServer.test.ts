@@ -14,7 +14,7 @@ describe('plugable server tests', () => {
       res.end(JSON.stringify({"hello":"hello"}))
     })
 
-    const res = await httpUtils.get(`http://127.0.0.1:${testUtils.config.chart.port}/hello`)
+    const res = await httpUtils.get(`${testUtils.config.localhost}:${testUtils.config.chart.port}/hello`)
 
     expect(
        res.status
@@ -34,7 +34,7 @@ describe('plugable server tests', () => {
         res.end(JSON.stringify({"hello":"hello"}))
       })
 
-      const res = await httpUtils.get(`http://127.0.0.1:${testUtils.config.chart.port}/hello`)
+      const res = await httpUtils.get(`${testUtils.config.localhost}:${testUtils.config.chart.port}/hello`)
 
       expect(
         res.status
@@ -45,7 +45,7 @@ describe('plugable server tests', () => {
 
       chartServer.unplug('get/hello')
 
-      const failure = await httpUtils.get(`http://127.0.0.1:${testUtils.config.chart.port}/hello}`).catch(e => ({status: e.response.status}))
+      const failure = await httpUtils.get(`${testUtils.config.localhost}:${testUtils.config.chart.port}/hello}`).catch(e => ({status: e.response.status}))
 
       expect(
         failure.status

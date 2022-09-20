@@ -19,7 +19,7 @@ describe('channel tests', () => {
 
     const chan = channel.new(opts);
 
-    const s1 = await chan.init;
+    const s1 = await chan.init();
     expect(s1.done).toBe(false);
     expect(s1.value).toEqual({ type: CmdType.PAUSE });
 
@@ -75,8 +75,8 @@ describe('channel tests', () => {
       const chanA = channel.new(optsA);
       const chanB = channel.new(optsB);
 
-      const s1A = await chanA.init;
-      const s1b = await chanB.init;
+      const s1A = await chanA.init();
+      const s1b = await chanB.init();
 
       expect(s1A.done).toBe(false);
       expect(s1A.done).toBe(false);

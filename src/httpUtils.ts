@@ -1,7 +1,7 @@
 import axios from 'axios/index.js';
 
-const post = async (url: string, json: Record<string, unknown>) => {
-  const resp = await axios.default.post<unknown>(url, json, {
+const post = async (url: string, data: unknown[]) => {
+  const resp = await axios.default.post<unknown>(url, data, {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
