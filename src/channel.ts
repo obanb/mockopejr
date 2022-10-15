@@ -17,7 +17,10 @@ const createChannel = (opts: ChannelOptions) => {
           `channel id: ${channelId} interval cleared by ${cmd.type} signal`,
         );
       } else {
+        console.log('callback')
         await opts.callbackFn();
+        console.log('callback res')
+
       }
     }, 1000);
 
@@ -42,7 +45,7 @@ const group = () => {
     add: (chan: ReturnType<typeof createChannel>) => {
       chans[chan.id()] = chan;
     },
-    deleteByUid: async(uid: string, kill: boolean = true) => {
+    deleteByUid: async(uid: string, kill = true) => {
       const chan = chans[uid]
 
       if(kill){
@@ -67,3 +70,5 @@ export const channel = {
   new: createChannel,
   group,
 };
+
+

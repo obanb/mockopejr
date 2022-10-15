@@ -1,8 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import * as url from 'url';
-import { Chart, ChartType, isCmd, isRunCmd, RouterTable } from './types.js';
-import { json } from './json.js';
-import { charts } from './charts.js';
+import { RouterTable } from './types.js';
 
 const _HTTP_CONTENT_TYPE = 'application/json';
 const _HTTP_ENCODING = 'application/json';
@@ -48,12 +46,16 @@ const createRouter = (
 
   return {
     route: (req: IncomingMessage, res: ServerResponse) => {
+      console.log('BHUUU KURVa 2')
+
       const method = req.method.toLowerCase();
 
       let found = false;
       for (const route of routes) {
         const path = getUrlPath(req.url);
         const key = `${method}${path}`;
+        console.log('BHUUU KURVa 2')
+
         if (key === route) {
           found = true;
 
@@ -62,11 +64,14 @@ const createRouter = (
             break;
           } else if (method === 'post') {
             let body = '';
+
+            console.log('BHUUU KURVa')
             req.on('data', (chunk) => {
               body += chunk.toString();
             });
             req.on('end', () => {
               const json = JSON.parse(body);
+              console.log('BODY KURVa', JSON.stringify(json))
               routerTable[key](req, res, json);
             });
             break;
@@ -98,80 +103,6 @@ const requestListener =
     }
   };
 
-const appRouterTable: RouterTable = {
-  'get/info': (_, res) => {
-    res.writeHead(200);
-    res.end('ok');
-  },
-  'get/mirror': (_, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-  },
-  'post/mirror/get': async (req, res, args) => {
-    const date = new Date();
-    const fileName = `mirror_${date.getFullYear()}${
-      date.getMonth() + 1
-    }${date.getDate()}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
-
-    const chart: Chart = {
-      schema: args,
-      headers: req.headers,
-      type: ChartType.UNKNOWN,
-    };
-
-    await json.writeChart(fileName, chart);
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
-  },
-  'post/mirror/post': async (req, res, args) => {
-    await charts.fromRequest(req, args, ChartType.GET)
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
-  },
-  'post/mirror/proxy/get': async (req, res, args) => {
-    await charts.fromRequest(req, args, ChartType.GET)
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
-  },
-  'post/mirror/proxy/post': async (req, res, args) => {
-    await charts.fromRequest(req, args, ChartType.GET)
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
-  },
-  'post/cmd': (_, res, args) => {
-    if (isCmd(args)) {
-      if (isRunCmd(args)) {
-        console.log('shit')
-      }
-    }
-
-    res.writeHead(200);
-    res.end('ok');
-  },
-  'post/apply': (_, res) => {
-    res.writeHead(200);
-    res.end('ok');
-  },
-  'post/reload': (_, res) => {
-    res.writeHead(200);
-    res.end('ok');
-  },
-};
-
-
-const proxyRouterTable: RouterTable = {
-  'post/mirror': (_, res, args) => {
-    console.log(`mirroring body: ${JSON.stringify(args)}`);
-    res.writeHead(200);
-    res.end('ok');
-  },
-};
-
-const chartRouterTable: RouterTable = {}
-
 export const routing = {
   getUrlPath,
   getQueryParamsPairs,
@@ -179,7 +110,4 @@ export const routing = {
   httpGateKeeper,
   createRouter,
   requestListener,
-  appRouterTable,
-  proxyRouterTable,
-  chartRouterTable
 };

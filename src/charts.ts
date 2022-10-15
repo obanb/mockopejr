@@ -6,22 +6,20 @@ import {
   isPostChart,
 } from './types.js';
 import { reflection } from './reflection.js';
-import { channelGroup, chartServer } from './main.js';
 import { channel } from './channel.js';
 import { httpUtils } from './httpUtils.js';
-import { testUtils } from './testUtils.js';
 import { IncomingMessage } from 'http';
 import { utils } from './utils.js';
 
 
-const reload = async () => {
+const reload = (chartServer: any, channelGroup: any) => async () => {
   const charts = await json.readCharts();
 
   for (const chart of charts) {
     if (isGetChart(chart)) {
-      addGetChart(chart);
+      addGetChart(chartServer)(chart);
     } else if (isPostChart(chart)) {
-      addPostChart(chart);
+      addPostChart(channelGroup)(chart);
     }
   }
 
@@ -30,7 +28,7 @@ const reload = async () => {
 
 
 
-const fromRequest = async(req: IncomingMessage, parsedBody: Record<string, unknown>, type: ChartType) => {
+const fromRequest =  (chartServer: any, channelGroup: any)  => async(req: IncomingMessage, parsedBody: Record<string, unknown>, type: ChartType) => {
   const date = new Date()
   const fileName = `${type}_${date.getFullYear()}${
     date.getMonth() + 1
@@ -53,7 +51,7 @@ const fromRequest = async(req: IncomingMessage, parsedBody: Record<string, unkno
         type,
       };
 
-      await addGetChart(getChart)
+      await addGetChart(chartServer)(getChart)
 
       return getChart
 
@@ -64,7 +62,7 @@ const fromRequest = async(req: IncomingMessage, parsedBody: Record<string, unkno
         type,
       };
 
-      await addPostChart(postChart)
+      await addPostChart(channelGroup)(postChart)
 
       return chart
 
@@ -78,7 +76,7 @@ const fromRequest = async(req: IncomingMessage, parsedBody: Record<string, unkno
 }
 
 const addGetChart =
-  (chart: Chart<ChartType.GET>): void => {
+  (chartServer: any) => (chart: Chart<ChartType.GET>): void => {
   chartServer.plug('GET', chart.options.url,  (_, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     if (chart.options.buffer > 1) {
@@ -94,10 +92,10 @@ const addGetChart =
 };
 
 const addPostChart =
-  async(chart: Chart<ChartType.POST>): Promise<void> => {
+  (channelGroup: any) => async(chart: Chart<ChartType.POST>): Promise<void> => {
     console.log(chart);
     const reflected = Array.from({length: chart.options.buffer}, () => reflection.reflectAndGenerate(chart.schema))
-    const chan = channel.new({callbackFn: () => httpUtils.post(`${testUtils.config.localhost}:${testUtils.config.chart.port}/mirror`, reflected)})
+    const chan = channel.new({callbackFn: async() => httpUtils.post(`${'http://127.0.0.1'}:${3032}/mirror`, reflected)})
     await chan.init()
     channelGroup.add(chan)
   };
@@ -105,9 +103,10 @@ const addPostChart =
 const list = () => json.readCharts();
 
 export const charts = {
+  reload,
+  fromRequest,
   addGetChart,
   addPostChart,
-  reload,
-  list,
-  fromRequest
+  list
 };
+
