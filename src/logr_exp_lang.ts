@@ -75,17 +75,42 @@ const executeExpr = (expr: ValueExpression): unknown => {
         );
       }
     }
-    case LogrKeyword.DRange: {
-      return json;
-    }
     case LogrKeyword.SRange: {
-      return json;
+      const errorMsg = `Logr expression ${expr.keyword} must be an array of one element. Example syntax: "#SRANGE[1,5]"`
+      if(Array.isArray(json) && json.length === 2){
+        const r1 = json[0]
+        const r2 = json[1]
+
+        if(!isNaN(r1) && r1 % 1 === 0 && !isNaN(r2) && r2 % 1 == 0){
+          const n = Math.random() * (r2 - r1) + r1;
+          return n.toString()
+        }else {
+          throw new Error(errorMsg)
+        }
+      }else {
+        throw new Error(errorMsg)
+      }
     }
     case LogrKeyword.NRange: {
-      return json;
+      const errorMsg = `Logr expression ${expr.keyword} must be an array of one element. Example syntax: "#DRANGE[1,5]"`
+      if(Array.isArray(json) && json.length === 2){
+        const r1 = json[0]
+        const r2 = json[1]
+
+        if(!isNaN(r1) && r1 % 1 === 0 && !isNaN(r2) && r2 % 1 == 0){
+          return Math.random() * (r2 - r1) + r1;
+        }else {
+          throw new Error(errorMsg)
+        }
+      }else {
+        throw new Error(errorMsg)
+      }
+    }
+    case LogrKeyword.DRange: {
+      return json
     }
     case LogrKeyword.Stringify: {
-      return json;
+      return JSON.stringify(json);
     }
     default: {
       const exhaustive: never = expr.keyword;

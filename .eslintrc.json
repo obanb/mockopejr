@@ -20,6 +20,7 @@
   ],
   "rules": {
     "no-useless-escape": "off",
-    "jest/no-conditional-expect": "off"
+    "jest/no-conditional-expect": "off",
+    "no-case-declarations": "off"
   }
 }
