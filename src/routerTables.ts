@@ -1,8 +1,10 @@
 import { Chart, ChartType, isCmd, isRunCmd, RouterTable } from './types.js';
 import { json } from './json.js';
 import { charts } from './charts.js';
+import { plugableServer } from './plugableServer.js';
+import { channel } from './channel.js';
 
-const appRouterTable = (chartServer: any, channelGroup: any): RouterTable => ({
+const appRouterTable = (chartServer: ReturnType<typeof plugableServer.new>, channelGroup: ReturnType<typeof channel.group>): RouterTable => ({
   'get/info': (_, res) => {
     res.writeHead(200);
     res.end('ok');

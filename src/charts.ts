@@ -10,9 +10,10 @@ import { channel } from './channel.js';
 import { httpUtils } from './httpUtils.js';
 import { IncomingMessage } from 'http';
 import { utils } from './utils.js';
+import { plugableServer } from './plugableServer.js';
 
 
-const reload = (chartServer: any, channelGroup: any) => async () => {
+const reload = (chartServer: ReturnType<typeof plugableServer.new>, channelGroup: ReturnType<typeof channel.group>) => async () => {
   const charts = await json.readCharts();
 
   for (const chart of charts) {
@@ -28,7 +29,7 @@ const reload = (chartServer: any, channelGroup: any) => async () => {
 
 
 
-const fromRequest =  (chartServer: any, channelGroup: any)  => async(req: IncomingMessage, parsedBody: Record<string, unknown>, type: ChartType) => {
+const fromRequest =  (chartServer: ReturnType<typeof plugableServer.new>, channelGroup: ReturnType<typeof channel.group>)  => async(req: IncomingMessage, parsedBody: Record<string, unknown>, type: ChartType) => {
   const date = new Date()
   const fileName = `${type}_${date.getFullYear()}${
     date.getMonth() + 1
@@ -76,7 +77,7 @@ const fromRequest =  (chartServer: any, channelGroup: any)  => async(req: Incomi
 }
 
 const addGetChart =
-  (chartServer: any) => (chart: Chart<ChartType.GET>): void => {
+  (chartServer: ReturnType<typeof plugableServer.new>) => (chart: Chart<ChartType.GET>): void => {
   chartServer.plug('GET', chart.options.url,  (_, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     if (chart.options.buffer > 1) {
@@ -92,7 +93,7 @@ const addGetChart =
 };
 
 const addPostChart =
-  (channelGroup: any) => async(chart: Chart<ChartType.POST>): Promise<void> => {
+  (channelGroup: ReturnType<typeof channel.group>) => async(chart: Chart<ChartType.POST>): Promise<void> => {
     console.log(chart);
     const reflected = Array.from({length: chart.options.buffer}, () => reflection.reflectAndGenerate(chart.schema))
     const chan = channel.new({callbackFn: async() => httpUtils.post(`${'http://127.0.0.1'}:${3032}/mirror`, reflected)})
