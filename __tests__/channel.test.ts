@@ -27,13 +27,13 @@ describe('channel tests', () => {
     expect(jestFn).not.toBeCalled();
 
     // after the next call the next interval started
-    const s2 = await chan.next({  type: CmdType.RUN });
+    const s2 = await chan.next({ type: CmdType.RUN });
 
     // w8 for intervals
     jest.advanceTimersByTime(totalTimeMs);
 
     expect(jestFn).toBeCalled();
-    expect(jestFn).toHaveBeenCalledTimes(totalTimeMs / (1000 ));
+    expect(jestFn).toHaveBeenCalledTimes(totalTimeMs / 1000);
 
     expect(s2.done).toBe(false);
 
@@ -80,7 +80,7 @@ describe('channel tests', () => {
 
       expect(s1A.done).toBe(false);
       expect(s1A.done).toBe(false);
-      expect(s1b.value).toEqual({  type: CmdType.PAUSE });
+      expect(s1b.value).toEqual({ type: CmdType.PAUSE });
       expect(s1b.value).toEqual({ type: CmdType.PAUSE });
 
       // generator has been initialized, but the callback has not yet run
@@ -88,16 +88,22 @@ describe('channel tests', () => {
       expect(jestFnB).not.toBeCalled();
 
       // after the next call the next interval started
-      const s2A = await chanA.next({ type: CmdType.RUN, options: {
-        perSec: 1,
-          url: "effe",
-          buffer: 1
-        } });
-      const s2B = await chanB.next({ type: CmdType.RUN,  options: {
+      const s2A = await chanA.next({
+        type: CmdType.RUN,
+        options: {
           perSec: 1,
-          url: "effe",
-          buffer: 1
-        }});
+          url: 'effe',
+          buffer: 1,
+        },
+      });
+      const s2B = await chanB.next({
+        type: CmdType.RUN,
+        options: {
+          perSec: 1,
+          url: 'effe',
+          buffer: 1,
+        },
+      });
 
       jestFnBetween();
       // just in case
@@ -109,17 +115,11 @@ describe('channel tests', () => {
       expect(jestFnA).toBeCalled();
       expect(jestFnB).toBeCalled();
       expect(jestFnAB).toBeCalled();
-      expect(jestFnA).toHaveBeenCalledTimes(
-        totalTimeMs / (1000),
-      );
-      expect(jestFnB).toHaveBeenCalledTimes(
-        totalTimeMs / (1000),
-      );
+      expect(jestFnA).toHaveBeenCalledTimes(totalTimeMs / 1000);
+      expect(jestFnB).toHaveBeenCalledTimes(totalTimeMs / 1000);
 
       // 2x generator interval (4000ms / 1000) * generator interval callback call
-      expect(jestFnAB).toHaveBeenCalledTimes(
-        (totalTimeMs / (1000)) * 2,
-      );
+      expect(jestFnAB).toHaveBeenCalledTimes((totalTimeMs / 1000) * 2);
 
       expect(s2A.done).toBe(false);
       expect(s2B.done).toBe(false);

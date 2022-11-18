@@ -1,25 +1,93 @@
 import { Command } from 'commander';
+import axios from 'axios/index.js';
 
 const program = new Command();
 
-program
-  .name('cli')
-  .description('CLI to some JavaScript string utilities')
-  .version('0.8.0');
+program.name('Logr CLI').description('Logr CLI').version('0.0.1');
 
 program
-  .command('split')
-  .description('Split a string into substrings and display as an array')
-  .argument('<string>', 'string to split')
-  .option('--first', 'display just the first substring')
-  .option('-s, --separator <char>', 'separator character', ',')
-  .action((str, options) => {
-    const limit = options.first ? 1 : undefined;
-    console.log(str.split(options.separator, limit));
+  .hook('preAction', (_, actionCommand) => {
+    console.log(`running command: ${actionCommand.name().toUpperCase()}`);
+    console.log('args: %O', actionCommand.args);
+    console.log('options: %o', actionCommand.opts());
+  })
+  .hook('postAction', (_, actionCommand) => {
+    console.log(`command ${actionCommand.name().toUpperCase()} executed`);
   });
 
 program
-  .command('start <service>', 'start named service')
-  .command('stop [service]', 'stop named service, or all if no name supplied');
+  .command('run')
+  .description(
+    'The command starts running the active call of the selected chart.',
+  )
+  .argument('<string>', 'chart name')
+  .option(
+    '--ps, --perSecond <string>',
+    'number of active calls per second',
+    '1',
+  )
+  .action(
+    (
+      chartName: string,
+      options: {
+        perSecond?: string;
+      },
+    ) => {
+      return new Promise(() => {
+        return axios.default
+          .post<unknown>(
+            'effef',
+            { a: 1 },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+            },
+          )
+          .catch((_) => {
+            console.log('CHYBa');
+          });
+      });
+
+      console.log('RUN');
+      console.log(chartName);
+      console.log(options.perSecond);
+    },
+  );
+
+program
+  .command('kill')
+  .description('Kill command to execute the active call of a running chart.')
+  .argument('<string>', 'chart name')
+  .option('--all, --all', 'kills all running charts')
+  .option('--h, --hard', 'also deletes the record of an existing chart')
+  .action(
+    (
+      chartName: string,
+      options: {
+        hard?: string;
+      },
+    ) => {
+      console.log('KILL');
+      console.log(chartName);
+      console.log(options.hard);
+    },
+  );
+
+program
+  .command('reload')
+  .description('Reloads all existing json charts into program memory.')
+  .option('--h, --hard', 'also deletes the record of an existing chart')
+  .action(() => {
+    console.log('RELOAD');
+  });
+
+program
+  .command('show')
+  .description('Displays a list of all JSON charts.')
+  .action(() => {
+    console.log('show');
+  });
 
 program.parse();

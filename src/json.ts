@@ -12,18 +12,25 @@ const writeChart = async (fileName: string, schema: unknown) => {
 };
 
 const readCharts = async () => {
-  const charts: Chart[] = [];
+  const charts: Record<string, Chart> = {};
   const files = await readdir(schemaPath);
   for (const f of files) {
+    const chartName = path.parse(f).name;
     const buffer = await readFile(path.join(schemaPath, f));
     const json = JSON.parse(buffer.toString());
-    charts.push(json);
+    charts[chartName] = json;
   }
 
   return charts;
 };
 
+const getCount = async () => {
+  const files = await readdir(schemaPath);
+  return files.length;
+};
+
 export const json = {
   writeChart,
   readCharts,
+  getCount,
 };

@@ -1,10 +1,10 @@
-import { Chart, ChartType, isCmd, isRunCmd, RouterTable } from './types.js';
+import { Chart, ChartType, RouterTable } from './types.js';
 import { json } from './json.js';
 import { charts } from './charts.js';
-import { plugableServer } from './plugableServer.js';
-import { channel } from './channel.js';
 
-const appRouterTable = (chartServer: ReturnType<typeof plugableServer.new>, channelGroup: ReturnType<typeof channel.group>): RouterTable => ({
+const appRouterTable = (
+  chartGroup: ReturnType<typeof charts.group>,
+): RouterTable => ({
   'get/info': (_, res) => {
     res.writeHead(200);
     res.end('ok');
@@ -27,46 +27,44 @@ const appRouterTable = (chartServer: ReturnType<typeof plugableServer.new>, chan
     await json.writeChart(fileName, chart);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
+    res.end(JSON.stringify(''));
   },
   'post/mirror/post': async (req, res, args) => {
-    await charts.fromRequest(chartServer, channelGroup)(req, args, ChartType.GET)
+    await charts.fromRequest(chartGroup)(req, args, ChartType.GET);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
+    res.end(JSON.stringify(''));
   },
   'post/mirror/proxy/get': async (req, res, args) => {
-    await charts.fromRequest(chartServer, channelGroup)(req, args, ChartType.GET)
+    await charts.fromRequest(chartGroup)(req, args, ChartType.GET);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
+    res.end(JSON.stringify(''));
   },
   'post/mirror/proxy/post': async (req, res, args) => {
-    await charts.fromRequest(chartServer, channelGroup)(req, args, ChartType.GET)
+    await charts.fromRequest(chartGroup)(req, args, ChartType.POST);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(""));
+    res.end(JSON.stringify(''));
   },
-  'post/cmd': (_, res, args) => {
-    if (isCmd(args)) {
-      if (isRunCmd(args)) {
-        console.log('shit')
-      }
-    }
+  'post/cmd': async(_, res, args) => {
+    // if (isCmd(args)) {
+      const r = await chartGroup.cmd(args.identifier as any, args as any)
+    // }
 
     res.writeHead(200);
-    res.end('ok');
+    res.end(JSON.stringify(r));
   },
   'post/apply': (_, res) => {
     res.writeHead(200);
     res.end('ok');
   },
-  'post/reload': (_, res) => {
+  'post/reload': async (_, res) => {
     res.writeHead(200);
+    await json.readCharts();
     res.end('ok');
   },
 });
-
 
 const proxyRouterTable: RouterTable = {
   'post/mirror': (_, res, args) => {
@@ -76,10 +74,10 @@ const proxyRouterTable: RouterTable = {
   },
 };
 
-const chartRouterTable: RouterTable = {}
+const chartRouterTable: RouterTable = {};
 
 export const routerTables = {
   appRouterTable,
   proxyRouterTable,
-  chartRouterTable
-}
+  chartRouterTable,
+};

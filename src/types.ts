@@ -63,8 +63,10 @@ export type KillCmd = {
 export const isCmd = (obj: any): obj is Cmd =>
   obj.type && Object.values(CmdType).includes(obj.type);
 export const isRunCmd = (cmd: Cmd): cmd is RunCmd => cmd.type === CmdType.RUN;
-export const isPause = (cmd: Cmd): cmd is RunCmd => cmd.type === CmdType.PAUSE;
-export const isKillCmd = (cmd: Cmd): cmd is RunCmd => cmd.type === CmdType.KILL;
+export const isPauseCmd = (cmd: Cmd): cmd is PauseCmd =>
+  cmd.type === CmdType.PAUSE;
+export const isKillCmd = (cmd: Cmd): cmd is KillCmd =>
+  cmd.type === CmdType.KILL;
 
 export type RouterTable = Record<
   string,
@@ -74,7 +76,6 @@ export type RouterTable = Record<
     args: Record<string, unknown>,
   ) => unknown
 >;
-
 
 export type ChannelOptions = {
   callbackFn: () => Promise<unknown>;

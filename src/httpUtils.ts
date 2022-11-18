@@ -1,7 +1,7 @@
 import axios from 'axios/index.js';
 
 const post = async (url: string, data: unknown) => {
-  console.log('CALL POST',url)
+  console.log('CALL POST', url);
   const resp = await axios.default.post<unknown>(url, data, {
     headers: {
       'Content-Type': 'application/json',
@@ -9,7 +9,7 @@ const post = async (url: string, data: unknown) => {
     },
   });
   console.log(`axios POST with status:`);
-  return  resp
+  return resp;
 };
 
 const get = async (url: string) => {
@@ -20,10 +20,10 @@ const get = async (url: string) => {
     },
   });
   console.log(`axios GET with status: ${resp.status}`);
-  return  resp
+  return resp;
 };
 
 export const httpUtils = {
   post,
-  get
+  get,
 };

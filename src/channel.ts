@@ -5,7 +5,7 @@ const createChannel = (opts: ChannelOptions) => {
   const channelId = uuidv4();
   console.log(`channel id: ${channelId} created`);
 
-  async function* fn(): AsyncGenerator<Cmd, void, Cmd> {
+  async function* fn(): AsyncGenerator<Cmd, Cmd, Cmd> {
     let cmd: Cmd = {
       type: CmdType.PAUSE,
     };
@@ -17,10 +17,9 @@ const createChannel = (opts: ChannelOptions) => {
           `channel id: ${channelId} interval cleared by ${cmd.type} signal`,
         );
       } else {
-        console.log('callback')
+        console.log('callback');
         await opts.callbackFn();
-        console.log('callback res')
-
+        console.log('callback res');
       }
     }, 1000);
 
@@ -29,6 +28,7 @@ const createChannel = (opts: ChannelOptions) => {
       cmd = yield cmd;
     }
     console.log(`channel id: ${channelId} generator released`);
+    return cmd
   }
   const s = fn();
   return {
@@ -45,11 +45,11 @@ const group = () => {
     add: (chan: ReturnType<typeof createChannel>) => {
       chans[chan.id()] = chan;
     },
-    deleteByUid: async(uid: string, kill = true) => {
-      const chan = chans[uid]
+    deleteByUid: async (uid: string, kill = true) => {
+      const chan = chans[uid];
 
-      if(kill){
-        await chan.next({type: CmdType.KILL })
+      if (kill) {
+        await chan.next({ type: CmdType.KILL });
       }
 
       delete chans[uid];
@@ -57,12 +57,12 @@ const group = () => {
     getByUid: (uid: string) => chans[uid],
     purge: () => {
       Object.entries(chans).forEach(async ([_, chan]) => {
-        await chan.next({type: CmdType.KILL })
-      })
-      chans = {}
+        await chan.next({ type: CmdType.KILL });
+      });
+      chans = {};
     },
     reload: () => (chans = {}),
-    list: () => chans
+    list: () => chans,
   };
 };
 
@@ -70,5 +70,3 @@ export const channel = {
   new: createChannel,
   group,
 };
-
-

@@ -39,14 +39,12 @@ const getQueryParamsPairs = (params: string[]) => {
   return pairs;
 };
 
-const createRouter = (
-  routerTable: RouterTable,
-) => {
+const createRouter = (routerTable: RouterTable) => {
   const routes = Object.keys(routerTable);
 
   return {
     route: (req: IncomingMessage, res: ServerResponse) => {
-      console.log('BHUUU KURVa 2')
+      console.log('BHUUU KURVa 2');
 
       const method = req.method.toLowerCase();
 
@@ -54,7 +52,7 @@ const createRouter = (
       for (const route of routes) {
         const path = getUrlPath(req.url);
         const key = `${method}${path}`;
-        console.log('BHUUU KURVa 2')
+        console.log('BHUUU KURVa 2');
 
         if (key === route) {
           found = true;
@@ -65,13 +63,13 @@ const createRouter = (
           } else if (method === 'post') {
             let body = '';
 
-            console.log('BHUUU KURVa')
+            console.log('BHUUU KURVa');
             req.on('data', (chunk) => {
               body += chunk.toString();
             });
             req.on('end', () => {
               const json = JSON.parse(body);
-              console.log('BODY KURVa', JSON.stringify(json))
+              console.log('BODY KURVa', JSON.stringify(json));
               routerTable[key](req, res, json);
             });
             break;
