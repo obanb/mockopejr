@@ -3,8 +3,8 @@ import { ChannelOptions, CmdType } from '../src/types.js';
 
 jest.useFakeTimers();
 
-describe('channel tests', () => {
-  it('shoud test async generator with interval fn', async () => {
+describe('channel/async generators tests', () => {
+  it('shoud test async generator/channel with interval fn', async () => {
     const totalTimeMs = 4000;
     const jestFn = jest.fn();
 
@@ -45,7 +45,7 @@ describe('channel tests', () => {
 
     expect(1).toBe(1);
   }),
-    it('shoud test two async generators with interval fns', async () => {
+    it('shoud test two async generators/channels with interval fns', async () => {
       const totalTimeMs = 4000;
       const jestFnA = jest.fn();
       const jestFnB = jest.fn();
@@ -109,7 +109,7 @@ describe('channel tests', () => {
       // just in case
       expect(jestFnBetween).toBeCalled();
 
-      // w8 for intervals
+      // time travel Morty
       jest.advanceTimersByTime(totalTimeMs);
 
       expect(jestFnA).toBeCalled();

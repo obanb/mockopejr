@@ -1,5 +1,7 @@
 import { Command } from 'commander';
 import axios from 'axios/index.js';
+import { testUtils } from './testUtils.js';
+import { CmdType } from './types.js';
 
 const program = new Command();
 
@@ -36,8 +38,14 @@ program
       return new Promise(() => {
         return axios.default
           .post<unknown>(
-            'effef',
-            { a: 1 },
+            `${testUtils.config.localhost}:${8090}/cmd`,
+            { type: CmdType.RUN,
+              options: {
+                perSec: 1,
+                url: null,
+                buffer: 1,
+              },
+              identifier: chartName},
             {
               headers: {
                 'Content-Type': 'application/json',
@@ -45,14 +53,14 @@ program
               },
             },
           )
-          .catch((_) => {
-            console.log('CHYBa');
+          .catch((e) => {
+            console.log(e);
           });
       });
 
       console.log('RUN');
       console.log(chartName);
-      console.log(options.perSecond);
+      console.log(options?.perSecond);
     },
   );
 

@@ -24,7 +24,7 @@
     }
   },
   "options": {
-    "url": "hello",
+    "url": null,
     "buffer": 1
   },
   "headers": {

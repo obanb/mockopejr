@@ -1,13 +1,14 @@
 import { Chart, ChartType, RouterTable } from './types.js';
 import { json } from './json.js';
 import { charts } from './charts.js';
+import { utils } from './utils.js';
 
 const appRouterTable = (
   chartGroup: ReturnType<typeof charts.group>,
 ): RouterTable => ({
   'get/info': (_, res) => {
     res.writeHead(200);
-    res.end('ok');
+    res.end(JSON.stringify(({charts: chartGroup.list()})));
   },
   'get/mirror': (_, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -30,7 +31,7 @@ const appRouterTable = (
     res.end(JSON.stringify(''));
   },
   'post/mirror/post': async (req, res, args) => {
-    await charts.fromRequest(chartGroup)(req, args, ChartType.GET);
+    await charts.fromRequest(chartGroup)(req, args, ChartType.POST);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(''));
@@ -68,7 +69,9 @@ const appRouterTable = (
 
 const proxyRouterTable: RouterTable = {
   'post/mirror': (_, res, args) => {
-    console.log(`mirroring body: ${JSON.stringify(args)}`);
+    utils.colourfulUnicorn.info(`mirroring incoming request`);
+    utils.colourfulUnicorn.prettyJson(args)
+
     res.writeHead(200);
     res.end('ok');
   },

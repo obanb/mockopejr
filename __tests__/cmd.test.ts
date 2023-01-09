@@ -1,89 +1,146 @@
-// import { routing } from '../src/routing.js';
-// import { IncomingMessage, ServerResponse } from 'http';
-import { appTestServer, chartTestServer, testChartGroup, testUtils } from '../src/testUtils.js';
-import { plugableServer } from '../src/plugableServer.js';
-// import { charts } from '../src/charts.js';
-import { server } from '../src/server.js';
+import {testChartGroup, testUtils } from '../src/testUtils.js';
 import * as post_chart from './post_chart.json';
 import { Chart, ChartType, CmdType } from '../src/types.js';
 import { httpUtils } from '../src/httpUtils.js';
-import { charts } from '../src/charts.js';
-// import { IncomingMessage, ServerResponse } from 'http';
-// import { routing } from '../src/routing.js';
 import { routerTables } from '../src/routerTables.js';
-// import { charts } from '../src/charts.js';
-// import { httpUtils } from '../src/httpUtils.js';
+
 
 const jestFn = jest.fn((callback) => callback);
-
-// beforeAll(() => {
-//   jest.spyOn(routing, 'createRouter').mockImplementation(() => ({
-//     route: (_: IncomingMessage, res: ServerResponse) => {
-//       console.log('prase');
-//       jestFn(_);
-//       console.log(res.statusCode);
-//       res.writeHead(200);
-//       res.end('ok');
-//     },
-//   }));
-// });
 testUtils.useServers();
+jest.setTimeout(10000);
 
-describe('cmd integration tests', () => {
-  it('should test channel run and stop throw server cmd', async () => {
-    jest.spyOn(plugableServer, 'new').mockImplementation(() => chartTestServer);
-    jest.spyOn(charts, 'group').mockImplementation(() => testChartGroup);
-
-    jest.spyOn(server, 'runServer').mockImplementation(() => appTestServer);
+describe('http cmd/json chart/active channel integration tests', () => {
+  it('should test the retry based chart/channel mechanism via http requests', async () => {
+    const cfg = {
+      chart: {
+        name: 'testChart',
+        method: 'POST'
+      },
+      channel: {
+        perSec: 1,
+        buffer: 1,
+        runs: 2
+      },
+      test: {
+        delay: 0.5
+      }
+    }
 
     const chart = post_chart as any as Chart<ChartType.POST>;
-    // const original = utils.structuredClone(chart)
-    await testChartGroup.add(chart, 'testChart');
+
+    await testChartGroup.add(chart, cfg.chart.name);
 
     const currentCharts = testChartGroup.list();
     const keys = Object.keys(currentCharts);
-    expect(Object.keys(keys)).toHaveLength(1);
+    expect(keys).toHaveLength(1);
 
-    const activeChannel = testChartGroup.get()['testChart'].channel;
+    const activeChannel = testChartGroup.get()[cfg.chart.name].channel;
 
     expect(activeChannel).toBeDefined();
 
-    console.log('URI', `${testUtils.config.localhost}:${testUtils.config.app.port}/info`)
-
-
-    const res = await httpUtils.post(
+    const cmdHttpResponse = await httpUtils.post(
       `${testUtils.config.localhost}:${testUtils.config.app.port}/cmd`,
       {
         type: CmdType.RUN,
         options: {
-          perSec: 1,
-          url: '--',
-          buffer: 1,
+          perSec: cfg.channel.perSec,
+          url: null,
+          buffer: cfg.channel.buffer,
         },
-        identifier: "testChart"
+        identifier: cfg.chart.name
       }
     );
 
-      jest.spyOn(routerTables.proxyRouterTable, 'post/mirror').mockImplementation((_, res, args) => {
-          console.log(res)
-          console.log("ROUTUJU",JSON.stringify(args))
-          jestFn(_)
+      jest.spyOn(routerTables.proxyRouterTable, 'post/mirror').mockImplementation((req, res, args) => {
+          jestFn(req)
           res.writeHead(200);
           res.end(JSON.stringify(args));
         }
       );
-    //
-    // console.log("APP REST", res)
-    //
-    expect(res.status).toBe(200);
+
+     expect(cmdHttpResponse.status).toBe(200);
 
 
     await new Promise((res) =>
-      setTimeout(res, 1 * 2 * 1000 + 0.5 * 1000),
+      setTimeout(res, cfg.channel.perSec * cfg.channel.runs * 1000 + cfg.test.delay * 1000),
     );
 
-    expect(jestFn).toHaveBeenCalledTimes(2);
-    expect(jestFn.mock.calls.length).toBe(2);
-    expect(jestFn.mock.calls[0][0].method).toBe('POST');
+    expect(jestFn).toHaveBeenCalledTimes(cfg.channel.runs);
+    expect(jestFn.mock.calls.length).toBe(cfg.channel.runs);
+    expect(jestFn.mock.calls[0][0].method).toBe(cfg.chart.method);
   })
+    it('should test the start/stop chart/channel mechanism via http requests', async () => {
+      const cfg = {
+        chart: {
+          name: 'testChart',
+          method: 'POST'
+        },
+        channel: {
+          perSec: 4,
+          buffer: 1,
+          runs: 2
+        },
+        test: {
+          delay: 0.5
+        }
+      }
+
+      const chart = post_chart as any as Chart<ChartType.POST>;
+
+      await testChartGroup.add(chart, cfg.chart.name);
+
+      const currentCharts = testChartGroup.list();
+      const keys = Object.keys(currentCharts);
+      expect(keys).toHaveLength(1);
+
+      const activeChannel = testChartGroup.get()[cfg.chart.name].channel;
+
+      expect(activeChannel).toBeDefined();
+
+      const cmdHttpResponse = await httpUtils.post(
+        `${testUtils.config.localhost}:${testUtils.config.app.port}/cmd`,
+        {
+          type: CmdType.RUN,
+          options: {
+            perSec: cfg.channel.perSec,
+            url: '--',
+            buffer: cfg.channel.buffer,
+          },
+          identifier: cfg.chart.name
+        }
+      );
+
+      jest.spyOn(routerTables.proxyRouterTable, 'post/mirror').mockImplementation((req, res, args) => {
+          jestFn(req)
+          res.writeHead(200);
+          res.end(JSON.stringify(args));
+        }
+      );
+
+      expect(cmdHttpResponse.status).toBe(200);
+
+      await new Promise((res) =>
+        setTimeout(res, cfg.channel.runs * 1000 + cfg.test.delay * 1000),
+      );
+
+
+      const httpPause = await httpUtils.post(
+        `${testUtils.config.localhost}:${testUtils.config.app.port}/cmd`,
+        {
+          type: CmdType.PAUSE,
+          identifier: cfg.chart.name
+        }
+      );
+
+      expect(httpPause.status).toBe(200);
+
+
+      await new Promise((res) =>
+        setTimeout(res, cfg.channel.runs * 1000),
+      );
+
+      expect(jestFn).toHaveBeenCalledTimes(cfg.channel.runs);
+      expect(jestFn.mock.calls.length).toBe(cfg.channel.runs);
+      expect(jestFn.mock.calls[0][0].method).toBe(cfg.chart.method);
+    })
 })

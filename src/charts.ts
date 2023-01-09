@@ -10,16 +10,20 @@ import { plugableServer } from './plugableServer.js';
 const reload = (chartGroup: ReturnType<typeof group>) => async () => {
   const jsonCharts = await json.readCharts();
 
+  utils.colourfulUnicorn.error(JSON.stringify(jsonCharts))
+
   await chartGroup.purge();
 
   for (const [chartName, chart] of Object.entries(jsonCharts)) {
     await chartGroup.add(chart, chartName);
   }
 
+  console.log("\x1b[36m%s\x1b[0m\'","NECO",chartGroup.list())
+
   return charts;
 };
 
-const computeChartName = async (type: ChartType) => {
+const computeIdentifiers = async (type: ChartType) => {
   const date = new Date();
   const next = await json.getCount();
 
@@ -27,7 +31,9 @@ const computeChartName = async (type: ChartType) => {
     date.getMonth() + 1
   }${date.getDate()}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
 
-  return chartName;
+  const temporaryUrl = `${next}_${type}`
+
+  return {chartName, temporaryUrl};
 };
 
 const fromRequest =
@@ -37,7 +43,7 @@ const fromRequest =
     parsedBody: Record<string, unknown>,
     type: ChartType,
   ) => {
-    const fileName = await computeChartName(type);
+    const { chartName: fileName } = await computeIdentifiers(type);
 
     const chart: Chart = {
       schema: parsedBody,
@@ -53,6 +59,10 @@ const fromRequest =
           schema: parsedBody,
           headers: req.headers,
           type,
+          options:{
+            buffer: 1,
+            url: null,
+          }
         };
 
         await chartGroup.add(getChart, fileName);
@@ -64,6 +74,11 @@ const fromRequest =
           schema: parsedBody,
           headers: req.headers,
           type,
+          options:{
+            perSec: 1,
+            buffer: 1,
+            url: null,
+          }
         };
 
         await chartGroup.add(postChart, fileName);
@@ -79,8 +94,11 @@ const fromRequest =
 
 const hookGetChart =
   (chartServer: ReturnType<typeof plugableServer.new>) =>
-  (chart: Chart<ChartType.GET>): void => {
-    chartServer.plug('GET', chart.options.url, (_, res) => {
+  async(chart: Chart<ChartType.GET>): Promise<void> => {
+
+    const url = chart.options?.url || (await computeIdentifiers(ChartType.GET)).temporaryUrl
+
+    chartServer.plug('GET',  url, (_, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       if (chart.options.buffer > 1) {
         const reflected = Array.from({ length: chart.options.buffer }, () =>
@@ -105,7 +123,7 @@ const hookPostChart = async (
   );
   const chan = channel.new({
     callbackFn: async () =>
-      httpUtils.post(`${'http://127.0.0.1'}:${3032}/mirror`, reflected),
+      httpUtils.post(chart.options.useProxy || !chart.options?.url ?`${'http://127.0.0.1'}:${3032}/mirror` : chart.options.url, reflected),
   });
   await chan.init();
 
@@ -133,12 +151,13 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
       return chart
     },
     add: async (chart: Chart, chartName?: string) => {
+      console.log("ADD", chart)
       if (isGetChart(chart)) {
-        const name = chartName ?? (await computeChartName(ChartType.GET));
+        const name = chartName ?? (await computeIdentifiers(ChartType.GET)).chartName;
         hookGetChart(chartServer)(chart);
         charts[name] = { chart };
       } else if (isPostChart(chart)) {
-        const name = chartName ?? (await computeChartName(ChartType.POST));
+        const name = chartName ?? (await computeIdentifiers(ChartType.POST)).chartName;
         const { chan } = await hookPostChart(chart);
         charts[name] = { chart, channel: chan };
       }
@@ -245,3 +264,4 @@ export const charts = {
   hookPostChart,
   group,
 };
+

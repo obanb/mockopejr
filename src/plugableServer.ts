@@ -7,8 +7,6 @@ const _new = (
   options: { port: number; desc?: string },
   defaultRouterTable: RouterTable,
 ) => {
-  const serverStatus = 'IDLE';
-
   // just for clarity
   let routeState = defaultRouterTable;
 
@@ -43,14 +41,13 @@ const _new = (
           default: {
             res.writeHead(422);
             res.end('not supported http method');
-            break;
             return
           }
         }
       }
 
     res.writeHead(404);
-    res.end('route not found');
+    res.end();
     return
 
   };
@@ -65,13 +62,7 @@ const _new = (
   });
 
   return {
-    run: (routerTable?: RouterTable) => {
-      if (serverStatus !== 'IDLE') {
-        console.log(`server cannot be started from the state: ${serverStatus}`);
-      }
-      if (routerTable) {
-        routeState = routerTable;
-      }
+    run: () => {
       srv.listen(options.port);
       console.log(
         'plugable server ' + options.desc + ' running on port: ' + options.port,
@@ -93,7 +84,6 @@ const _new = (
     },
     exists: (uri: string) => !!routeState[uri],
     info: () => ({
-      status: serverStatus,
       routes: Object.keys(routeState),
     }),
     _getRoutes: () => routeState,

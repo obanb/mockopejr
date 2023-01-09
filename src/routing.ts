@@ -2,20 +2,20 @@ import { IncomingMessage, ServerResponse } from 'http';
 import * as url from 'url';
 import { RouterTable } from './types.js';
 
-const _HTTP_CONTENT_TYPE = 'application/json';
-const _HTTP_ENCODING = 'application/json';
-
-const httpGateKeeper = (req: IncomingMessage) => {
-  const contentType = req.headers['content-type'];
-  if (!contentType.includes(_HTTP_CONTENT_TYPE)) {
-    throw new Error('Unsupported content type header.');
-  }
-
-  const accept = req.headers['accept'];
-  if (!accept.includes(_HTTP_ENCODING)) {
-    throw new Error('Unsupported accept header.');
-  }
-};
+// const _HTTP_CONTENT_TYPE = 'application/json';
+// const _HTTP_ENCODING = 'application/json';
+//
+// const httpGateKeeper = (req: IncomingMessage) => {
+//   const contentType = req.headers['content-type'];
+//   if (!contentType.includes(_HTTP_CONTENT_TYPE)) {
+//     throw new Error('Unsupported content type header.');
+//   }
+//
+//   const accept = req.headers['accept'];
+//   if (!accept.includes(_HTTP_ENCODING)) {
+//     throw new Error('Unsupported accept header.');
+//   }
+// };
 
 export const getUrlPath = (uri: string) => url.parse(uri).pathname;
 
@@ -93,7 +93,6 @@ const requestListener =
   (router: { route: (req: IncomingMessage, res: ServerResponse) => void }) =>
   (req: IncomingMessage, res: ServerResponse) => {
     try {
-      httpGateKeeper(req);
       router.route(req, res);
     } catch (e) {
       res.writeHead(400);
@@ -105,7 +104,6 @@ export const routing = {
   getUrlPath,
   getQueryParamsPairs,
   getQueryParams,
-  httpGateKeeper,
   createRouter,
   requestListener,
 };

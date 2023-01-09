@@ -16,7 +16,8 @@ export type Chart<ChartType = unknown> = {
         perSec: number;
         buffer: number;
         url: string;
-        args?: unknown[];
+        useProxy?: boolean;
+      args?: unknown[];
       }
     : ChartType extends ChartType.GET
     ? {
@@ -27,17 +28,11 @@ export type Chart<ChartType = unknown> = {
     : null;
 };
 
-export const isGetChart = (chart: Chart): chart is Chart<ChartType.GET> =>
-  chart.type === ChartType.GET;
-export const isPostChart = (chart: Chart): chart is Chart<ChartType.POST> =>
-  chart.type === ChartType.POST;
-
 export enum CmdType {
   RUN = 'RUN',
   PAUSE = 'PAUSE',
   KILL = 'KILL',
 }
-
 export type RunCmdOptions = {
   perSec: number;
   buffer: number;
@@ -60,13 +55,6 @@ export type KillCmd = {
   type: CmdType.KILL;
 };
 
-export const isCmd = (obj: any): obj is Cmd =>
-  obj.type && Object.values(CmdType).includes(obj.type);
-export const isRunCmd = (cmd: Cmd): cmd is RunCmd => cmd.type === CmdType.RUN;
-export const isPauseCmd = (cmd: Cmd): cmd is PauseCmd =>
-  cmd.type === CmdType.PAUSE;
-export const isKillCmd = (cmd: Cmd): cmd is KillCmd =>
-  cmd.type === CmdType.KILL;
 
 export type RouterTable = Record<
   string,
@@ -80,3 +68,19 @@ export type RouterTable = Record<
 export type ChannelOptions = {
   callbackFn: () => Promise<unknown>;
 };
+
+
+export const isGetChart = (chart: Chart): chart is Chart<ChartType.GET> =>
+  chart.type === ChartType.GET;
+export const isPostChart = (chart: Chart): chart is Chart<ChartType.POST> =>
+  chart.type === ChartType.POST;
+
+export const isCmd = (obj: any): obj is Cmd =>
+  obj.type && Object.values(CmdType).includes(obj.type);
+export const isRunCmd = (cmd: Cmd): cmd is RunCmd => cmd.type === CmdType.RUN;
+export const isPauseCmd = (cmd: Cmd): cmd is PauseCmd =>
+  cmd.type === CmdType.PAUSE;
+export const isKillCmd = (cmd: Cmd): cmd is KillCmd =>
+  cmd.type === CmdType.KILL;
+
+

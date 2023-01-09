@@ -70,12 +70,9 @@ const useServers = () => {
 
       console.log(`test servers closed`);
     }),
-    beforeEach(() => {
-      // testChartGroup = charts.group(chartTestServer);
-    });
-  afterEach(() => {
+  afterEach(async() => {
     jest.clearAllMocks();
-    testChartGroup = null;
+    await testChartGroup.purge()
   });
 };
 
