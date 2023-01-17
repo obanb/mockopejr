@@ -28,11 +28,16 @@ program
     'number of active calls per second',
     '1',
   )
+  .option(
+    '--url, --url <string>',
+    'target URL',
+  )
   .action(
     (
       chartName: string,
       options: {
         perSecond?: string;
+        url?: string;
       },
     ) => {
       return new Promise(() => {
@@ -41,8 +46,8 @@ program
             `${testUtils.config.localhost}:${8090}/cmd`,
             { type: CmdType.RUN,
               options: {
-                perSec: 1,
-                url: null,
+                perSec: options.perSecond,
+                url: options.url,
                 buffer: 1,
               },
               identifier: chartName},
@@ -77,11 +82,55 @@ program
         hard?: string;
       },
     ) => {
-      console.log('KILL');
-      console.log(chartName);
-      console.log(options.hard);
+      console.log(options)
+      return new Promise(() => {
+        return axios.default
+          .post<unknown>(
+            `${testUtils.config.localhost}:${8090}/cmd`,
+            { type: CmdType.KILL,
+              identifier: chartName},
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+            },
+          )
+          .catch((e) => {
+            console.log(e);
+          });
+      });
     },
   );
+
+program
+  .command('pause')
+  .description('Pauses the active call.')
+  .argument('<string>', 'chart name')
+  .action(
+    (
+      chartName: string,
+    ) => {
+      return new Promise(() => {
+        return axios.default
+          .post<unknown>(
+            `${testUtils.config.localhost}:${8090}/cmd`,
+            { type: CmdType.PAUSE,
+              identifier: chartName},
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+            },
+          )
+          .catch((e) => {
+            console.log(e);
+          });
+      });
+    },
+  );
+
 
 program
   .command('reload')

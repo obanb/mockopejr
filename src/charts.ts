@@ -1,11 +1,12 @@
 import { json } from './json.js';
-import { Chart, ChartType, Cmd, CmdType, isGetChart, isPostChart } from './types.js';
+import { Chart, ChartType, Cmd, CmdType, isGetChart, isPostChart, RunCmdOptions } from './types.js';
 import { reflection } from './reflection.js';
 import { channel } from './channel.js';
 import { httpUtils } from './httpUtils.js';
 import { IncomingMessage } from 'http';
 import { utils } from './utils.js';
 import { plugableServer } from './plugableServer.js';
+import { AxiosError } from 'axios';
 
 const reload = (chartGroup: ReturnType<typeof group>) => async () => {
   const jsonCharts = await json.readCharts();
@@ -118,12 +119,25 @@ const hookPostChart = async (
   chart: Chart<ChartType.POST>,
 ): Promise<{ chan: ReturnType<typeof channel.new> }> => {
   console.log(chart);
-  const reflected = Array.from({ length: chart.options.buffer }, () =>
-    reflection.reflectAndGenerate(chart.schema),
-  );
+
   const chan = channel.new({
-    callbackFn: async () =>
-      httpUtils.post(chart.options.useProxy || !chart.options?.url ?`${'http://127.0.0.1'}:${3032}/mirror` : chart.options.url, reflected),
+    callbackFn: async (opts?: RunCmdOptions) => {
+      const mergedOpts = {...chart.options, ...opts}
+
+      if(!mergedOpts.url || !mergedOpts.perSec){
+        throw new Error("Invalid options")
+      }
+
+      const reflected = Array.from({ length: mergedOpts?.buffer || 1 }, () =>
+        reflection.reflectAndGenerate(chart.schema),
+      );
+      console.log("VOLAM URL", mergedOpts.url)
+      return httpUtils.post(mergedOpts?.useProxy || !mergedOpts?.url ?`${'http://127.0.0.1'}:${3032}/mirror` : mergedOpts.url, reflected).catch((e: AxiosError) => {
+        console.log(e?.message)
+        console.log(e?.response?.status)
+        console.log(e?.response?.statusText)
+      })
+    }
   });
   await chan.init();
 
@@ -131,6 +145,7 @@ const hookPostChart = async (
     chan,
   };
 };
+
 
 const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
   let charts: Record<
@@ -200,11 +215,13 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
     },
     cmd: async (identifier: string, cmd: Cmd): Promise<{state: 'executed' | 'ignored' | 'forbidden',  msgs: string[]}> => {
       let chartName = identifier;
+
+      // first try, direct match
       let chart = charts[chartName];
 
-      console.log("CHART PICO", charts)
 
       if (!chart) {
+        // second try, partial match
         const keys = Object.keys(charts);
         chartName = keys.find((k) => k.includes(`${identifier}_`));
         chart = charts[chartName];

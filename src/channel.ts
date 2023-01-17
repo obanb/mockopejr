@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ChannelOptions, Cmd, CmdType } from './types.js';
+import { ChannelOptions, Cmd, CmdType, isRunCmd } from './types.js';
 
 const createChannel = (opts: ChannelOptions) => {
   const channelId = uuidv4();
@@ -12,23 +12,30 @@ const createChannel = (opts: ChannelOptions) => {
       type: CmdType.PAUSE,
     };
 
-    let timer: NodeJS.Timer
+    let timer: NodeJS.Timer = null
 
     // blocking scope until..
     while (cmd.type !== CmdType.KILL) {
       // if the kill command is set, the while loop is aborted and followed by a return to done state
       cmd = yield cmd;
 
+      if(isRunCmd(cmd)){
+        measure.start()
+        // apply interval again
+        const c = cmd
+
+        if(timer){
+          resetInterval(timer)
+        }
+
+        timer = applyInterval(timer, 1000 / c.options.perSec, measure, () => opts.callbackFn(c.options))
+      }
+
       if(cmd.type === CmdType.PAUSE){
         // if the command is of type pause, then we reset the interval but the scope generator still holds
         resetInterval(timer)
       }
 
-      if(cmd.type === CmdType.RUN){
-        measure.start()
-        // apply interval again
-        timer = applyInterval(timer, 1000, measure, opts.callbackFn)
-      }
     }
 
     resetInterval(timer)

@@ -37,6 +37,7 @@ export type RunCmdOptions = {
   perSec: number;
   buffer: number;
   url: string;
+  useProxy?: boolean;
   args?: unknown[];
 };
 
@@ -66,7 +67,7 @@ export type RouterTable = Record<
 >;
 
 export type ChannelOptions = {
-  callbackFn: () => Promise<unknown>;
+  callbackFn: (opts?: RunCmdOptions) => Promise<unknown>;
 };
 
 
