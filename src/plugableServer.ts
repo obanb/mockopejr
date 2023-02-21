@@ -18,38 +18,36 @@ const _new = (
     const path = getUrlPath(req.url);
     const key = `${method}${path}`;
 
-    const found = routeKeys.find(r => r === key)
+    const found = routeKeys.find((r) => r === key);
 
-
-      if (found) {
-        switch(method) {
-          case 'get': {
-            routeState[key](req, res, {});
-            return
-          }
-          case 'post': {
-            let body = '';
-            req.on('data', (chunk) => {
-              body += chunk.toString();
-            });
-            req.on('end', () => {
-              const json = JSON.parse(body);
-              routeState[key](req, res, json);
-            });
-            return
-          }
-          default: {
-            res.writeHead(422);
-            res.end('not supported http method');
-            return
-          }
+    if (found) {
+      switch (method) {
+        case 'get': {
+          routeState[key](req, res, {});
+          return;
+        }
+        case 'post': {
+          let body = '';
+          req.on('data', (chunk) => {
+            body += chunk.toString();
+          });
+          req.on('end', () => {
+            const json = JSON.parse(body);
+            routeState[key](req, res, json);
+          });
+          return;
+        }
+        default: {
+          res.writeHead(422);
+          res.end('not supported http method');
+          return;
         }
       }
+    }
 
     res.writeHead(404);
     res.end();
-    return
-
+    return;
   };
 
   const srv = http.createServer((req: IncomingMessage, res: ServerResponse) => {

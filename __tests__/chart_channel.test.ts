@@ -1,14 +1,9 @@
-
 import { Chart, ChartType, CmdType } from '../src/types.js';
 import * as post_chart from './post_chart.json';
 
-import {
-  testChartGroup,
-  testUtils,
-} from '../src/testUtils.js';
+import { testChartGroup, testUtils } from '../src/testUtils.js';
 import { routing } from '../src/routing.js';
 import { IncomingMessage, ServerResponse } from 'http';
-
 
 const jestFn = jest.fn((callback) => callback);
 
@@ -26,21 +21,20 @@ testUtils.useServers();
 
 describe('chart/channel integration tests', () => {
   it('should test active channel and post chart', async () => {
-
     const cfg = {
       chart: {
         name: 'testChart',
-        method: 'POST'
+        method: 'POST',
       },
       channel: {
         perSec: 1,
         buffer: 1,
-        runs: 2
+        runs: 2,
       },
       test: {
-        delay: 0.5
-      }
-    }
+        delay: 0.5,
+      },
+    };
 
     const chart = post_chart as any as Chart<ChartType.POST>;
     // const original = utils.structuredClone(chart)
@@ -51,7 +45,6 @@ describe('chart/channel integration tests', () => {
     expect(Object.keys(keys)).toHaveLength(1);
 
     const activeChannel = testChartGroup.get()['testChart'].channel;
-
 
     await activeChannel.next({
       type: CmdType.RUN,
@@ -67,7 +60,10 @@ describe('chart/channel integration tests', () => {
     expect(activeChannel).toBeDefined();
 
     await new Promise((res) =>
-      setTimeout(res, cfg.channel.perSec * cfg.channel.runs * 1000 + cfg.test.delay * 1000),
+      setTimeout(
+        res,
+        cfg.channel.perSec * cfg.channel.runs * 1000 + cfg.test.delay * 1000,
+      ),
     );
 
     expect(jestFn).toHaveBeenCalledTimes(cfg.channel.runs);

@@ -54,4 +54,3 @@ const generateFromJsonPrimitive = (value: unknown) => {
 export const generator = {
   generateFromJsonPrimitive,
 };
-

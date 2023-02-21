@@ -34,8 +34,7 @@ const useServers = () => {
     );
     chartTestServer.run();
 
-
-    testChartGroup = charts.group(chartTestServer)
+    testChartGroup = charts.group(chartTestServer);
 
     proxyTestServer = runServer(
       config.proxy.port,
@@ -70,10 +69,10 @@ const useServers = () => {
 
       console.log(`test servers closed`);
     }),
-  afterEach(async() => {
-    jest.clearAllMocks();
-    await testChartGroup.purge()
-  });
+    afterEach(async () => {
+      jest.clearAllMocks();
+      await testChartGroup.purge();
+    });
 };
 
 export const testUtils = {

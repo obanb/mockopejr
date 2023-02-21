@@ -1,5 +1,13 @@
 import { json } from './json.js';
-import { Chart, ChartType, Cmd, CmdType, isGetChart, isPostChart, RunCmdOptions } from './types.js';
+import {
+  Chart,
+  ChartType,
+  Cmd,
+  CmdType,
+  isGetChart,
+  isPostChart,
+  RunCmdOptions,
+} from './types.js';
 import { reflection } from './reflection.js';
 import { channel } from './channel.js';
 import { httpUtils } from './httpUtils.js';
@@ -11,7 +19,7 @@ import { AxiosError } from 'axios';
 const reload = (chartGroup: ReturnType<typeof group>) => async () => {
   const jsonCharts = await json.readCharts();
 
-  utils.colourfulUnicorn.error(JSON.stringify(jsonCharts))
+  utils.colourfulUnicorn.error(JSON.stringify(jsonCharts));
 
   await chartGroup.purge();
 
@@ -19,7 +27,7 @@ const reload = (chartGroup: ReturnType<typeof group>) => async () => {
     await chartGroup.add(chart, chartName);
   }
 
-  console.log("\x1b[36m%s\x1b[0m\'","NECO",chartGroup.list())
+  console.log("\x1b[36m%s\x1b[0m'", 'NECO', chartGroup.list());
 
   return charts;
 };
@@ -32,9 +40,9 @@ const computeIdentifiers = async (type: ChartType) => {
     date.getMonth() + 1
   }${date.getDate()}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
 
-  const temporaryUrl = `${next}_${type}`
+  const temporaryUrl = `${next}_${type}`;
 
-  return {chartName, temporaryUrl};
+  return { chartName, temporaryUrl };
 };
 
 const fromRequest =
@@ -60,10 +68,10 @@ const fromRequest =
           schema: parsedBody,
           headers: req.headers,
           type,
-          options:{
+          options: {
             buffer: 1,
             url: null,
-          }
+          },
         };
 
         await chartGroup.add(getChart, fileName);
@@ -75,11 +83,11 @@ const fromRequest =
           schema: parsedBody,
           headers: req.headers,
           type,
-          options:{
+          options: {
             perSec: 1,
             buffer: 1,
             url: null,
-          }
+          },
         };
 
         await chartGroup.add(postChart, fileName);
@@ -95,11 +103,12 @@ const fromRequest =
 
 const hookGetChart =
   (chartServer: ReturnType<typeof plugableServer.new>) =>
-  async(chart: Chart<ChartType.GET>): Promise<void> => {
+  async (chart: Chart<ChartType.GET>): Promise<void> => {
+    const url =
+      chart.options?.url ||
+      (await computeIdentifiers(ChartType.GET)).temporaryUrl;
 
-    const url = chart.options?.url || (await computeIdentifiers(ChartType.GET)).temporaryUrl
-
-    chartServer.plug('GET',  url, (_, res) => {
+    chartServer.plug('GET', url, (_, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       if (chart.options.buffer > 1) {
         const reflected = Array.from({ length: chart.options.buffer }, () =>
@@ -122,22 +131,29 @@ const hookPostChart = async (
 
   const chan = channel.new({
     callbackFn: async (opts?: RunCmdOptions) => {
-      const mergedOpts = {...chart.options, ...opts}
+      const mergedOpts = { ...chart.options, ...opts };
 
-      if(!mergedOpts.url || !mergedOpts.perSec){
-        throw new Error("Invalid options")
+      if (!mergedOpts.url || !mergedOpts.perSec) {
+        throw new Error('Invalid options');
       }
 
       const reflected = Array.from({ length: mergedOpts?.buffer || 1 }, () =>
         reflection.reflectAndGenerate(chart.schema),
       );
-      console.log("VOLAM URL", mergedOpts.url)
-      return httpUtils.post(mergedOpts?.useProxy || !mergedOpts?.url ?`${'http://127.0.0.1'}:${3032}/mirror` : mergedOpts.url, reflected).catch((e: AxiosError) => {
-        console.log(e?.message)
-        console.log(e?.response?.status)
-        console.log(e?.response?.statusText)
-      })
-    }
+      console.log('VOLAM URL', mergedOpts.url);
+      return httpUtils
+        .post(
+          mergedOpts?.useProxy || !mergedOpts?.url
+            ? `${'http://127.0.0.1'}:${3032}/mirror`
+            : mergedOpts.url,
+          reflected,
+        )
+        .catch((e: AxiosError) => {
+          console.log(e?.message);
+          console.log(e?.response?.status);
+          console.log(e?.response?.statusText);
+        });
+    },
   });
   await chan.init();
 
@@ -145,7 +161,6 @@ const hookPostChart = async (
     chan,
   };
 };
-
 
 const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
   let charts: Record<
@@ -163,16 +178,18 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
         chart = charts[chartName];
       }
 
-      return chart
+      return chart;
     },
     add: async (chart: Chart, chartName?: string) => {
-      console.log("ADD", chart)
+      console.log('ADD', chart);
       if (isGetChart(chart)) {
-        const name = chartName ?? (await computeIdentifiers(ChartType.GET)).chartName;
+        const name =
+          chartName ?? (await computeIdentifiers(ChartType.GET)).chartName;
         hookGetChart(chartServer)(chart);
         charts[name] = { chart };
       } else if (isPostChart(chart)) {
-        const name = chartName ?? (await computeIdentifiers(ChartType.POST)).chartName;
+        const name =
+          chartName ?? (await computeIdentifiers(ChartType.POST)).chartName;
         const { chan } = await hookPostChart(chart);
         charts[name] = { chart, channel: chan };
       }
@@ -213,12 +230,17 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
 
       delete chart[chartName];
     },
-    cmd: async (identifier: string, cmd: Cmd): Promise<{state: 'executed' | 'ignored' | 'forbidden',  msgs: string[]}> => {
+    cmd: async (
+      identifier: string,
+      cmd: Cmd,
+    ): Promise<{
+      state: 'executed' | 'ignored' | 'forbidden';
+      msgs: string[];
+    }> => {
       let chartName = identifier;
 
       // first try, direct match
       let chart = charts[chartName];
-
 
       if (!chart) {
         // second try, partial match
@@ -231,48 +253,65 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
         console.log(`no chart with identifier ${identifier} found`);
       }
 
-
-      if(isPostChart(chart.chart)){
+      if (isPostChart(chart.chart)) {
         const y = await chart.channel.next(cmd);
-        if(y.done){
-            return {state: 'ignored', msgs: ['command ignored - channel no longer active']}
-        }else{
-          return {state: 'executed', msgs: [`command {${cmd.type}} executed`, `actual channel state: value: {${y.value}}, done: ${y.done}`]}
+        if (y.done) {
+          return {
+            state: 'ignored',
+            msgs: ['command ignored - channel no longer active'],
+          };
+        } else {
+          return {
+            state: 'executed',
+            msgs: [
+              `command {${cmd.type}} executed`,
+              `actual channel state: value: {${y.value}}, done: ${y.done}`,
+            ],
+          };
         }
       }
 
-
-      if(isGetChart(chart.chart)){
-        const uri = chart.chart.options.url
-        const route = chartServer.exists(uri)
+      if (isGetChart(chart.chart)) {
+        const uri = chart.chart.options.url;
+        const route = chartServer.exists(uri);
 
         switch (cmd.type) {
           case CmdType.PAUSE:
           case CmdType.KILL:
-            if(!route){
-              return {state: 'executed', msgs: [`route {${uri}} not found, ignoring`]}
+            if (!route) {
+              return {
+                state: 'executed',
+                msgs: [`route {${uri}} not found, ignoring`],
+              };
             }
             chartServer.unplug(uri);
             delete chart[chartName];
-            return {state: 'executed', msgs: [`command {${cmd.type}} executed`]}
+            return {
+              state: 'executed',
+              msgs: [`command {${cmd.type}} executed`],
+            };
           case CmdType.RUN:
-            if(route){
-              return {state: 'executed', msgs: [`existing route {${uri}} found, replacing`,`creating route {${uri}}`]}
+            if (route) {
+              return {
+                state: 'executed',
+                msgs: [
+                  `existing route {${uri}} found, replacing`,
+                  `creating route {${uri}}`,
+                ],
+              };
             }
             await hookGetChart(chartServer)(chart.chart);
 
-            return {state: 'executed', msgs: [`creating route {${uri}}`]}
+            return { state: 'executed', msgs: [`creating route {${uri}}`] };
         }
       }
 
-      return {state: 'forbidden', msgs: ["fe"]}
-
+      return { state: 'forbidden', msgs: ['fe'] };
     },
     list: () => Object.keys(charts),
     get: () => charts,
   };
 };
-
 
 export const charts = {
   reload,
@@ -281,4 +320,3 @@ export const charts = {
   hookPostChart,
   group,
 };
-

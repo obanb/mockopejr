@@ -8,7 +8,7 @@ const appRouterTable = (
 ): RouterTable => ({
   'get/info': (_, res) => {
     res.writeHead(200);
-    res.end(JSON.stringify(({charts: chartGroup.list()})));
+    res.end(JSON.stringify({ charts: chartGroup.list() }));
   },
   'get/mirror': (_, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -48,9 +48,9 @@ const appRouterTable = (
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(''));
   },
-  'post/cmd': async(_, res, args) => {
+  'post/cmd': async (_, res, args) => {
     // if (isCmd(args)) {
-      const r = await chartGroup.cmd(args.identifier as any, args as any)
+    const r = await chartGroup.cmd(args.identifier as any, args as any);
     // }
 
     res.writeHead(200);
@@ -70,7 +70,7 @@ const appRouterTable = (
 const proxyRouterTable: RouterTable = {
   'post/mirror': (_, res, args) => {
     utils.colourfulUnicorn.info(`mirroring incoming request`);
-    utils.colourfulUnicorn.prettyJson(args)
+    utils.colourfulUnicorn.prettyJson(args);
 
     res.writeHead(200);
     res.end('ok');

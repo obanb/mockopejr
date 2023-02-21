@@ -28,10 +28,7 @@ program
     'number of active calls per second',
     '1',
   )
-  .option(
-    '--url, --url <string>',
-    'target URL',
-  )
+  .option('--url, --url <string>', 'target URL')
   .action(
     (
       chartName: string,
@@ -44,13 +41,15 @@ program
         return axios.default
           .post<unknown>(
             `${testUtils.config.localhost}:${8090}/cmd`,
-            { type: CmdType.RUN,
+            {
+              type: CmdType.RUN,
               options: {
                 perSec: options.perSecond,
                 url: options.url,
                 buffer: 1,
               },
-              identifier: chartName},
+              identifier: chartName,
+            },
             {
               headers: {
                 'Content-Type': 'application/json',
@@ -82,13 +81,12 @@ program
         hard?: string;
       },
     ) => {
-      console.log(options)
+      console.log(options);
       return new Promise(() => {
         return axios.default
           .post<unknown>(
             `${testUtils.config.localhost}:${8090}/cmd`,
-            { type: CmdType.KILL,
-              identifier: chartName},
+            { type: CmdType.KILL, identifier: chartName },
             {
               headers: {
                 'Content-Type': 'application/json',
@@ -107,30 +105,24 @@ program
   .command('pause')
   .description('Pauses the active call.')
   .argument('<string>', 'chart name')
-  .action(
-    (
-      chartName: string,
-    ) => {
-      return new Promise(() => {
-        return axios.default
-          .post<unknown>(
-            `${testUtils.config.localhost}:${8090}/cmd`,
-            { type: CmdType.PAUSE,
-              identifier: chartName},
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-              },
+  .action((chartName: string) => {
+    return new Promise(() => {
+      return axios.default
+        .post<unknown>(
+          `${testUtils.config.localhost}:${8090}/cmd`,
+          { type: CmdType.PAUSE, identifier: chartName },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
             },
-          )
-          .catch((e) => {
-            console.log(e);
-          });
-      });
-    },
-  );
-
+          },
+        )
+        .catch((e) => {
+          console.log(e);
+        });
+    });
+  });
 
 program
   .command('reload')

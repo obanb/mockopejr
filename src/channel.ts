@@ -6,43 +6,44 @@ const createChannel = (opts: ChannelOptions) => {
   console.log(`channel id: ${channelId} created`);
 
   async function* gen(): AsyncGenerator<Cmd, Cmd, Cmd> {
-    const measure = measuring()
+    const measure = measuring();
 
     let cmd: Cmd = {
       type: CmdType.PAUSE,
     };
 
-    let timer: NodeJS.Timer = null
+    let timer: NodeJS.Timer = null;
 
     // blocking scope until..
     while (cmd.type !== CmdType.KILL) {
       // if the kill command is set, the while loop is aborted and followed by a return to done state
       cmd = yield cmd;
 
-      if(isRunCmd(cmd)){
-        measure.start()
+      if (isRunCmd(cmd)) {
+        measure.start();
         // apply interval again
-        const c = cmd
+        const c = cmd;
 
-        if(timer){
-          resetInterval(timer)
+        if (timer) {
+          resetInterval(timer);
         }
 
-        timer = applyInterval(timer, 1000 / c.options.perSec, measure, () => opts.callbackFn(c.options))
+        timer = applyInterval(timer, 1000 / c.options.perSec, measure, () =>
+          opts.callbackFn(c.options),
+        );
       }
 
-      if(cmd.type === CmdType.PAUSE){
+      if (cmd.type === CmdType.PAUSE) {
         // if the command is of type pause, then we reset the interval but the scope generator still holds
-        resetInterval(timer)
+        resetInterval(timer);
       }
-
     }
 
-    resetInterval(timer)
+    resetInterval(timer);
 
     console.log(`channel id: ${channelId} generator released`);
 
-    return cmd
+    return cmd;
   }
   // must persists
   const g = gen();
@@ -64,52 +65,56 @@ const measuring = () => {
     error: 0,
     slowest: 40,
     fastest: 10,
-  }
+  };
 
   return {
-    start(){
-      m.start = Date.now()
+    start() {
+      m.start = Date.now();
     },
     inc: (status: number, duration: number) => {
-      m.requests += 1
+      m.requests += 1;
 
-      if(m.slowest < duration || m.slowest === 0){
-        m.slowest = duration
+      if (m.slowest < duration || m.slowest === 0) {
+        m.slowest = duration;
       }
 
-      if(m.fastest > duration || m.fastest === 0){
-        m.fastest = duration
+      if (m.fastest > duration || m.fastest === 0) {
+        m.fastest = duration;
       }
 
-      if(status < 400) {
-        m.ok += 1
+      if (status < 400) {
+        m.ok += 1;
       } else {
-        m.error += 1
+        m.error += 1;
       }
     },
-    update(key: keyof typeof m, value: number){
-      m[key] = value
+    update(key: keyof typeof m, value: number) {
+      m[key] = value;
     },
-    close(){
-      m.end = Date.now()
-      m.duration = m.end - m.start
-      m.avg = m.duration / m.requests
-      return m
-    }
-  }
-}
+    close() {
+      m.end = Date.now();
+      m.duration = m.end - m.start;
+      m.avg = m.duration / m.requests;
+      return m;
+    },
+  };
+};
 
+const applyInterval = (
+  timer: NodeJS.Timer,
+  interval: number,
+  measure: ReturnType<typeof measuring>,
+  callback: () => Promise<unknown>,
+) => {
+  timer = setInterval(async () => {
+    measure.start();
+    await callback();
+    measure.inc(200, measure.close().duration);
+  }, interval);
+  return timer;
+};
 
-const applyInterval = (timer: NodeJS.Timer, interval: number, measure: ReturnType<typeof measuring>,callback: () => Promise<unknown>) => {
-  timer = setInterval(async() => {
-    measure.start()
-    await callback()
-    measure.inc(200, measure.close().duration)
-  }, interval)
-  return timer
-}
-
-const resetInterval = (timer: NodeJS.Timer) => clearInterval(timer)
+const resetInterval = (timer: NodeJS.Timer) => clearInterval(timer);
 
 const group = () => {
   let chans: Record<string, ReturnType<typeof createChannel>> = {};

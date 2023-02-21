@@ -17,7 +17,7 @@ export type Chart<ChartType = unknown> = {
         buffer: number;
         url: string;
         useProxy?: boolean;
-      args?: unknown[];
+        args?: unknown[];
       }
     : ChartType extends ChartType.GET
     ? {
@@ -56,7 +56,6 @@ export type KillCmd = {
   type: CmdType.KILL;
 };
 
-
 export type RouterTable = Record<
   string,
   (
@@ -70,7 +69,6 @@ export type ChannelOptions = {
   callbackFn: (opts?: RunCmdOptions) => Promise<unknown>;
 };
 
-
 export const isGetChart = (chart: Chart): chart is Chart<ChartType.GET> =>
   chart.type === ChartType.GET;
 export const isPostChart = (chart: Chart): chart is Chart<ChartType.POST> =>
@@ -83,5 +81,3 @@ export const isPauseCmd = (cmd: Cmd): cmd is PauseCmd =>
   cmd.type === CmdType.PAUSE;
 export const isKillCmd = (cmd: Cmd): cmd is KillCmd =>
   cmd.type === CmdType.KILL;
-
-
