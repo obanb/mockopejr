@@ -6,7 +6,7 @@
 // TOKENIZER
 // splits input string into arrays of individual tokens
 
-// input = "#PLUS(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))"
+// input = "#INSERT(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))"
 
 // const tokens = [
 //   {
@@ -142,11 +142,11 @@
 // TRAVERSER
 // recursively traverses the parents and their children and evaluates the result in the composition style (a(b(c(value))) according to the assigned function
 
-// input =  "#PLUS(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))"
+// input =  "#INSERT(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))"
 // const result = SOME_PREFIX-2.2161299227719167-SOME_SUFFIX
 
 
-type Expression = '#EXACT' | '#STRINGIFY' | '#RANGE' | '#PLUS';
+type Expression = '#EXACT' | '#STRINGIFY' | '#RANGE' | '#INSERT';
 
 type GrammerSubtype =
   | Expression
@@ -205,11 +205,11 @@ const grammar: Dictionary = {
     match: /\#RANGE/,
     value: '#RANGE',
   },
-  '#PLUS': {
+  '#INSERT': {
     type: 'EXPRESSION',
-    subtype: '#PLUS',
-    match: /\#PLUS/,
-    value: '#PLUS',
+    subtype: '#INSERT',
+    match: /\#INSERT/,
+    value: '#INSERT',
   },
   word: {
     type: 'VALUE',
@@ -315,7 +315,7 @@ const expressionHooks = (exp: Expression) => {
       };
     case '#STRINGIFY':
       return JSON.stringify;
-    case '#PLUS':
+    case '#INSERT':
       return (...args: any[]) => {
         if (args && args.length > 3) {
           throw new Error('shit');
@@ -352,7 +352,7 @@ const traverser = (ast: AST): unknown => {
   throw new Error(`Unknown AST node type: ${ast.type}`);
 };
 
-const t = tokenizer('#PLUS(EGDPORTAL-,-LPZ,#STRINGIFY(#RANGE(1,3)))');
+const t = tokenizer('#INSERT(EGDPORTAL-,-LPZ,#STRINGIFY(#RANGE(1,3)))');
 // const t = tokenizer("#STRINGIFY({a:1,b:2})")
 const p = parser(t);
 
