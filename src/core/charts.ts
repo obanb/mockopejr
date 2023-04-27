@@ -7,19 +7,20 @@ import {
   isGetChart,
   isPostChart,
   RunCmdOptions,
-} from './types.js';
-import { reflection } from './reflection.js';
+} from '../types.js';
 import { channel } from './channel.js';
-import { httpUtils } from './httpUtils.js';
 import { IncomingMessage } from 'http';
-import { utils } from './utils.js';
-import { plugableServer } from './plugableServer.js';
 import { AxiosError } from 'axios';
+import { reflection } from '../parsing/reflection.js';
+import { httpUtils } from '../utils/httpUtils.js';
+import { colourfulUnicorn } from '../utils/colourfulUnicorn.js';
+import { commonUtils } from '../utils/commonUtils.js';
+
 
 const reload = (chartGroup: ReturnType<typeof group>) => async () => {
   const jsonCharts = await json.readCharts();
 
-  utils.colourfulUnicorn.error(JSON.stringify(jsonCharts));
+ colourfulUnicorn.error(JSON.stringify(jsonCharts));
 
   await chartGroup.purge();
 
@@ -97,7 +98,7 @@ const fromRequest =
       case ChartType.UNKNOWN:
         return chart;
       default:
-        return utils.absurd<Chart>(type);
+        return commonUtils.absurd<Chart>(type);
     }
   };
 

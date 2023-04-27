@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ChannelOptions, Cmd, CmdType, isRunCmd } from './types.js';
+import { ChannelOptions, Cmd, CmdType, isRunCmd } from '../types.js';
 
 const createChannel = (opts: ChannelOptions) => {
   const channelId = uuidv4();

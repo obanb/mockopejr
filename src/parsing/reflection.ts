@@ -1,5 +1,6 @@
 import { generator } from './generator.js';
-import { logr_expr_lang } from './logr_exp_lang.js';
+import { Expression } from './types.js';
+import { expressionParser } from './expression_parser.js';
 
 type JsonPrimitives = string | number | boolean | null;
 
@@ -12,9 +13,8 @@ const reflectAndGenerate = (schema: unknown) => {
     } else if (isObject(elem)) {
       return reflectAndGenerate(elem);
     } else if (isPrimitive(elem)) {
-      if (logr_expr_lang.isExpr(elem)) {
-        const expr = logr_expr_lang.getExpr(elem);
-        schema[key] = logr_expr_lang.executeExpr(expr);
+      if (isExpression(elem)) {
+        schema[key] = expressionParser.proceed(elem)
       } else {
         schema[key] = generator.generateFromJsonPrimitive(elem);
       }
@@ -22,6 +22,13 @@ const reflectAndGenerate = (schema: unknown) => {
   });
   return schema;
 };
+
+const isExpression = (elem: unknown): elem is Expression => {
+  if(isString(elem)) {
+    return elem.startsWith('#')
+  }
+  return false
+}
 
 const isPrimitive = (elem: unknown) =>
   isNumber(elem) || isString(elem) || isBoolean(elem) || elem === null;
