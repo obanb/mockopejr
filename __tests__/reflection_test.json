@@ -1,8 +1,0 @@
-{
-  "a": {
-    "b": "#ENUM[\"kockapes\", \"les\"]",
-    "c": "#EXACT[\"pes\"]"
-  },
-  "b": 12,
-  "c": "slovo"
-}
