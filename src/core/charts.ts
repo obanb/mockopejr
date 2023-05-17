@@ -147,7 +147,7 @@ const hookPostChart = async (
       return httpUtils
         .post(
           mergedOpts?.useProxy || !mergedOpts?.url
-            ? `${'http://127.0.0.1'}:${3032}/mirror`
+            ? `${'http://localhost'}:${3000}`
             : mergedOpts.url,
           reflected,
         )

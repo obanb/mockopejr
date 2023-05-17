@@ -1,0 +1,16 @@
+{
+  "schema": {
+    "a": 1
+  },
+  "headers": {
+    "content-type": "application/xml",
+    "user-agent": "PostmanRuntime/7.28.4",
+    "accept": "*/*",
+    "postman-token": "d4557b67-e9eb-499d-a083-3edfb83d70f4",
+    "host": "localhost:8090",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "7"
+  },
+  "type": "POST"
+}

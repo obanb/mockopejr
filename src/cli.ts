@@ -1,6 +1,5 @@
 import { Command } from 'commander';
 import axios from 'axios/index.js';
-import { testUtils } from './testUtils.js';
 import { CmdType } from './types.js';
 
 const program = new Command();
@@ -40,7 +39,7 @@ program
       return new Promise(() => {
         return axios.default
           .post<unknown>(
-            `${testUtils.config.localhost}:${8090}/cmd`,
+            `${""}:${8090}/cmd`,
             {
               type: CmdType.RUN,
               options: {
@@ -85,7 +84,7 @@ program
       return new Promise(() => {
         return axios.default
           .post<unknown>(
-            `${testUtils.config.localhost}:${8090}/cmd`,
+            `${""}:${8090}/cmd`,
             { type: CmdType.KILL, identifier: chartName },
             {
               headers: {
@@ -109,7 +108,7 @@ program
     return new Promise(() => {
       return axios.default
         .post<unknown>(
-          `${testUtils.config.localhost}:${8090}/cmd`,
+          `${""}:${8090}/cmd`,
           { type: CmdType.PAUSE, identifier: chartName },
           {
             headers: {

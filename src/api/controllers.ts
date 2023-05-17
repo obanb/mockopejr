@@ -50,6 +50,8 @@ const appController = (
   },
   'post/cmd': async (_, res, args) => {
     // if (isCmd(args)) {
+    console.log("ARGS", args)
+    // TODO
     const r = await chartGroup.cmd(args.identifier as any, args as any);
     // }
 
