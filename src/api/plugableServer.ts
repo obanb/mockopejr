@@ -1,9 +1,7 @@
 import * as http from 'http';
-import { RouterTable } from './types.js';
+import { RouterTable } from '../types.js';
 import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath } from './routing.js';
-
-
 
 const _new = (
   options: { port: number; desc?: string },
@@ -86,6 +84,9 @@ const _new = (
     info: () => ({
       routes: Object.keys(routeState),
     }),
+    setRouter: (routerTable: RouterTable) => {
+      routeState = routerTable;
+    },
     _getRoutes: () => routeState,
   };
 };

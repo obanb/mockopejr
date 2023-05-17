@@ -15,6 +15,8 @@ import { reflection } from '../parsing/reflection.js';
 import { httpUtils } from '../utils/httpUtils.js';
 import { colourfulUnicorn } from '../utils/colourfulUnicorn.js';
 import { commonUtils } from '../utils/commonUtils.js';
+import { plugableServer } from '../api/plugableServer.js';
+
 
 
 const reload = (chartGroup: ReturnType<typeof group>) => async () => {

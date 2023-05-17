@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import * as url from 'url';
-import { RouterTable } from './types.js';
+import { RouterTable } from '../types.js';
 
 // const _HTTP_CONTENT_TYPE = 'application/json';
 // const _HTTP_ENCODING = 'application/json';
