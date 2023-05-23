@@ -24,7 +24,7 @@
   },
   "scripts": {
     "start": "node --inspect -r dotenv/config build/src/index.js",
-    "cli": "node build/src/cli.js",
+    "cli": "node  dotenv/config build/src/cli.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run lint",
     "build": "tsc -p tsconfig.json",
@@ -43,6 +43,7 @@
     "commander": "^9.4.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "openai": "^3.2.1",
     "tslib": "~2.4",
     "uuid": "^8.3.2",
     "uuidv4": "^6.2.13",
