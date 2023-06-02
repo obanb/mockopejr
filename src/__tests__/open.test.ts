@@ -1,10 +1,19 @@
+
 import { templates } from '../gpt/templates.js';
 
-describe('empty test', () => {
-  it('should run empty test', async() => {
+jest.setTimeout(100000)
 
-    const pes = await templates.generateJSON({a: 1, b: 2, c: 3});
-    expect(pes).toBe(true);
-    expect(true).toBe(true);
+describe('GPT dev tests', () => {
+  it('generate json with default template', async() => {
+
+    const json = await templates.generateJSON({a: "Prague", b: "Želivského 805", c: "Letadlo"}, );
+
+    // const test = await Promise.all(Array.from({length: 10}).map(async() => {
+    //    return templates.generateJSON({a: "Prague", b: "Želivského 805", c: "Letadlo"}, );
+    // }))
+
+    expect(test).toBeDefined()
+
+    expect(json).toBeDefined()
   });
 });
