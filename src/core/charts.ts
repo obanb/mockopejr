@@ -2,12 +2,9 @@ import { json } from './json.js';
 import {
   Chart,
   ChartType,
-  Cmd,
-  CmdType,
   isGetChart,
   isPostChart,
-  RunCmdOptions,
-} from '../types.js';
+} from './types.js';
 import { channel } from './channel.js';
 import { IncomingMessage } from 'http';
 import { AxiosError } from 'axios';
@@ -16,7 +13,7 @@ import { httpUtils } from '../utils/httpUtils.js';
 import { colourfulUnicorn } from '../utils/colourfulUnicorn.js';
 import { commonUtils } from '../utils/commonUtils.js';
 import { plugableServer } from '../api/plugableServer.js';
-
+import { Cmd, CmdType, RunCmdOptions } from '../api/types.js';
 
 
 const reload = (chartGroup: ReturnType<typeof group>) => async () => {

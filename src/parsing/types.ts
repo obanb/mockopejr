@@ -28,3 +28,4 @@ export type AST = {
   children: AST[];
   type: 'EXPRESSION' | 'ARGS' | 'PROGRAM';
 };
+

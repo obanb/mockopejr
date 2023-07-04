@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import axios from 'axios/index.js';
-import { CmdType } from './types.js';
+import { CmdType, RunCmd } from './types.js';
 
 const program = new Command();
 
@@ -40,7 +40,7 @@ program
       console.log(options);
       return new Promise(() => {
         return axios.default
-          .post<unknown>(
+          .post<unknown, unknown, RunCmd>(
             `localhost"${process.env.APP_PORT}/cmd`,
             {
               type: CmdType.RUN,
@@ -85,7 +85,7 @@ program
       console.log(options);
       return new Promise(() => {
         return axios.default
-          .post<unknown>(
+          .post<unknown, unknown, any>(
             `localhost"${process.env.APP_PORT}/cmd`,
             { type: CmdType.KILL, identifier: chartName },
             {

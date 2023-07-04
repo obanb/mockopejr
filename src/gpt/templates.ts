@@ -2,7 +2,7 @@ import { Configuration, OpenAIApi, CreateCompletionRequest } from 'openai';
 import { commonUtils } from '../utils/commonUtils.js';
 
 const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY || '',
+  apiKey: process.env.OPENAI_API_KEY || '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',
   organization: "org-31X1Fn2v6CdUdFKfvenAtK1a"
 });
 
@@ -14,7 +14,7 @@ const templateSettings: Record<string, CreateCompletionRequest> = {
     model: "text-davinci-003",
     temperature: 1,
     max_tokens: 1000,
-    top_p: 1.0,
+    top_p: 0.3,
     frequency_penalty: 0.5,
     presence_penalty: 0.0,
   }
@@ -27,15 +27,14 @@ const generateJSON = async(jsonPattern: unknown, additionalPrompt: string | null
   const mergedCfg =  commonUtils.mergeObjects(defaultCfg, cfg || {});
 
   let prompt =  `
-    1. read this JSON structure pattern: ${JSON.stringify(jsonPattern)}
-    2. generate JSON with same structure, but randomize content of each field
-    3. make each generated data similar to the original data, but not the same
-    4. keep same language of each field content
-    5. use same data types as the original data
-    7. return only JSON object, without any other text
+    1. JSON structure pattern: ${JSON.stringify(jsonPattern)}
+    2. generate JSON with same structure, randomize content of each field
+    3. make generated data similar  to the original data
+    4. keep same natural language and datatype for each field as original field content (e.g. "Letadlo > Auto", "Car" > "Plane")
+    5. return only JSON object, without any other text
   `
   if(additionalPrompt) {
-    prompt += `8. apply this prompt to data: ${additionalPrompt}`
+    prompt += `6. apply additional prompt: ${additionalPrompt}`
   }
 
   mergedCfg.prompt = prompt

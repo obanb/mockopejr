@@ -24,7 +24,7 @@
   },
   "scripts": {
     "start": "node --inspect -r dotenv/config build/src/index.js",
-    "cli": "node  dotenv/config build/src/cli.js",
+    "cli": "node  -r dotenv/config build/src/cli.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run lint",
     "build": "tsc -p tsconfig.json",

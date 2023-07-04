@@ -1,5 +1,5 @@
 import * as http from 'http';
-import { RouterTable } from '../types.js';
+import { RouterTable } from './types.js';
 import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath } from './routing.js';
 

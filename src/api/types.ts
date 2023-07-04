@@ -1,32 +1,4 @@
-import { IncomingHttpHeaders } from 'http';
 import http from 'http';
-
-export enum ChartType {
-  GET = 'GET',
-  POST = 'POST',
-  UNKNOWN = 'UNKNOWN',
-}
-
-export type Chart<ChartType = unknown> = {
-  schema: Record<string, unknown>;
-  headers: IncomingHttpHeaders;
-  type: ChartType;
-  options?: ChartType extends ChartType.POST
-    ? {
-        perSec: number;
-        buffer: number;
-        url: string;
-        useProxy?: boolean;
-        args?: unknown[];
-      }
-    : ChartType extends ChartType.GET
-    ? {
-        url: string;
-        buffer: number;
-        args?: unknown[];
-      }
-    : null;
-};
 
 export enum CmdType {
   RUN = 'RUN',
@@ -45,6 +17,7 @@ export type Cmd = RunCmd | PauseCmd | KillCmd;
 
 export type RunCmd = {
   type: CmdType.RUN;
+  identifier: string;
   options?: RunCmdOptions;
 };
 
@@ -63,16 +36,8 @@ export type RouterTable = Record<
     res: http.ServerResponse,
     args: Record<string, unknown>,
   ) => unknown
->;
+  >;
 
-export type ChannelOptions = {
-  callbackFn: (opts?: RunCmdOptions) => Promise<unknown>;
-};
-
-export const isGetChart = (chart: Chart): chart is Chart<ChartType.GET> =>
-  chart.type === ChartType.GET;
-export const isPostChart = (chart: Chart): chart is Chart<ChartType.POST> =>
-  chart.type === ChartType.POST;
 
 export const isCmd = (obj: any): obj is Cmd =>
   obj.type && Object.values(CmdType).includes(obj.type);

@@ -1,6 +1,7 @@
 import { charts } from '../core/charts.js';
-import { Chart, ChartType, RouterTable } from '../types.js';
+import { RouterTable } from './types.js';
 import { json } from '../core/json.js';
+import { Chart, ChartType } from '../core/types.js';
 
 
 const appController = (

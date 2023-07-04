@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ChannelOptions, Cmd, CmdType, isRunCmd } from '../types.js';
+import { ChannelOptions } from './types.js';
+import { Cmd, CmdType, isRunCmd } from '../api/types.js';
 
 const createChannel = (opts: ChannelOptions) => {
   const channelId = uuidv4();
@@ -116,35 +117,7 @@ const applyInterval = (
 
 const resetInterval = (timer: NodeJS.Timer) => clearInterval(timer);
 
-const group = () => {
-  let chans: Record<string, ReturnType<typeof createChannel>> = {};
-
-  return {
-    add: (chan: ReturnType<typeof createChannel>) => {
-      chans[chan.id()] = chan;
-    },
-    deleteByUid: async (uid: string, kill = true) => {
-      const chan = chans[uid];
-
-      if (kill) {
-        await chan.next({ type: CmdType.KILL });
-      }
-
-      delete chans[uid];
-    },
-    getByUid: (uid: string) => chans[uid],
-    purge: () => {
-      Object.entries(chans).forEach(async ([_, chan]) => {
-        await chan.next({ type: CmdType.KILL });
-      });
-      chans = {};
-    },
-    reload: () => (chans = {}),
-    list: () => chans,
-  };
-};
 
 export const channel = {
   new: createChannel,
-  group,
 };
