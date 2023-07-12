@@ -1,13 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ChannelOptions } from './types.js';
 import { Cmd, CmdType, isRunCmd } from '../api/types.js';
+import { measuring } from './measuring.js';
 
 const createChannel = (opts: ChannelOptions) => {
   const channelId = uuidv4();
   console.log(`channel id: ${channelId} created`);
 
   async function* gen(): AsyncGenerator<Cmd, Cmd, Cmd> {
-    const measure = measuring();
+    const measure = measuring.new();
 
     let cmd: Cmd = {
       type: CmdType.PAUSE,
@@ -55,56 +56,10 @@ const createChannel = (opts: ChannelOptions) => {
   };
 };
 
-const measuring = () => {
-  const m = {
-    start: 0,
-    end: 0,
-    duration: 0,
-    requests: 0,
-    avg: 0,
-    ok: 0,
-    error: 0,
-    slowest: 40,
-    fastest: 10,
-  };
-
-  return {
-    start() {
-      m.start = Date.now();
-    },
-    inc: (status: number, duration: number) => {
-      m.requests += 1;
-
-      if (m.slowest < duration || m.slowest === 0) {
-        m.slowest = duration;
-      }
-
-      if (m.fastest > duration || m.fastest === 0) {
-        m.fastest = duration;
-      }
-
-      if (status < 400) {
-        m.ok += 1;
-      } else {
-        m.error += 1;
-      }
-    },
-    update(key: keyof typeof m, value: number) {
-      m[key] = value;
-    },
-    close() {
-      m.end = Date.now();
-      m.duration = m.end - m.start;
-      m.avg = m.duration / m.requests;
-      return m;
-    },
-  };
-};
-
 const applyInterval = (
   timer: NodeJS.Timer,
   interval: number,
-  measure: ReturnType<typeof measuring>,
+  measure: ReturnType<typeof measuring.new>,
   callback: () => Promise<unknown>,
 ) => {
   timer = setInterval(async () => {

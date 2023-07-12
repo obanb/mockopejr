@@ -1,6 +1,6 @@
 import { readdir, readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { Chart } from '../types.js';
+import { Chart } from './types.js';
 
 const schemaPath = './charts/';
 
