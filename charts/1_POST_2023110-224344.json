@@ -12,5 +12,7 @@
     "connection": "keep-alive",
     "content-length": "49"
   },
-  "type": "POST"
+  "type": "POST",
+  "url": "http://localhost:3000",
+  "perSec": 1
 }

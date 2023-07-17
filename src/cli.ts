@@ -41,7 +41,7 @@ program
       return new Promise(() => {
         return axios.default
           .post<unknown>(
-            `localhost"${process.env.APP_PORT}/cmd`,
+            `http://localhost:${process.env.APP_PORT}/cmd`,
             {
               type: CmdType.RUN,
               options: {
@@ -58,7 +58,8 @@ program
               },
             },
           )
-          .catch((_) => {
+          .catch((e) => {
+            console.log(e)
             console.log('chyba');
           });
       });
