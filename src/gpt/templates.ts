@@ -3,7 +3,7 @@ import { commonUtils } from '../utils/commonUtils.js';
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY || '',
-  organization: "org-31X1Fn2v6CdUdFKfvenAtK1a"
+  organization: ""
 });
 
 const openai = new OpenAIApi(configuration);

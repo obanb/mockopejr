@@ -45,7 +45,7 @@ program
             {
               type: CmdType.RUN,
               options: {
-                perSec: options.perSecond,
+                perSec: Number(options.perSecond),
                 url: options.url,
                 buffer: 1,
               },

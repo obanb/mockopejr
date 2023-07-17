@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import axios from 'axios/index.js';
-import { CmdType } from './types.js';
+import { CmdType } from './api/types.js';
 
 const program = new Command();
 
@@ -58,8 +58,8 @@ program
               },
             },
           )
-          .catch((e) => {
-            console.log(e);
+          .catch((_) => {
+            console.log('chyba');
           });
       });
 

@@ -9,7 +9,6 @@ export type RunCmdOptions = {
   perSec: number;
   buffer: number;
   url: string;
-  useProxy?: boolean;
   args?: unknown[];
 };
 

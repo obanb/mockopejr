@@ -18,6 +18,7 @@
     "plugin:jest/recommended",
     "prettier"
   ],
+  "ignorePatterns": ["global.d.ts"],
   "rules": {
     "no-useless-escape": "off",
     "jest/no-conditional-expect": "off",

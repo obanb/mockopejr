@@ -2,10 +2,10 @@ import express from 'express';
 
 const app = express();
 
-app.use(express.json({limit: '1mb'}));
+app.use(express.json({limit: '20mb'}));
 
 app.use('*', (req, res) => {
-   console.log('PARAMS')
+    console.log('PARAMS')
     console.log(req.params)
 
     console.log('URL')

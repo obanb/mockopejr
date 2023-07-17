@@ -134,7 +134,7 @@ const hookPostChart = async (
       const mergedOpts = { ...chart.options, ...opts };
 
       if (!mergedOpts.url || !mergedOpts.perSec) {
-        throw new Error('Invalid options');
+        throw new Error('The options ["url","perSec"] are mandatory, please define them in the JSON file of the corresponding charter or as part of a command.');
       }
 
       const reflected = Array.from({ length: mergedOpts?.buffer || 1 }, () =>
@@ -143,9 +143,7 @@ const hookPostChart = async (
       console.log('VOLAM URL', mergedOpts.url);
       return httpUtils
         .post(
-          mergedOpts?.useProxy || !mergedOpts?.url
-            ? `${'http://localhost'}:${3000}`
-            : mergedOpts.url,
+          mergedOpts.url,
           reflected,
         )
         .catch((e: AxiosError) => {

@@ -16,7 +16,6 @@ export type Chart<ChartType = unknown> = {
       perSec: number;
       buffer: number;
       url: string;
-      useProxy?: boolean;
       args?: unknown[];
     }
     : ChartType extends ChartType.GET
