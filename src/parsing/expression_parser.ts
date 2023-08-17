@@ -305,6 +305,9 @@ const traverser = (ast: AST): unknown => {
     // if the args type is found, the recursion terminates and proceeds to the next descendant
     const expArgs = ast.children.map((child) => traverser(child));
     console.log(expArgs);
+
+    bindings.validate(ast.value as Expression)(...expArgs)
+
     // @ts-ignore
     return expHook(...expArgs);
   }

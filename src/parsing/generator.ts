@@ -1,6 +1,7 @@
 import { reflection } from './reflection.js';
+import { JsonPrimitive } from './types.js';
 
-const generateFromJsonPrimitive = (value: unknown) => {
+const generateFromJsonPrimitive = (value: JsonPrimitive) => {
   const specialsReg = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
   const vovelsReg = /[aeiou]/;
   const consonantsReg = /[bcdfghjklmnpqrstvwxyz]/;

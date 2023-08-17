@@ -2,15 +2,21 @@ import { generator } from './generator.js';
 import { Expression } from './types.js';
 import { expressionParser } from './expression_parser.js';
 
-type JsonPrimitives = string | number | boolean | null;
+type JsonPrimitive = string | number | boolean | null;
+
+// the order depends
 
 const reflectAndGenerate = (schema: unknown) => {
   Object.entries(schema).map(([key, elem]) => {
     if (isNotEmptyPrimitiveArray(elem)) {
-      return elem.map(generator.generateFromJsonPrimitive);
+      console.log('primitivni pole')
+      elem.forEach((item, i) => {
+         elem[i] = generator.generateFromJsonPrimitive(item)
+      });
+      return elem;
     } else if (isNotEmptyObjectArray(elem)) {
       return elem.forEach(reflectAndGenerate);
-    } else if (isObject(elem)) {
+    } else if (isNotNullableObject(elem)) {
       return reflectAndGenerate(elem);
     } else if (isPrimitive(elem)) {
       if (isExpression(elem)) {
@@ -33,7 +39,7 @@ const isExpression = (elem: unknown): elem is Expression => {
 const isPrimitive = (elem: unknown) =>
   isNumber(elem) || isString(elem) || isBoolean(elem) || elem === null;
 
-const isNotEmptyPrimitiveArray = (elem: unknown): elem is JsonPrimitives[] => {
+const isNotEmptyPrimitiveArray = (elem: unknown): elem is JsonPrimitive[] => {
   if (Array.isArray(elem)) {
     const elem0 = elem[0];
 
@@ -51,7 +57,7 @@ const isNotEmptyObjectArray = (
   if (Array.isArray(elem)) {
     const elem0 = elem[0];
 
-    if (elem0 && !Array.isArray(elem0) && isObject(elem0)) {
+    if (elem0 && !Array.isArray(elem0) && isNotNullableObject(elem0)) {
       return true;
     }
   }
@@ -71,6 +77,9 @@ const isBoolean = (val: unknown): val is 'boolean' => typeof val === 'boolean';
 const isObject = (val: unknown): val is Record<string, unknown> =>
   typeof val === 'object';
 
+const isNotNullableObject = (val: unknown): val is Record<string, unknown> =>
+  typeof val === 'object' && val !== null;
+
 export const reflection = {
   reflectAndGenerate,
   isString,
@@ -79,4 +88,6 @@ export const reflection = {
   isDateString,
   isNull,
   isBoolean,
+  isObject,
+  isNotNullableObject
 };

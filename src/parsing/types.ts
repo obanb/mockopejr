@@ -29,3 +29,5 @@ export type AST = {
   type: 'EXPRESSION' | 'ARGS' | 'PROGRAM';
 };
 
+export type JsonPrimitive = string | number | boolean | null;
+
