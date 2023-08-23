@@ -9,7 +9,6 @@ export type RunCmdOptions = {
   perSec: number;
   buffer: number;
   url: string;
-  args?: unknown[];
 };
 
 export type Cmd = RunCmd | PauseCmd | KillCmd;
@@ -22,10 +21,12 @@ export type RunCmd = {
 
 export type PauseCmd = {
   type: CmdType.PAUSE;
+  identifier: string;
 };
 
 export type KillCmd = {
   type: CmdType.KILL;
+  identifier: string;
 };
 
 export type RouterTable = Record<

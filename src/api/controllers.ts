@@ -2,6 +2,7 @@ import { charts } from '../core/charts.js';
 import { RouterTable } from './types.js';
 import { json } from '../core/json.js';
 import { Chart, ChartType } from '../core/types.js';
+import { validateCmd } from './validations.js';
 
 
 const appController = (
@@ -50,14 +51,12 @@ const appController = (
     res.end(JSON.stringify(''));
   },
   'post/cmd': async (_, res, args) => {
-    // if (isCmd(args)) {
-    console.log("ARGS", args)
-    // TODO
-    const r = await chartGroup.cmd(args.identifier as any, args as any);
-    // }
+    validateCmd(args)
+
+    const exec = await chartGroup.cmd(args.identifier, args);
 
     res.writeHead(200);
-    res.end(JSON.stringify(r));
+    res.end(JSON.stringify(exec));
   },
   'post/apply': (_, res) => {
     res.writeHead(200);
