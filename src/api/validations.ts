@@ -1,11 +1,11 @@
-import { Cmd, CmdType, RunCmd, RunCmdOptions } from './types.js';
+import { Cmd, CmdType, KillCmd, PauseCmd, RunCmd, RunCmdOptions } from './types.js';
 
 
 // TypeScript cannot use arrowFunctions for assertions.
 
 export function validateRunCmd (input: any): asserts input is RunCmd {
   if (typeof input !== 'object' || input === null) {
-    throw new Error('command must not be an empty object');
+    throw new Error('command must be an object');
   }
 
   if(input.type !== CmdType.RUN){
@@ -27,9 +27,39 @@ export function validateRunCmd (input: any): asserts input is RunCmd {
   validateRunCmdOptions(input.options)
 }
 
+export function validatePauseCmd(input:any): asserts input is PauseCmd {
+
+  if (typeof input !== 'object' || input === null) {
+    throw new Error('command must be an object');
+  }
+
+  if(input.type !== CmdType.PAUSE){
+      throw new Error('command must be of type PAUSE')
+  }
+
+  if(!input.identifier){
+    throw new Error('identifier is required')
+  }
+}
+
+export function validateKillCmd(input:any): asserts input is KillCmd {
+    if (typeof input !== 'object' || input === null) {
+      throw new Error('command must be an object');
+    }
+
+    if(input.type !== CmdType.KILL){
+        throw new Error('command must be of type KILL')
+    }
+
+    if(!input.identifier){
+      throw new Error('identifier is required')
+    }
+
+}
+
 export function validateRunCmdOptions(input: any): asserts input is RunCmdOptions {
   if (typeof input !== 'object' || input === null) {
-    throw new Error('options must not be an empty object');
+    throw new Error('options must be an object');
   }
 
   if(input.url && typeof input.url !== 'string'){
@@ -62,11 +92,17 @@ export function validateCmd(input: any): asserts input is Cmd  {
       throw new Error('type is required')
   }
 
-  if(!Object.values(CmdType).includes(input.type)){
-      throw new Error('type must be a valid CmdType')
-  }
-
-  if(input.type === CmdType.RUN){
-      validateRunCmd(input)
+  switch(input.type){
+      case CmdType.RUN:
+          validateRunCmd(input)
+          break;
+      case CmdType.PAUSE:
+          validatePauseCmd(input)
+          break;
+      case CmdType.KILL:
+          validateKillCmd(input)
+          break;
+      default:
+          throw new Error('type must be a valid CmdType')
   }
 }
