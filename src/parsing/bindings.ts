@@ -34,37 +34,19 @@ const validate = (exp: Expression) => {
   switch (exp) {
     case '#RANGE':
       return (...args: string[]) => {
-        if (!args.length) {
-          throw new Error(`${exp} - no arguments found`)
-        } else {
-
-        }
-        if (args.length && args.length !== 2) {
-          throw new Error(`${exp} - wrong number of arguments, somewhere near ${exp}(${args}). Expected format: #RANGE(1,10)`)
-        }
+        checkArgsCount(exp, args, 2,2, '#RANGE(1,10)')
 
         if (!isWholeNumber(args[0]) || !isWholeNumber(args[1])) {
           throw new Error(`${exp} - wrong argument format, somewhere near ${exp}(${args}). Expected format: #RANGE(1,10)`)
         }
       }
-
     case '#STRINGIFY':
       return (...args: []) => {
-        if(!args.length){
-          throw new Error(`${exp} - no arguments found`)
-        }
-        if(args.length && args.length !== 1){
-          throw new Error(`${exp} - wrong number of arguments, somewhere near ${exp}(${args})`)
-        }
+        checkArgsCount(exp, args, 1,1, "#STRINGIFY(1)")
       };
     case '#INSERT':
       return (...args: []) => {
-        if(!args.length){
-          throw new Error(`${exp} - no arguments found`)
-        }
-        if(args.length && args.length !== 3){
-          throw new Error(`${exp} - wrong number of arguments, somewhere near ${exp}(${args})`)
-        }
+        checkArgsCount(exp, args, 3,3, "#INSERT(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))")
       };
     default: {
       const exhaustive: never = exp as never;
@@ -72,6 +54,14 @@ const validate = (exp: Expression) => {
     }
   }
 };
+
+const checkArgsCount = (exp: Expression, args: string[], min: number, max: number, example: string) => {
+    const len = args.length;
+
+    if(len < min || len > max){
+      throw new Error(`${exp} - wrong number of arguments, somewhere near ${exp}(${args}). Expected format: ${example}`)
+    }
+}
 
 const isWholeNumber = (str: string) => {
   // check if the string only contains digits
@@ -88,6 +78,9 @@ export const bindings = {
   bind,
   validate
 }
+
+
+
 
 
 
