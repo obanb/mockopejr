@@ -229,12 +229,13 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
       delete chart[chartName];
     },
     cmd: async (
-      identifier: string,
       cmd: Cmd,
     ): Promise<{
       state: 'executed' | 'ignored' | 'forbidden';
       msgs: string[];
     }> => {
+      const identifier = cmd.identifier
+
       let chartName = identifier;
 
       // first try, direct match

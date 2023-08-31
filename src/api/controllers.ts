@@ -51,6 +51,7 @@ const appController = (
     res.end(JSON.stringify(''));
   },
   'post/cmd': async (_, res, args) => {
+
     validateCmd(args)
 
     const exec = await chartGroup.cmd(args.identifier, args);

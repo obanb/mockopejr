@@ -30,7 +30,7 @@ const bind = (exp: Expression) => {
 };
 
 
-const validate = (exp: Expression) => {
+const validate = (exp: Expression): (...args: string[]) => Expression => {
   switch (exp) {
     case '#RANGE':
       return (...args: string[]) => {
@@ -39,14 +39,18 @@ const validate = (exp: Expression) => {
         if (!isWholeNumber(args[0]) || !isWholeNumber(args[1])) {
           throw new Error(`${exp} - wrong argument format, somewhere near ${exp}(${args}). Expected format: #RANGE(1,10)`)
         }
+
+        return exp
       }
     case '#STRINGIFY':
       return (...args: []) => {
         checkArgsCount(exp, args, 1,1, "#STRINGIFY(1)")
+        return exp
       };
     case '#INSERT':
       return (...args: []) => {
         checkArgsCount(exp, args, 3,3, "#INSERT(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))")
+        return exp
       };
     default: {
       const exhaustive: never = exp as never;
