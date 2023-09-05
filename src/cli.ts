@@ -29,44 +29,40 @@ program
   )
   .option('--url, --url <string>', 'target URL')
   .action(
-    (
+    async(
       chartName: string,
       options: {
         perSecond?: string;
         url?: string;
+        buffer?: number;
       },
     ) => {
 
-      console.log(options);
-      return new Promise(() => {
-        return axios.default
-          .post<unknown>(
-            `http://localhost:${process.env.APP_PORT}/cmd`,
-            {
-              type: CmdType.RUN,
-              options: {
-                perSec: options.perSecond,
-                url: options.url,
-                buffer: 1,
-              },
-              identifier: chartName,
+      try {
+        const response = await axios.default.post<unknown>(
+          `http://localhost:${process.env.APP_PORT}/cmd`,
+          {
+            type: CmdType.RUN,
+            options: {
+              perSec: options.perSecond,
+              url: options.url,
+              buffer: options.buffer,
             },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-              },
+            identifier: chartName,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
             },
-          )
-          .catch((e) => {
-            console.log(e)
-            console.log('chyba');
-          });
-      });
+          },
+        );
 
-      console.log('RUN');
-      console.log(chartName);
-      console.log(options?.perSecond);
+        // Log the response if necessary
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error making HTTP POST request:', error.message);
+      }
     },
   );
 

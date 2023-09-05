@@ -306,6 +306,7 @@ const traverser = (ast: AST): unknown => {
     const expArgs = ast.children.map((child) => traverser(child));
     console.log(expArgs);
 
+    // @ts-ignore
     bindings.validate(ast.value as Expression)(...expArgs)
 
     // @ts-ignore

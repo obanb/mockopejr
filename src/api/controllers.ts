@@ -8,12 +8,14 @@ import { validateCmd } from './validations.js';
 const appController = (
   chartGroup: ReturnType<typeof charts.group>,
 ): RouterTable => ({
-  'get/info': (_, res) => {
+  'get/charts': (_, res) => {
     res.writeHead(200);
     res.end(JSON.stringify({ charts: chartGroup.list() }));
   },
-  'get/mirror': (_, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+  'post/charts/reload': async (_, res) => {
+    res.writeHead(200);
+    await json.readCharts();
+    res.end('ok');
   },
   'post/mirror/get': async (req, res, args) => {
     const date = new Date();
@@ -54,19 +56,10 @@ const appController = (
 
     validateCmd(args)
 
-    const exec = await chartGroup.cmd(args.identifier, args);
+    const exec = await chartGroup.cmd(args);
 
     res.writeHead(200);
     res.end(JSON.stringify(exec));
-  },
-  'post/apply': (_, res) => {
-    res.writeHead(200);
-    res.end('ok');
-  },
-  'post/reload': async (_, res) => {
-    res.writeHead(200);
-    await json.readCharts();
-    res.end('ok');
   },
 });
 

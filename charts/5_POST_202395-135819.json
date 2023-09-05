@@ -1,0 +1,25 @@
+{
+  "schema": {
+    "name": "Ondra",
+    "detail": [
+      {
+        "email": "pes@les.cz"
+      },
+      {
+        "email": "pes@deatel.cz"
+      }
+    ]
+  },
+  "headers": {
+    "authorization": "Basic YWRtaW5fMTIzOjEyMzQ1Ng==",
+    "content-type": "application/json",
+    "user-agent": "PostmanRuntime/7.28.4",
+    "accept": "*/*",
+    "postman-token": "b7bd51ba-7c90-4ab5-a74a-8c6209e59755",
+    "host": "localhost:8092",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "167"
+  },
+  "type": "POST"
+}

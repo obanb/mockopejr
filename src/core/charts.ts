@@ -27,7 +27,7 @@ const reload = (chartGroup: ReturnType<typeof group>) => async () => {
     await chartGroup.add(chart, chartName);
   }
 
-  console.log("\x1b[36m%s\x1b[0m'", 'NECO', chartGroup.list());
+  colourfulUnicorn.prettyJson(chartGroup.list(), false, "reloaded charts");
 
   return charts;
 };
@@ -127,7 +127,6 @@ const hookGetChart =
 const hookPostChart = async (
   chart: Chart<ChartType.POST>,
 ): Promise<{ chan: ReturnType<typeof channel.new> }> => {
-  console.log(chart);
 
   const chan = channel.new({
     callbackFn: async (opts?: RunCmdOptions) => {
@@ -140,7 +139,6 @@ const hookPostChart = async (
       const reflected = Array.from({ length: mergedOpts?.buffer || 1 }, () =>
         reflection.reflectAndGenerate(chart.schema),
       );
-      console.log('VOLAM URL', mergedOpts.url);
       return httpUtils
         .post(
           mergedOpts.url,
@@ -179,7 +177,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
       return chart;
     },
     add: async (chart: Chart, chartName?: string) => {
-      console.log('ADD', chart);
+      console.log(`(re)creating chart "${chartName}"`);
       if (isGetChart(chart)) {
         const name =
           chartName ?? (await computeIdentifiers(ChartType.GET)).chartName;
@@ -198,7 +196,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
           chartServer.unplug(chart.options.url);
         } else {
           if (channel) {
-            await channel.next({ type: CmdType.KILL });
+            await channel.next({ type: CmdType.KILL, identifier: "_" });
           }
         }
       }
@@ -222,7 +220,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
         chartServer.unplug(chart.chart.options.url);
       } else {
         if (chart.channel) {
-          await chart.channel.next({ type: CmdType.KILL });
+          await chart.channel.next({ type: CmdType.KILL, identifier: "_" });
         }
       }
 

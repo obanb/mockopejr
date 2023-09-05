@@ -12,6 +12,7 @@ const createChannel = (opts: ChannelOptions) => {
 
     let cmd: Cmd = {
       type: CmdType.PAUSE,
+      identifier: "_"
     };
 
     let timer: NodeJS.Timer = null;

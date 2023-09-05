@@ -85,7 +85,7 @@ export function validateRunCmdOptions(input: any): asserts input is RunCmdOption
 
 export function validateCmd(input: any): asserts input is Cmd  {
   if (typeof input !== 'object' || input === null) {
-    throw new Error('command must not be an empty object');
+    throw new Error('command must be non-empty object');
   }
 
   if(!input.type){
