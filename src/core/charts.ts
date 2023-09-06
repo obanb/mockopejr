@@ -13,7 +13,7 @@ import { httpUtils } from '../utils/httpUtils.js';
 import { colourfulUnicorn } from '../utils/colourfulUnicorn.js';
 import { commonUtils } from '../utils/commonUtils.js';
 import { plugableServer } from '../api/plugableServer.js';
-import { Cmd, CmdType, RunCmdOptions } from '../api/types.js';
+import { Cmd, CmdType, isRunCmd, RunCmd, RunCmdOptions } from '../api/types.js';
 
 
 const reload = (chartGroup: ReturnType<typeof group>) => async () => {
@@ -246,11 +246,16 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
         chart = charts[chartName];
       }
 
+
       if (!chart) {
         console.log(`no chart with identifier ${identifier} found`);
       }
 
       if (isPostChart(chart.chart)) {
+        if(isRunCmd(cmd)){
+          validateRunCmdOptions(chart.chart, cmd);
+        }
+
         const y = await chart.channel.next(cmd);
         if (y.done) {
           return {
@@ -309,6 +314,17 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
     get: () => charts,
   };
 };
+
+
+
+const validateRunCmdOptions = (chart: Chart<ChartType.POST>, cmd: RunCmd) => {
+  const mergedOpts = { ...chart.options, ...cmd.options };
+
+  if(!mergedOpts.perSec || !mergedOpts.url) {
+    throw new Error('perSec and url are mandatory in a JSON chart definition or command options');
+  }
+}
+
 
 export const charts = {
   reload,

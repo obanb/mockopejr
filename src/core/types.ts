@@ -16,13 +16,11 @@ export type Chart<ChartType = unknown> = {
       perSec: number;
       buffer: number;
       url: string;
-      args?: unknown[];
     }
     : ChartType extends ChartType.GET
       ? {
         url: string;
         buffer: number;
-        args?: unknown[];
       }
       : null;
 };

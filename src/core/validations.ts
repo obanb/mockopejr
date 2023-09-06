@@ -1,18 +1,16 @@
-import { Chart } from './types.js';
-import { Cmd, CmdType } from '../api/types.js';
+import { Chart, ChartType } from './types.js';
+import { RunCmd } from '../api/types.js';
 
-export const validateChartOpts = (chart: Chart, cmd: Cmd) => {
-  switch(cmd.type){
-    case CmdType.RUN:
-      validateRunCmd(input)
-      break;
-    case CmdType.PAUSE:
-      validatePauseCmd(input)
-      break;
-    case CmdType.KILL:
-      validateKillCmd(input)
-      break;
-    default:
-      throw new Error('type must be a valid CmdType')
+export const validateAndMergeCmdOptions = (chart: Chart<ChartType.POST>, cmd: RunCmd) => {
+  const mergedOpts = { ...chart.options, ...cmd.options };
+
+  if(!mergedOpts.perSec || !mergedOpts.url) {
+    throw new Error('perSec and url are mandatory in a JSON chart definition or command options');
   }
+
+  return {
+    ...mergedOpts,
+    buffer: mergedOpts.buffer ?? 1,
+  }
+
 }
