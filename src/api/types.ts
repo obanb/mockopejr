@@ -35,7 +35,7 @@ export type RouterTable = Record<
     req: http.IncomingMessage,
     res: http.ServerResponse,
     args: Record<string, unknown>,
-  ) => unknown
+  ) => Promise<unknown>
   >;
 
 

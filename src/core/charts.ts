@@ -108,7 +108,7 @@ const hookGetChart =
       chart.options?.url ||
       (await computeIdentifiers(ChartType.GET)).temporaryUrl;
 
-    chartServer.plug('GET', url, (_, res) => {
+    chartServer.plug('GET', url, async (_, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       if (chart.options.buffer > 1) {
         const reflected = Array.from({ length: chart.options.buffer }, () =>

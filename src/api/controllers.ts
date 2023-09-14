@@ -8,7 +8,7 @@ import { validateCmd } from './validations.js';
 const appController = (
   chartGroup: ReturnType<typeof charts.group>,
 ): RouterTable => ({
-  'get/charts': (_, res) => {
+  'get/charts': async(_, res) => {
     res.writeHead(200);
     res.end(JSON.stringify({ charts: chartGroup.list() }));
   },

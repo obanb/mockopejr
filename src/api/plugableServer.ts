@@ -20,6 +20,13 @@ const _new = (
 
     const found = routeKeys.find((r) => r === key);
 
+    req.on('error', (err) => {
+      console.error(err);
+      res.writeHead(400);
+      res.end(err.message);
+      return;
+    })
+
     if (found) {
       switch (method) {
         case 'get': {
@@ -32,8 +39,13 @@ const _new = (
             body += chunk.toString();
           });
           req.on('end', () => {
-            const json = JSON.parse(body);
-            routeState[key](req, res, json);
+              const json = JSON.parse(body);
+              routeState[key](req, res, json).catch((e) => {
+                res.writeHead(400);
+                console.log(e.message)
+                res.end(e.message);
+                return
+              });
           });
           return;
         }
@@ -70,7 +82,7 @@ const _new = (
     plug: (
       method: 'POST' | 'GET',
       uri: string,
-      httpHandler: (req: IncomingMessage, res: ServerResponse) => void,
+      httpHandler: (req: IncomingMessage, res: ServerResponse) => Promise<void>,
     ) => {
       routeState[`${method.toLowerCase()}/` + uri] = httpHandler;
     },
