@@ -20,12 +20,6 @@ const _new = (
 
     const found = routeKeys.find((r) => r === key);
 
-    req.on('error', (err) => {
-      console.error(err);
-      res.writeHead(400);
-      res.end(err.message);
-      return;
-    })
 
     if (found) {
       switch (method) {
@@ -42,6 +36,7 @@ const _new = (
               const json = JSON.parse(body);
               routeState[key](req, res, json).catch((e) => {
                 res.writeHead(400);
+                console.log('msg')
                 console.log(e.message)
                 res.end(e.message);
                 return

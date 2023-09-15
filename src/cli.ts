@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import axios from 'axios/index.js';
 import { CmdType } from './api/types.js';
+import { colourfulUnicorn } from './utils/colourfulUnicorn.js';
 
 const program = new Command();
 
@@ -61,7 +62,8 @@ program
         // Log the response if necessary
         console.log(response.data);
       } catch (error) {
-        console.error('Error making HTTP POST request:', error.message);
+        console.log(JSON.stringify(error, null, 2))
+        colourfulUnicorn.error(`Error making HTTP POST request: ${error.response.data}`);
       }
     },
   );
@@ -138,3 +140,4 @@ program
   });
 
 program.parse();
+
