@@ -2,6 +2,21 @@ import * as http from 'http';
 import { RouterTable } from './types.js';
 import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath } from './routing.js';
+import { parseRequestParams } from 'graphql-http/lib/use/http';
+
+function extractKeys(queryString) {
+  // Remove all line breaks and extra spaces
+  const cleanedQuery = queryString.replace(/\s+/g, ' ');
+
+  // Find all words in the string that are not enclosed in parentheses
+  const matches = cleanedQuery.match(/([a-zA-Z_]\w*)(?![^\(]*\))/g);
+
+  // Remove duplicates (if any)
+  const uniqueMatches = Array.from(new Set(matches));
+
+  return uniqueMatches;
+}
+
 
 const _new = (
   options: { port: number; desc?: string },
@@ -29,6 +44,18 @@ const _new = (
         }
         case 'post': {
           let body = '';
+
+
+          if(key === 'post/graphql' || key === 'get/graphql'){
+            parseRequestParams(req, res).then((d) => {
+              console.log(d.query)
+              const keys = extractKeys(d.query)
+              res.end(JSON.stringify(keys))
+            }).catch((e) => {console.log("error", JSON.stringify(e))})
+            return
+          }
+
+
           req.on('data', (chunk) => {
             body += chunk.toString();
           });

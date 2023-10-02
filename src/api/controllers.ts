@@ -8,6 +8,15 @@ import { validateCmd } from './validations.js';
 const appController = (
   chartGroup: ReturnType<typeof charts.group>,
 ): RouterTable => ({
+  'post/graphql': async(_, res, args) => {
+    console.log("BODY", JSON.stringify(args))
+    res.writeHead(200);
+    res.end(JSON.stringify({ graphqlpost:true }));
+  },
+  'get/graphql': async(_, res) => {
+    res.writeHead(200);
+    res.end(JSON.stringify({ graphqlget:true }));
+  },
   'get/charts': async(_, res) => {
     res.writeHead(200);
     res.end(JSON.stringify({ charts: chartGroup.list() }));
