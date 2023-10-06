@@ -29,14 +29,13 @@ export type KillCmd = {
   identifier: string;
 };
 
-export type RouterTable = Record<
-  string,
-  (
-    req: http.IncomingMessage,
-    res: http.ServerResponse,
-    args: Record<string, unknown>,
-  ) => Promise<unknown>
-  >;
+
+export type RouterTable =
+    {
+      graphql: (res: http.ServerResponse, keys: string[]) => Promise<unknown>,
+      http:  Record<string,(req: http.IncomingMessage, res: http.ServerResponse, args: Record<string, unknown>) => Promise<unknown>>
+    }
+
 
 
 export const isCmd = (obj: any): obj is Cmd =>

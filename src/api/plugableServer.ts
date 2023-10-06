@@ -112,7 +112,7 @@ const _new = (
       delete routeState[uri];
     },
     reset: () => {
-      routeState = {};
+      routeState = {graphql: routeState.graphql, http: {}};
     },
     exists: (uri: string) => !!routeState[uri],
     info: () => ({
