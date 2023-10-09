@@ -9,8 +9,8 @@ export enum ChartType {
 }
 
 export type Chart<ChartType = unknown> = {
-  schema: Record<string, unknown>;
-  headers: IncomingHttpHeaders;
+  schema: ChartType extends ChartType.GRAPHQL ? string[] :Record<string, unknown>;
+  headers: ChartType extends ChartType.GRAPHQL ? never: IncomingHttpHeaders;
   type: ChartType;
   options?: ChartType extends ChartType.POST
     ? {
@@ -23,7 +23,7 @@ export type Chart<ChartType = unknown> = {
         url: string;
         buffer: number;
       }
-      : null;
+      : {buffer: number};
 };
 
 

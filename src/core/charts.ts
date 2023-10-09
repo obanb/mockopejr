@@ -94,6 +94,21 @@ const fromRequest =
 
         return chart;
 
+
+      case ChartType.GRAPHQL:
+        const graphqlChart: Chart<ChartType.GRAPHQL> = {
+          schema: parsedBody,
+          type,
+          options: {
+            buffer: 1,
+          },
+        };
+
+        await chartGroup.add(graphqlChart, fileName);
+
+        return chart;
+
+
       case ChartType.UNKNOWN:
         return chart;
       default:
