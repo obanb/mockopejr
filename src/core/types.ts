@@ -4,6 +4,7 @@ import { RunCmdOptions } from '../api/types.js';
 export enum ChartType {
   GET = 'GET',
   POST = 'POST',
+  GRAPHQL = 'GRAPHQL',
   UNKNOWN = 'UNKNOWN',
 }
 

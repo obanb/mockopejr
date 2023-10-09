@@ -12,7 +12,7 @@ function extractKeys(queryString) {
   const matches = cleanedQuery.match(/([a-zA-Z_]\w*)(?![^\(]*\))/g);
 
   // Remove duplicates (if any)
-  const uniqueMatches = Array.from(new Set(matches));
+  const uniqueMatches: string[] = Array.from(new Set(matches));
 
   return uniqueMatches;
 }
@@ -48,9 +48,8 @@ const _new = (
 
           if(key === 'post/graphql' || key === 'get/graphql'){
             parseRequestParams(req, res).then((d) => {
-              console.log(d.query)
               const keys = extractKeys(d.query)
-              res.end(JSON.stringify(keys))
+              routeState['post/graphql'](res, keys)
             }).catch((e) => {console.log("error", JSON.stringify(e))})
             return
           }
@@ -112,7 +111,7 @@ const _new = (
       delete routeState[uri];
     },
     reset: () => {
-      routeState = {graphql: routeState.graphql, http: {}};
+      routeState = {...routeState, http: {}};
     },
     exists: (uri: string) => !!routeState[uri],
     info: () => ({

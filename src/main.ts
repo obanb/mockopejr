@@ -11,7 +11,7 @@ const {
 export const main = async() => {
   console.log('Logr started..');
 
-  const srvr = plugableServer.new({ port: Number(APP_PORT), desc: 'app' }, {});
+  const srvr = plugableServer.new({ port: Number(APP_PORT), desc: 'app' }, {'post/graphql':() => Promise.resolve({}),http:{}});
 
   const chartGroup = charts.group(srvr);
 
