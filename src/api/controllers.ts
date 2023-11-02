@@ -10,7 +10,6 @@ const appController = (
 ): RouterTable => ({
   'post/graphql': async(res, keys) => {
     console.log("GRAPHQL INNER POST KEYS", keys)
-    await charts.fromRequest(chartGroup)(req, args, ChartType.GRAPHQL);
     res.writeHead(200)
     res.end(JSON.stringify({graphql: true}))
   },

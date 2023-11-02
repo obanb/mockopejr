@@ -2,8 +2,8 @@ import { json } from './json.js';
 import {
   Chart,
   ChartType,
-  isGetChart,
-  isPostChart,
+  isHttpDispatchChart,
+  isHttpHookChart,
 } from './types.js';
 import { channel } from './channel.js';
 import { IncomingMessage } from 'http';
@@ -63,8 +63,8 @@ const fromRequest =
     await json.writeChart(fileName, chart);
 
     switch (type) {
-      case ChartType.GET:
-        const getChart: Chart<ChartType.GET> = {
+      case ChartType.HTTP_HOOK:
+        const getChart: Chart<ChartType.HTTP_HOOK> = {
           schema: parsedBody,
           headers: req.headers,
           type,
@@ -78,8 +78,8 @@ const fromRequest =
 
         return getChart;
 
-      case ChartType.POST:
-        const postChart: Chart<ChartType.POST> = {
+      case ChartType.HTTP_DISPATCH:
+        const postChart: Chart<ChartType.HTTP_DISPATCH> = {
           schema: parsedBody,
           headers: req.headers,
           type,
@@ -95,8 +95,8 @@ const fromRequest =
         return chart;
 
 
-      case ChartType.GRAPHQL:
-        const graphqlChart: Chart<ChartType.GRAPHQL> = {
+      case ChartType.GRAPHQL_HOOK:
+        const graphqlChart: Chart<ChartType.GRAPHQL_HOOK> = {
           schema: parsedBody,
           type,
           options: {
@@ -109,19 +109,37 @@ const fromRequest =
         return chart;
 
 
+      case ChartType.GRAPHQL_DISPATCH:
+        const graphqlDispatchChart: Chart<ChartType.GRAPHQL_DISPATCH> = {
+          schema: parsedBody,
+          type,
+          options: {
+            perSec: 1,
+            buffer: 1,
+            url: null,
+          }
+        }
+
+        await chartGroup.add(graphqlDispatchChart, fileName);
+
+        return chart;
+
+
+
       case ChartType.UNKNOWN:
         return chart;
       default:
+        // absurd helper for static exhaustive switch
         return commonUtils.absurd<Chart>(type);
     }
   };
 
 const hookGetChart =
   (chartServer: ReturnType<typeof plugableServer.new>) =>
-  async (chart: Chart<ChartType.GET>): Promise<void> => {
+  async (chart: Chart<ChartType.HTTP_HOOK>): Promise<void> => {
     const url =
       chart.options?.url ||
-      (await computeIdentifiers(ChartType.GET)).temporaryUrl;
+      (await computeIdentifiers(ChartType.HTTP_HOOK)).temporaryUrl;
 
     chartServer.plug('GET', url, async (_, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -140,7 +158,7 @@ const hookGetChart =
   };
 
 const hookPostChart = async (
-  chart: Chart<ChartType.POST>,
+  chart: Chart<ChartType.HTTP_DISPATCH>,
 ): Promise<{ chan: ReturnType<typeof channel.new> }> => {
 
   const chan = channel.new({
@@ -193,21 +211,21 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
     },
     add: async (chart: Chart, chartName?: string) => {
       console.log(`(re)creating chart "${chartName}"`);
-      if (isGetChart(chart)) {
+      if (isHttpHookChart(chart)) {
         const name =
-          chartName ?? (await computeIdentifiers(ChartType.GET)).chartName;
+          chartName ?? (await computeIdentifiers(ChartType.HTTP_HOOK)).chartName;
         hookGetChart(chartServer)(chart);
         charts[name] = { chart };
-      } else if (isPostChart(chart)) {
+      } else if (isHttpDispatchChart(chart)) {
         const name =
-          chartName ?? (await computeIdentifiers(ChartType.POST)).chartName;
+          chartName ?? (await computeIdentifiers(ChartType.HTTP_DISPATCH)).chartName;
         const { chan } = await hookPostChart(chart);
         charts[name] = { chart, channel: chan };
       }
     },
     purge: async () => {
       for (const [_, { chart, channel }] of Object.entries(charts)) {
-        if (isGetChart(chart)) {
+        if (isHttpHookChart(chart)) {
           chartServer.unplug(chart.options.url);
         } else {
           if (channel) {
@@ -231,7 +249,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
         console.log(`no chart with identifier ${identifier} found`);
       }
 
-      if (isGetChart(chart.chart)) {
+      if (isHttpHookChart(chart.chart)) {
         chartServer.unplug(chart.chart.options.url);
       } else {
         if (chart.channel) {
@@ -266,7 +284,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
         console.log(`no chart with identifier ${identifier} found`);
       }
 
-      if (isPostChart(chart.chart)) {
+      if (isHttpDispatchChart(chart.chart)) {
         if(isRunCmd(cmd)){
           validateRunCmdOptions(chart.chart, cmd);
         }
@@ -288,7 +306,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
         }
       }
 
-      if (isGetChart(chart.chart)) {
+      if (isHttpHookChart(chart.chart)) {
         const uri = chart.chart.options.url;
         const route = chartServer.exists(uri);
 
@@ -332,7 +350,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
 
 
 
-const validateRunCmdOptions = (chart: Chart<ChartType.POST>, cmd: RunCmd) => {
+const validateRunCmdOptions = (chart: Chart<ChartType.HTTP_DISPATCH>, cmd: RunCmd) => {
   const mergedOpts = { ...chart.options, ...cmd.options };
 
   if(!mergedOpts.perSec || !mergedOpts.url) {

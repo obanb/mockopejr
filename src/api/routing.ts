@@ -14,7 +14,7 @@ const getQueryParams = (uri: string) => {
   return params;
 };
 
-const getQueryParamsPairs = (params: string[]) => {
+const getQueryParamsPairs = (params: string[]): Record<string, unknown> => {
   const pairs = params.reduce((acc, next) => {
     const [param, value] = next.split('=');
     acc[param] = value;

@@ -1,10 +1,10 @@
 import * as http from 'http';
 import { RouterTable } from './types.js';
 import { IncomingMessage, ServerResponse } from 'http';
-import { getUrlPath } from './routing.js';
+import { getUrlPath, routing } from './routing.js';
 import { parseRequestParams } from 'graphql-http/lib/use/http';
 
-function extractKeys(queryString) {
+const extractKeys = (queryString: string) => {
   // Remove all line breaks and extra spaces
   const cleanedQuery = queryString.replace(/\s+/g, ' ');
 
@@ -28,6 +28,10 @@ const _new = (
   const route = (req: IncomingMessage, res: ServerResponse) => {
     const method = req.method.toLowerCase();
 
+
+    const params = routing.getQueryParams(req.url)
+    const paramsPairs = routing.getQueryParamsPairs(params)
+
     // retrieves the current keys each time it is routed
     const routeKeys = Object.keys(routeState);
     const path = getUrlPath(req.url);
@@ -35,11 +39,10 @@ const _new = (
 
     const found = routeKeys.find((r) => r === key);
 
-
     if (found) {
       switch (method) {
         case 'get': {
-          routeState[key](req, res, {});
+          routeState[key](req, res, {}, paramsPairs);
           return;
         }
         case 'post': {
@@ -49,7 +52,7 @@ const _new = (
           if(key === 'post/graphql' || key === 'get/graphql'){
             parseRequestParams(req, res).then((d) => {
               const keys = extractKeys(d.query)
-              routeState['post/graphql'](res, keys)
+              routeState['post/graphql'](res, keys, paramsPairs)
             }).catch((e) => {console.log("error", JSON.stringify(e))})
             return
           }
@@ -59,8 +62,8 @@ const _new = (
             body += chunk.toString();
           });
           req.on('end', () => {
-              const json = JSON.parse(body);
-              routeState[key](req, res, json).catch((e) => {
+              const parsedbody = JSON.parse(body);
+              routeState[key](req, res, parsedbody, paramsPairs).catch((e) => {
                 res.writeHead(400);
                 console.log('msg')
                 console.log(e.message)
