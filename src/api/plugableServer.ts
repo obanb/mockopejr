@@ -3,6 +3,7 @@ import { RouterTable } from './types.js';
 import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath, routing } from './routing.js';
 import { parseRequestParams } from 'graphql-http/lib/use/http';
+import { parse, visit } from 'graphql';
 
 const extractKeys = (queryString: string) => {
   // Remove all line breaks and extra spaces
@@ -51,6 +52,43 @@ const _new = (
 
           if(key === 'post/graphql' || key === 'get/graphql'){
             parseRequestParams(req, res).then((d) => {
+             const parsed = parse(d.query)
+
+
+
+
+              const selectionSet0 = parsed.definitions[0]["selectionSet"]
+              const selections = selectionSet0["selections"]
+
+              const deep =  selections[0]["selectionSet"]["selections"]
+
+              console.log("deep", JSON.stringify(deep))
+
+              const withArgs = deep.filter((s) => s["arguments"].length > 0)
+
+              console.log("withArgs", withArgs)
+
+              const ar = withArgs.reduce((acu, next) => {
+                const args = next["arguments"]
+
+
+                args.forEach((a) => {
+                  const name = a["name"]["value"]
+                  const value = a["value"]["value"]
+                  acu = {...acu, [name]: value}
+                })
+
+                return acu
+              },{})
+
+              console.log("AR",ar)
+
+              // const args = withArgs.arguments.reduce((acu, next) => {
+              //     return {...acu, [next.name.value]: next.value.value}
+              // }, {})
+
+              // console.log("args", args)
+
               const keys = extractKeys(d.query)
               routeState['post/graphql'](res, keys, paramsPairs)
             }).catch((e) => {console.log("error", JSON.stringify(e))})

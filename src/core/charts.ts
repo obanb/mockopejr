@@ -1,7 +1,7 @@
 import { json } from './json.js';
 import {
   Chart,
-  ChartType,
+  ChartType, isGraphqlDispatchChart, isGraphqlHookChart,
   isHttpDispatchChart,
   isHttpHookChart,
 } from './types.js';
@@ -97,7 +97,8 @@ const fromRequest =
 
       case ChartType.GRAPHQL_HOOK:
         const graphqlChart: Chart<ChartType.GRAPHQL_HOOK> = {
-          schema: parsedBody,
+          headers: req.headers,
+          schema: ["pes"],
           type,
           options: {
             buffer: 1,
@@ -111,7 +112,8 @@ const fromRequest =
 
       case ChartType.GRAPHQL_DISPATCH:
         const graphqlDispatchChart: Chart<ChartType.GRAPHQL_DISPATCH> = {
-          schema: parsedBody,
+          headers: req.headers,
+          schema: ["pes"],
           type,
           options: {
             perSec: 1,
@@ -209,18 +211,33 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
 
       return chart;
     },
+    // adds the chart to the in memory state, where it becomes accessible for http/CLI commands
     add: async (chart: Chart, chartName?: string) => {
       console.log(`(re)creating chart "${chartName}"`);
+
+      // the chart is linked to the defined URL of the local server
       if (isHttpHookChart(chart)) {
         const name =
           chartName ?? (await computeIdentifiers(ChartType.HTTP_HOOK)).chartName;
         hookGetChart(chartServer)(chart);
         charts[name] = { chart };
-      } else if (isHttpDispatchChart(chart)) {
+      }
+
+      // channel creation for active dispatching to target URL
+      if (isHttpDispatchChart(chart)) {
         const name =
           chartName ?? (await computeIdentifiers(ChartType.HTTP_DISPATCH)).chartName;
         const { chan } = await hookPostChart(chart);
         charts[name] = { chart, channel: chan };
+      }
+
+      if(isGraphqlHookChart(chart)) {
+        console.log('graphql hook chart')
+      }
+
+      // channel creation for active dispatching to target URL
+      if (isGraphqlDispatchChart(chart)) {
+        console.log('graphql dispatch chart')
       }
     },
     purge: async () => {

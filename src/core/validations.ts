@@ -1,7 +1,7 @@
 import { Chart, ChartType } from './types.js';
 import { RunCmd } from '../api/types.js';
 
-export const validateAndMergeCmdOptions = (chart: Chart<ChartType.POST>, cmd: RunCmd) => {
+export const validateAndMergeCmdOptions = (chart: Chart<ChartType.HTTP_DISPATCH>, cmd: RunCmd) => {
   const mergedOpts = { ...chart.options, ...cmd.options };
 
   if(!mergedOpts.perSec || !mergedOpts.url) {

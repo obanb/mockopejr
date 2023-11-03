@@ -50,19 +50,19 @@ const appController = (
       res.end(JSON.stringify(''));
     },
     'post/mirror/post': async (req, res, args) => {
-      await charts.fromRequest(chartGroup)(req, args, ChartType.POST);
+      await charts.fromRequest(chartGroup)(req, args, ChartType.HTTP_DISPATCH);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(''));
     },
     'post/mirror/proxy/get': async (req, res, args) => {
-      await charts.fromRequest(chartGroup)(req, args, ChartType.GET);
+      await charts.fromRequest(chartGroup)(req, args, ChartType.HTTP_HOOK);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(''));
     },
     'post/mirror/proxy/post': async (req, res, args) => {
-      await charts.fromRequest(chartGroup)(req, args, ChartType.POST);
+      await charts.fromRequest(chartGroup)(req, args, ChartType.HTTP_DISPATCH);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(''));
