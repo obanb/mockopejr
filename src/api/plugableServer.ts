@@ -55,33 +55,136 @@ const _new = (
              const parsed = parse(d.query)
 
 
+              // const getFieldDef = (node: FieldNode) => {
+              //   const fieldDef = {
+              //     name: node.name.value,
+              //     fields: [],
+              //     arguments: []
+              //   };
+              //   if (node.arguments && node.arguments.length) {
+              //     fieldDef.arguments = node.arguments.map(arg => {
+              //       return {
+              //         name: arg.name.value,
+              //         value: '...' // Placeholder, should be replaced with logic to handle values
+              //       };
+              //     });
+              //   }
+              //   if (node.selectionSet) {
+              //     fieldDef.fields = [];
+              //   }
+              //   return fieldDef;
+              // }
 
 
-              const selectionSet0 = parsed.definitions[0]["selectionSet"]
-              const selections = selectionSet0["selections"]
 
-              const deep =  selections[0]["selectionSet"]["selections"]
-
-              console.log("deep", JSON.stringify(deep))
-
-              const withArgs = deep.filter((s) => s["arguments"].length > 0)
-
-              console.log("withArgs", withArgs)
-
-              const ar = withArgs.reduce((acu, next) => {
-                const args = next["arguments"]
+              const jsonStructure = {};
 
 
-                args.forEach((a) => {
-                  const name = a["name"]["value"]
-                  const value = a["value"]["value"]
-                  acu = {...acu, [name]: value}
-                })
+              function createPathString(pathArray) {
+                return pathArray.reduce((acc, key) => {
+                  if (typeof key === 'number') {
+                    return `${acc}[${key}]`; // for array indexes
+                  } else {
+                    return `${acc}.${key}`; // for object properties
+                  }
+                }, '').substring(1); // Remove the initial dot
+              }
 
-                return acu
-              },{})
 
-              console.log("AR",ar)
+
+              visit(parsed, {
+                OperationDefinition: {
+                  enter(node) {
+                    const operationType = node.operation;
+                    jsonStructure[operationType] = {
+                      selectionSet: []
+                    };
+                  }
+                },
+                Argument: {
+                  enter(node, key, parent, path, _) {
+                    // console.log("ARG", JSON.stringify(node, null, 2))
+
+                    const p = parent
+                    p
+
+                    console.log('name', node.name.value)
+                    console.log('key`', key)
+                    console.log('path', path)
+
+                    const patha = createPathString(path)
+                   console.log("patha", patha)
+
+                    if(node.value.kind === 'ObjectValue') {
+                      jsonStructure[node.name.value] = {}
+                    }else {
+                      jsonStructure[node.name.value] = (node.value as any).value
+                    }
+                  }
+                },
+                ObjectField: {
+                  enter(node, key, parent, path, ancestors) {
+                    // console.log("ARG", JSON.stringify(node, null, 2))
+
+                    const p = parent
+                    p
+
+                    console.log('name', node.name.value)
+                    console.log('key`', key)
+                    const patha = createPathString(path)
+
+                    console.log('path', patha)
+
+                    if(node.value.kind === 'ObjectValue') {
+                      jsonStructure[node.name.value] = {}
+                    }
+
+                    else if(node.value.kind === 'ListValue') {
+                     // console.log("LIST", JSON.stringify(node, null, 2))
+                    }
+
+
+                    else {
+                      console.log('parent of ', node.name.value)
+                      console.log('PARENT', JSON.stringify(ancestors, null, 2))
+
+                      jsonStructure[node.name.value] = (node.value as any).value
+                    }
+
+                  }
+                }
+              });
+
+
+              console.log("JSON_STRUCTURE", JSON.stringify(jsonStructure, null, 2))
+
+
+
+              // const selectionSet0 = parsed.definitions[0]["selectionSet"]
+              // const selections = selectionSet0["selections"]
+              //
+              // const deep =  selections[0]["selectionSet"]["selections"]
+              //
+              // console.log("deep", JSON.stringify(deep))
+              //
+              // const withArgs = deep.filter((s) => s["arguments"].length > 0)
+              //
+              // console.log("withArgs", withArgs)
+              //
+              // const ar = withArgs.reduce((acu, next) => {
+              //   const args = next["arguments"]
+              //
+              //
+              //   args.forEach((a) => {
+              //     const name = a["name"]["value"]
+              //     const value = a["value"]["value"]
+              //     acu = {...acu, [name]: value}
+              //   })
+              //
+              //   return acu
+              // },{})
+              //
+              // console.log("AR",ar)
 
               // const args = withArgs.arguments.reduce((acu, next) => {
               //     return {...acu, [next.name.value]: next.value.value}
