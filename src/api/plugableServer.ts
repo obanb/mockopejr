@@ -3,7 +3,8 @@ import { RouterTable } from './types.js';
 import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath, routing } from './routing.js';
 import { parseRequestParams } from 'graphql-http/lib/use/http';
-import { parse, visit } from 'graphql';
+import { ASTNode, parse, visit } from 'graphql';
+import { commonUtils } from '../utils/commonUtils.js';
 
 const extractKeys = (queryString: string) => {
   // Remove all line breaks and extra spaces
@@ -90,7 +91,40 @@ const _new = (
                 }, '').substring(1); // Remove the initial dot
               }
 
+              const getNearestAncestors = (ancestors: ASTNode[]) => {
+                  ancestors.reverse()
 
+                  const path = []
+
+                  for(let i = 0; i < ancestors.length; i++) {
+                    const node = ancestors[i]
+                    if(node.kind === 'Argument' || node.kind === 'ObjectField') {
+                      path.push(node.name.value)
+                    }
+                  }
+
+                  return path
+              }
+
+              function setNestedValue(obj, path, value) {
+                let current = obj;
+
+                // Iterate over the path array
+                for (let i = 0; i < path.length - 1; i++) {
+                  const key = path[i];
+
+                  // If the key doesn't exist or it's not an object, create a new object for that key
+                  if (!(key in current) || typeof current[key] !== 'object') {
+                    current[key] = {};
+                  }
+
+                  // Move to the next level in the nested object
+                  current = current[key];
+                }
+
+                // Set the value at the final key
+                current[path[path.length - 1]] = value;
+              }
 
               visit(parsed, {
                 OperationDefinition: {
@@ -102,7 +136,7 @@ const _new = (
                   }
                 },
                 Argument: {
-                  enter(node, key, parent, path, _) {
+                  enter(node, key, parent, path, ancestors) {
                     // console.log("ARG", JSON.stringify(node, null, 2))
 
                     const p = parent
@@ -116,9 +150,26 @@ const _new = (
                    console.log("patha", patha)
 
                     if(node.value.kind === 'ObjectValue') {
-                      jsonStructure[node.name.value] = {}
+                      const clone = commonUtils.structuredClone(ancestors)
+                      const ants = getNearestAncestors(clone as ASTNode[])
+
+                      ants.reverse()
+
+                      ants.push(node.name.value)
+
+                      setNestedValue(jsonStructure, ants, (node.value as any).value)
+                      // jsonStructure[node.name.value] = {}
                     }else {
-                      jsonStructure[node.name.value] = (node.value as any).value
+
+                      const clone = commonUtils.structuredClone(ancestors)
+                      const ants = getNearestAncestors(clone as ASTNode[])
+
+                      ants.reverse()
+
+                      ants.push(node.name.value)
+
+                      setNestedValue(jsonStructure, ants, (node.value as any).value)
+                      // jsonStructure[node.name.value] = (node.value as any).value
                     }
                   }
                 },
@@ -136,7 +187,17 @@ const _new = (
                     console.log('path', patha)
 
                     if(node.value.kind === 'ObjectValue') {
-                      jsonStructure[node.name.value] = {}
+                      const clone = commonUtils.structuredClone(ancestors)
+                      const ants = getNearestAncestors(clone as ASTNode[])
+
+                      ants.reverse()
+
+                      ants.push(node.name.value)
+
+                      setNestedValue(jsonStructure, ants, (node.value as any).value)
+
+
+                      // jsonStructure[jsonPath][node.name.value] = {}
                     }
 
                     else if(node.value.kind === 'ListValue') {
@@ -145,10 +206,23 @@ const _new = (
 
 
                     else {
-                      console.log('parent of ', node.name.value)
-                      console.log('PARENT', JSON.stringify(ancestors, null, 2))
 
-                      jsonStructure[node.name.value] = (node.value as any).value
+                      console.log("OBJECT")
+
+                      const clone = commonUtils.structuredClone(ancestors)
+                      const ants = getNearestAncestors(clone as ASTNode[])
+
+                      ants.reverse()
+
+                      // const jsonPath = createPathString(ants)
+
+                      console.log("ants", ants)
+
+                      ants.push(node.name.value)
+
+                      setNestedValue(jsonStructure, ants, (node.value as any).value)
+
+                      // jsonStructure[jsonPath][node.name.value] = (node.value as any).value
                     }
 
                   }
