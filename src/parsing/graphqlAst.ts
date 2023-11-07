@@ -1,6 +1,35 @@
-import { ASTNode, visit, DocumentNode, ArgumentNode, ObjectFieldNode } from 'graphql';
+import { ASTNode, visit, DocumentNode, ArgumentNode, ObjectFieldNode, ValueNode } from 'graphql';
 import { commonUtils } from '../utils/commonUtils.js';
 
+
+const convertValue = (node: ValueNode) => {
+  switch (node.kind) {
+    case 'IntValue':
+      return parseInt(node.value, 10);
+
+    case 'FloatValue':
+      return parseFloat(node.value);
+
+    case 'NullValue':
+      return null;
+
+    case 'BooleanValue':
+    case 'EnumValue':
+    case 'StringValue':
+      return node.value;
+
+    case 'ObjectValue':
+    case 'Variable':
+      return undefined;
+
+    case 'ListValue':
+      return node.values.map(convertValue);
+
+    default:
+      throw new Error(`Unknown value kind: ${node.kind}`);
+  }
+
+}
 
 const setNestedProperty = (obj: Record<string, any>, path: string[], value: unknown) =>  {
   let current = obj;
@@ -38,7 +67,7 @@ const createPathString = (pathArray: readonly (string | number)[]) => {
 
 
 const getNearestAncestors = (ancestors: ASTNode[]) => {
-  const path = []
+  const path: string[] = []
 
   // reverse array, because we want to start from the nearest ancestor - from tail
   ancestors.reverse()
@@ -54,7 +83,7 @@ const getNearestAncestors = (ancestors: ASTNode[]) => {
 }
 
 
-const setToAncestorsNodes = (node: ArgumentNode | ObjectFieldNode, ancestors: ASTNode[], jsonTree: Record<string, unknown>) => {
+const setToAncestorsNodes = (node: ArgumentNode | ObjectFieldNode, ancestors: ASTNode[], jsonTree: Record<string, unknown>): unknown => {
   // deep clone of array, we don't want to modify original array or reverse it - it causes problems and destroys AST
   const clone = commonUtils.structuredClone(ancestors)
   const nearestAntcs = getNearestAncestors(clone)
@@ -63,7 +92,12 @@ const setToAncestorsNodes = (node: ArgumentNode | ObjectFieldNode, ancestors: AS
   // push current node/placeholder for it to the array
   nearestAntcs.push(node.name.value)
 
-  setNestedProperty(jsonTree, nearestAntcs, (node.value as any).value)
+  // reconvert values from AST strings to original "JSON primitives"
+  const reconvertValue = convertValue(node.value)
+
+  setNestedProperty(jsonTree, nearestAntcs, reconvertValue)
+
+  return reconvertValue
 }
 
 const toJson = (ast: DocumentNode, jsonTree: Record<string, unknown>) =>{
@@ -79,21 +113,18 @@ const toJson = (ast: DocumentNode, jsonTree: Record<string, unknown>) =>{
     },
     Argument: {
       enter(node, key, parent, path, ancestors) {
-        const patha = createPathString(path)
 
-        console.log(patha)
+        const reconvertedValue = setToAncestorsNodes(node, ancestors as ASTNode[], jsonTree);
 
-
-        setToAncestorsNodes(node, ancestors as ASTNode[], jsonTree)
+        (node as any).value = {...node.value, value: reconvertedValue}
       }
     },
     ObjectField: {
       enter(node, key, parent, path, ancestors) {
-        const patha = createPathString(path)
+        const reconvertedValue = setToAncestorsNodes(node, ancestors as ASTNode[], jsonTree);
 
-        console.log(patha)
+        (node as any).value = {...node.value, value: reconvertedValue}
 
-        setToAncestorsNodes(node, ancestors as ASTNode[], jsonTree)
       }
     }
   });

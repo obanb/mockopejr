@@ -3,7 +3,7 @@ import { RouterTable } from './types.js';
 import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath, routing } from './routing.js';
 import { parseRequestParams } from 'graphql-http/lib/use/http';
-import { parse } from 'graphql';
+import { parse, print  } from 'graphql';
 import { graphqlAst } from '../parsing/graphqlAst.js';
 
 const extractKeys = (queryString: string) => {
@@ -60,6 +60,8 @@ const _new = (
               graphqlAst.toJson(ast, jsonTree)
 
               console.log("JSON_STRUCTURE", JSON.stringify(jsonTree, null, 2))
+
+              console.log('PRINT', print(ast))
 
 
               const keys = extractKeys(d.query)
