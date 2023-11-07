@@ -3,8 +3,8 @@ import { RouterTable } from './types.js';
 import { IncomingMessage, ServerResponse } from 'http';
 import { getUrlPath, routing } from './routing.js';
 import { parseRequestParams } from 'graphql-http/lib/use/http';
-import { ASTNode, parse, visit } from 'graphql';
-import { commonUtils } from '../utils/commonUtils.js';
+import { parse } from 'graphql';
+import { graphqlAst } from '../parsing/graphqlAst.js';
 
 const extractKeys = (queryString: string) => {
   // Remove all line breaks and extra spaces
@@ -53,218 +53,14 @@ const _new = (
 
           if(key === 'post/graphql' || key === 'get/graphql'){
             parseRequestParams(req, res).then((d) => {
-             const parsed = parse(d.query)
+             const ast = parse(d.query)
 
+              const jsonTree = {}
 
-              // const getFieldDef = (node: FieldNode) => {
-              //   const fieldDef = {
-              //     name: node.name.value,
-              //     fields: [],
-              //     arguments: []
-              //   };
-              //   if (node.arguments && node.arguments.length) {
-              //     fieldDef.arguments = node.arguments.map(arg => {
-              //       return {
-              //         name: arg.name.value,
-              //         value: '...' // Placeholder, should be replaced with logic to handle values
-              //       };
-              //     });
-              //   }
-              //   if (node.selectionSet) {
-              //     fieldDef.fields = [];
-              //   }
-              //   return fieldDef;
-              // }
+              graphqlAst.toJson(ast, jsonTree)
 
+              console.log("JSON_STRUCTURE", JSON.stringify(jsonTree, null, 2))
 
-
-              const jsonStructure = {};
-
-
-              function createPathString(pathArray) {
-                return pathArray.reduce((acc, key) => {
-                  if (typeof key === 'number') {
-                    return `${acc}[${key}]`; // for array indexes
-                  } else {
-                    return `${acc}.${key}`; // for object properties
-                  }
-                }, '').substring(1); // Remove the initial dot
-              }
-
-              const getNearestAncestors = (ancestors: ASTNode[]) => {
-                  ancestors.reverse()
-
-                  const path = []
-
-                  for(let i = 0; i < ancestors.length; i++) {
-                    const node = ancestors[i]
-                    if(node.kind === 'Argument' || node.kind === 'ObjectField') {
-                      path.push(node.name.value)
-                    }
-                  }
-
-                  return path
-              }
-
-              function setNestedValue(obj, path, value) {
-                let current = obj;
-
-                // Iterate over the path array
-                for (let i = 0; i < path.length - 1; i++) {
-                  const key = path[i];
-
-                  // If the key doesn't exist or it's not an object, create a new object for that key
-                  if (!(key in current) || typeof current[key] !== 'object') {
-                    current[key] = {};
-                  }
-
-                  // Move to the next level in the nested object
-                  current = current[key];
-                }
-
-                // Set the value at the final key
-                current[path[path.length - 1]] = value;
-              }
-
-              visit(parsed, {
-                OperationDefinition: {
-                  enter(node) {
-                    const operationType = node.operation;
-                    jsonStructure[operationType] = {
-                      selectionSet: []
-                    };
-                  }
-                },
-                Argument: {
-                  enter(node, key, parent, path, ancestors) {
-                    // console.log("ARG", JSON.stringify(node, null, 2))
-
-                    const p = parent
-                    p
-
-                    console.log('name', node.name.value)
-                    console.log('key`', key)
-                    console.log('path', path)
-
-                    const patha = createPathString(path)
-                   console.log("patha", patha)
-
-                    if(node.value.kind === 'ObjectValue') {
-                      const clone = commonUtils.structuredClone(ancestors)
-                      const ants = getNearestAncestors(clone as ASTNode[])
-
-                      ants.reverse()
-
-                      ants.push(node.name.value)
-
-                      setNestedValue(jsonStructure, ants, (node.value as any).value)
-                      // jsonStructure[node.name.value] = {}
-                    }else {
-
-                      const clone = commonUtils.structuredClone(ancestors)
-                      const ants = getNearestAncestors(clone as ASTNode[])
-
-                      ants.reverse()
-
-                      ants.push(node.name.value)
-
-                      setNestedValue(jsonStructure, ants, (node.value as any).value)
-                      // jsonStructure[node.name.value] = (node.value as any).value
-                    }
-                  }
-                },
-                ObjectField: {
-                  enter(node, key, parent, path, ancestors) {
-                    // console.log("ARG", JSON.stringify(node, null, 2))
-
-                    const p = parent
-                    p
-
-                    console.log('name', node.name.value)
-                    console.log('key`', key)
-                    const patha = createPathString(path)
-
-                    console.log('path', patha)
-
-                    if(node.value.kind === 'ObjectValue') {
-                      const clone = commonUtils.structuredClone(ancestors)
-                      const ants = getNearestAncestors(clone as ASTNode[])
-
-                      ants.reverse()
-
-                      ants.push(node.name.value)
-
-                      setNestedValue(jsonStructure, ants, (node.value as any).value)
-
-
-                      // jsonStructure[jsonPath][node.name.value] = {}
-                    }
-
-                    else if(node.value.kind === 'ListValue') {
-                     // console.log("LIST", JSON.stringify(node, null, 2))
-                    }
-
-
-                    else {
-
-                      console.log("OBJECT")
-
-                      const clone = commonUtils.structuredClone(ancestors)
-                      const ants = getNearestAncestors(clone as ASTNode[])
-
-                      ants.reverse()
-
-                      // const jsonPath = createPathString(ants)
-
-                      console.log("ants", ants)
-
-                      ants.push(node.name.value)
-
-                      setNestedValue(jsonStructure, ants, (node.value as any).value)
-
-                      // jsonStructure[jsonPath][node.name.value] = (node.value as any).value
-                    }
-
-                  }
-                }
-              });
-
-
-              console.log("JSON_STRUCTURE", JSON.stringify(jsonStructure, null, 2))
-
-
-
-              // const selectionSet0 = parsed.definitions[0]["selectionSet"]
-              // const selections = selectionSet0["selections"]
-              //
-              // const deep =  selections[0]["selectionSet"]["selections"]
-              //
-              // console.log("deep", JSON.stringify(deep))
-              //
-              // const withArgs = deep.filter((s) => s["arguments"].length > 0)
-              //
-              // console.log("withArgs", withArgs)
-              //
-              // const ar = withArgs.reduce((acu, next) => {
-              //   const args = next["arguments"]
-              //
-              //
-              //   args.forEach((a) => {
-              //     const name = a["name"]["value"]
-              //     const value = a["value"]["value"]
-              //     acu = {...acu, [name]: value}
-              //   })
-              //
-              //   return acu
-              // },{})
-              //
-              // console.log("AR",ar)
-
-              // const args = withArgs.arguments.reduce((acu, next) => {
-              //     return {...acu, [next.name.value]: next.value.value}
-              // }, {})
-
-              // console.log("args", args)
 
               const keys = extractKeys(d.query)
               routeState['post/graphql'](res, keys, paramsPairs)
