@@ -51,7 +51,7 @@ const _new = (
           let body = '';
 
 
-          if(key === 'post/graphql' || key === 'get/graphql'){
+          if(key === 'post/graphqlDispatch' || key === 'get/graphqlDispatch'){
             parseRequestParams(req, res).then((d) => {
              const ast = parse(d.query)
 
@@ -65,7 +65,8 @@ const _new = (
 
 
               const keys = extractKeys(d.query)
-              routeState['post/graphql'](res, keys, paramsPairs)
+              routeState['post/graphqlDispatch'](req, res, d.query, jsonTree, keys, paramsPairs)
+              return
             }).catch((e) => {console.log("error", JSON.stringify(e))})
             return
           }
@@ -76,7 +77,7 @@ const _new = (
           });
           req.on('end', () => {
               const parsedbody = JSON.parse(body);
-              routeState[key](req, res, parsedbody, paramsPairs).catch((e) => {
+              routeState['http'][key](req, res, parsedbody, paramsPairs).catch((e) => {
                 res.writeHead(400);
                 console.log('msg')
                 console.log(e.message)

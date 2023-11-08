@@ -8,8 +8,11 @@ import { validateCmd } from './validations.js';
 const appController = (
   chartGroup: ReturnType<typeof charts.group>,
 ): RouterTable => ({
-  'post/graphql': async(res, keys) => {
+  'post/graphqlDispatch': async(req, res, originalQuery, schema, keys, params) => {
     console.log("GRAPHQL INNER POST KEYS", keys)
+
+    await charts.fromGraphqlRequest(chartGroup)(req, originalQuery, schema, keys, ChartType.HTTP_DISPATCH);
+
     res.writeHead(200)
     res.end(JSON.stringify({graphql: true}))
   },

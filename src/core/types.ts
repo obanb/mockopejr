@@ -13,15 +13,19 @@ export type GRAPHQL_REQUEST = ChartType.GRAPHQL_HOOK | ChartType.GRAPHQL_DISPATC
 export type HTTP_REQUEST = ChartType.HTTP_HOOK | ChartType.HTTP_DISPATCH;
 
 export type Chart<ChartType = unknown> = {
-  schema: ChartType extends GRAPHQL_REQUEST ? string[] :Record<string, unknown>;
+  originalQuery?: ChartType extends GRAPHQL_REQUEST ? string : never;
+  schema: Record<string, unknown>;
   headers: IncomingHttpHeaders;
   type: ChartType;
-  options?: ChartType extends ChartType.HTTP_DISPATCH | ChartType.GRAPHQL_DISPATCH
+  options?: ChartType extends ChartType.HTTP_DISPATCH
     ? {
       perSec: number;
       buffer: number;
       url: string;
-    }
+    } :  ChartType extends ChartType.GRAPHQL_DISPATCH ? {
+        perSec: number;
+        url: string;
+      }
     : ChartType extends ChartType.HTTP_HOOK
       ? {
         url: string;

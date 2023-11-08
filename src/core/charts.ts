@@ -45,6 +45,30 @@ const computeIdentifiers = async (type: ChartType) => {
   return { chartName, temporaryUrl };
 };
 
+
+
+const fromGraphqlRequest =
+  (chartGroup: ReturnType<typeof group>) =>
+    async (
+      req: IncomingMessage,
+      originalQuery: string,
+      schema: Record<string, unknown>,
+      keys: string[],
+      type: ChartType,
+    ) => {
+      const { chartName: fileName } = await computeIdentifiers(type);
+
+      const chart: Chart<ChartType.GRAPHQL_DISPATCH> = {
+        originalQuery,
+        schema,
+        headers: req.headers,
+        type: ChartType.GRAPHQL_DISPATCH,
+      };
+
+      await json.writeChart(fileName, chart);
+
+    };
+
 const fromRequest =
   (chartGroup: ReturnType<typeof group>) =>
   async (
@@ -98,7 +122,7 @@ const fromRequest =
       case ChartType.GRAPHQL_HOOK:
         const graphqlChart: Chart<ChartType.GRAPHQL_HOOK> = {
           headers: req.headers,
-          schema: ["pes"],
+          schema: ["pes"] as any,
           type,
           options: {
             buffer: 1,
@@ -113,11 +137,10 @@ const fromRequest =
       case ChartType.GRAPHQL_DISPATCH:
         const graphqlDispatchChart: Chart<ChartType.GRAPHQL_DISPATCH> = {
           headers: req.headers,
-          schema: ["pes"],
+          schema: ["pes"] as any,
           type,
           options: {
             perSec: 1,
-            buffer: 1,
             url: null,
           }
         }
@@ -379,6 +402,7 @@ const validateRunCmdOptions = (chart: Chart<ChartType.HTTP_DISPATCH>, cmd: RunCm
 export const charts = {
   reload,
   fromRequest,
+  fromGraphqlRequest,
   hookGetChart,
   hookPostChart,
   group,
