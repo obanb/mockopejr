@@ -52,8 +52,8 @@ const _new = (
 
 
           if(key === 'post/graphqlDispatch' || key === 'get/graphqlDispatch'){
-            parseRequestParams(req, res).then((d) => {
-             const ast = parse(d.query)
+            parseRequestParams(req, res).then((gqlRp) => {
+             const ast = parse(gqlRp.query)
 
               const jsonTree = {}
 
@@ -64,8 +64,18 @@ const _new = (
               console.log('PRINT', print(ast))
 
 
-              const keys = extractKeys(d.query)
-              routeState['post/graphqlDispatch'](req, res, d.query, jsonTree, keys, paramsPairs)
+              const keys = extractKeys(gqlRp.query)
+              routeState['post/graphqlDispatch'](req, res, gqlRp.query, jsonTree, keys, paramsPairs)
+              return
+            }).catch((e) => {console.log("error", JSON.stringify(e))})
+            return
+          }
+
+
+          if(key === 'post/graphqlProxy' || key === 'get/graphqlProxy'){
+            parseRequestParams(req, res).then((gqlRp) => {
+              const keys = extractKeys(gqlRp.query)
+
               return
             }).catch((e) => {console.log("error", JSON.stringify(e))})
             return
