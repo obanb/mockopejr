@@ -7,6 +7,11 @@ export const getUrlPath = (uri: string) => url.parse(uri).pathname;
 const getQueryParams = (uri: string) => {
   const path = url.parse(uri).path;
   const results = path.match(/\?(?<query>.*)/);
+
+  if(!results) {
+    return [];
+  }
+
   const {
     groups: { query },
   } = results;
