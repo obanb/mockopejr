@@ -32,7 +32,9 @@ export type KillCmd = {
 
 export type RouterTable =
     {
-      'post/graphqlDispatch': (req: http.IncomingMessage, res: http.ServerResponse, originalQuery: string, schema: Record<string,unknown>, keys: string[], params?: Record<string, unknown>) => Promise<unknown>,
+      graphql: {
+        'post/graphqlDispatch': (req: http.IncomingMessage, res: http.ServerResponse, originalQuery: string, schema: Record<string,unknown>, keys: string[], params?: Record<string, unknown>) => Promise<unknown>,
+      }
       http:  Record<string,(req: http.IncomingMessage, res: http.ServerResponse, body: Record<string, unknown>, params?: Record<string, unknown>) => Promise<unknown>>
     }
 

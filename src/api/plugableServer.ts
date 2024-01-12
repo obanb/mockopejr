@@ -24,8 +24,7 @@ const _new = (
   options: { port: number; desc?: string },
   defaultRouterTable: RouterTable,
 ) => {
-  // just for clarity
-  let routeState = defaultRouterTable;
+  let routeState = {...defaultRouterTable.http, ...defaultRouterTable.graphql};
 
   const route = (req: IncomingMessage, res: ServerResponse) => {
     const method = req.method.toLowerCase();
@@ -87,7 +86,7 @@ const _new = (
           });
           req.on('end', () => {
               const parsedbody = JSON.parse(body);
-              routeState['http'][key](req, res, parsedbody, paramsPairs).catch((e) => {
+              routeState[key](req, res, parsedbody, paramsPairs).catch((e) => {
                 res.writeHead(400);
                 console.log('msg')
                 console.log(e.message)
@@ -138,14 +137,16 @@ const _new = (
       delete routeState[uri];
     },
     reset: () => {
-      routeState = {...routeState, http: {}};
+      // keep only fixed graphql routes
+      routeState = {...defaultRouterTable.graphql};
     },
     exists: (uri: string) => !!routeState[uri],
     info: () => ({
       routes: Object.keys(routeState),
     }),
     setRouter: (routerTable: RouterTable) => {
-      routeState = routerTable;
+      // rewrite all routes
+      routeState = {...routerTable.http, ...routerTable.graphql}
     },
     _getRoutes: () => routeState,
   };

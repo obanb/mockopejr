@@ -1,0 +1,19 @@
+{
+  "schema": {
+    "number": 1137414,
+    "queue": "sql",
+    "collection": "messages"
+  },
+  "headers": {
+    "content-type": "application/json",
+    "accept": "application/json",
+    "authorization": "Basic YWRtaW5fMTIzOjEyMzQ1Ng==",
+    "user-agent": "PostmanRuntime/7.28.4",
+    "postman-token": "852d9670-757c-483f-9678-757ff558727f",
+    "host": "localhost:8092",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "77"
+  },
+  "type": "HTTP_DISPATCH"
+}
