@@ -125,6 +125,7 @@ const fromRequest =
           schema: ["pes"] as any,
           type,
           options: {
+            keys: [],
             buffer: 1,
           },
         };

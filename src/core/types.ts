@@ -33,6 +33,7 @@ export type Chart<ChartType = unknown> = {
       }
       : ChartType extends ChartType.GRAPHQL_HOOK
         ? {
+          keys: string[];
           buffer: number;
         }
         : never;

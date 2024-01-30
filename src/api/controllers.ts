@@ -9,10 +9,10 @@ const appController = (
   chartGroup: ReturnType<typeof charts.group>,
 ): RouterTable => ({
   graphql: {
-    'post/graphqlDispatch': async(req, res, originalQuery, schema, keys, params) => {
+    'post/graphqlDispatch': async(req, res, originalQuery, jsonTree, keys, params) => {
       console.log("GRAPHQL INNER POST KEYS", keys)
 
-      await charts.fromGraphqlRequest(chartGroup)(req, originalQuery, schema, keys, ChartType.HTTP_DISPATCH);
+      await charts.fromGraphqlRequest(chartGroup)(req, originalQuery, jsonTree, keys, ChartType.HTTP_DISPATCH);
 
       res.writeHead(200)
       res.end(JSON.stringify({graphql: true}))

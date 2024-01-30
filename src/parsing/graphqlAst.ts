@@ -103,14 +103,6 @@ const setToAncestorsNodes = (node: ArgumentNode | ObjectFieldNode, ancestors: AS
 const toJson = (ast: DocumentNode, jsonTree: Record<string, unknown>) =>{
 
   visit(ast, {
-    // OperationDefinition: {
-    //   enter(node) {
-    //     const operationType = node.operation;
-    //     jsonTree[operationType] = {
-    //       selectionSet: []
-    //     };
-    //   }
-    // },
     Argument: {
       enter(node, key, parent, path, ancestors) {
 
