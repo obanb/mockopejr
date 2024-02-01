@@ -19,6 +19,35 @@ const appController = (
     },
   },
   http: {
+    'post/mirror': async (req, res, args, params) => {
+       res.end(JSON.stringify({ params }));
+       const {kind, apiType} = params
+
+       if(apiType === 'http'){
+         switch(kind){
+            case 'get':
+            case 'post':
+            default:
+              res.writeHead(400);
+              res.end(JSON.stringify({ error:`unknown kind:${kind}} apiType:${apiType}`}));
+              return
+         }
+       }
+
+       else if(apiType === 'graphql'){
+         switch(kind){
+            case 'get':
+            case 'post':
+            default:
+              res.writeHead(400);
+              res.end(JSON.stringify({ error:`unknown kind:${kind} for apiType:${apiType}}`}));
+              return
+         }
+
+       }
+       res.writeHead(400);
+       res.end(JSON.stringify({ error:`unknown apiType:${apiType}}`}));
+    },
     'post/graphql': async(_, res, args) => {
       console.log("BODY", JSON.stringify(args))
       res.writeHead(200);
