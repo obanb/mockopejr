@@ -47,3 +47,26 @@ export const isPauseCmd = (cmd: Cmd): cmd is PauseCmd =>
   cmd.type === CmdType.PAUSE;
 export const isKillCmd = (cmd: Cmd): cmd is KillCmd =>
   cmd.type === CmdType.KILL;
+
+export type MirrorGraphqlMethod = 'query' | 'mutation';
+export type MirrorHttpMethod = 'get' | 'post'
+export type MirrorMethod = MirrorGraphqlMethod | MirrorHttpMethod;
+export type MirrorApiType = 'graphql' | 'http';
+
+export type MirrorRequest = {
+  method: MirrorMethod;
+  type: MirrorApiType;
+}
+
+export type GraphqlMirrorRequest = MirrorRequest & {
+  type: 'graphql';
+  method: MirrorGraphqlMethod;
+}
+
+export type HttpMirrorRequest = MirrorRequest & {
+  type: 'http';
+  method: MirrorHttpMethod;
+}
+
+export const isGraphqlMirrorRequest = (req: any): req is GraphqlMirrorRequest => req.type === 'graphql';
+export const isHttpMirrorRequest = (req: any): req is HttpMirrorRequest => req.type === 'http';

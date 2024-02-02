@@ -1,8 +1,8 @@
 import { charts } from '../core/charts.js';
-import { RouterTable } from './types.js';
+import { isGraphqlMirrorRequest, isHttpMirrorRequest, RouterTable } from './types.js';
 import { json } from '../core/json.js';
 import { Chart, ChartType } from '../core/types.js';
-import { validateCmd } from './validations.js';
+import { validateCmd, validateGraphqlMirrorRequest } from './validations.js';
 
 
 const appController = (
@@ -21,32 +21,31 @@ const appController = (
   http: {
     'post/mirror': async (req, res, args, params) => {
        res.end(JSON.stringify({ params }));
-       const {kind, apiType} = params
 
-       if(apiType === 'http'){
-         switch(kind){
-            case 'get':
-            case 'post':
+       if(isGraphqlMirrorRequest(params)){
+         switch(params.method){
+            case 'query':
+            case 'mutation':
             default:
               res.writeHead(400);
-              res.end(JSON.stringify({ error:`unknown kind:${kind}} apiType:${apiType}`}));
+              res.end(JSON.stringify({ error:`unknown method:${params.method}} for API type:${params.type}`}));
               return
          }
        }
 
-       else if(apiType === 'graphql'){
-         switch(kind){
+       else if(isHttpMirrorRequest(params)){
+         switch(params.method){
             case 'get':
             case 'post':
             default:
               res.writeHead(400);
-              res.end(JSON.stringify({ error:`unknown kind:${kind} for apiType:${apiType}}`}));
+              res.end(JSON.stringify({ error:`unknown method:${params.method} for API type:${params.method}}`}));
               return
          }
 
        }
        res.writeHead(400);
-       res.end(JSON.stringify({ error:`unknown apiType:${apiType}}`}));
+       res.end(JSON.stringify({ error:`unknown apiType`}));
     },
     'post/graphql': async(_, res, args) => {
       console.log("BODY", JSON.stringify(args))

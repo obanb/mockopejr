@@ -1,4 +1,4 @@
-import { Cmd, CmdType, KillCmd, PauseCmd, RunCmd, RunCmdOptions } from './types.js';
+import { Cmd, CmdType, GraphqlMirrorRequest, KillCmd, PauseCmd, RunCmd, RunCmdOptions } from './types.js';
 
 
 // TypeScript cannot use arrowFunctions for assertions.
@@ -104,5 +104,27 @@ export function validateCmd(input: any): asserts input is Cmd  {
           break;
       default:
           throw new Error('type must be a valid CmdType')
+  }
+}
+
+export function validateGraphqlMirrorRequest(input: any): asserts input is GraphqlMirrorRequest {
+  if (typeof input !== 'object' || input === null) {
+    throw new Error('mirror request must be non-empty object');
+  }
+
+  if(!input.method){
+      throw new Error('method is required')
+  }
+
+  if(!input.type){
+      throw new Error('type is required')
+  }
+
+  if(input.type !== 'graphql'){
+      throw new Error('type must be graphql')
+  }
+
+  if(input.method !== 'query' && input.method !== 'mutation'){
+      throw new Error('method must be query or mutation')
   }
 }
