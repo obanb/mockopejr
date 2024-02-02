@@ -112,16 +112,17 @@ export function validateGraphqlMirrorRequest(input: any): asserts input is Graph
     throw new Error('mirror request must be non-empty object');
   }
 
-  if(!input.method){
-      throw new Error('method is required')
-  }
-
   if(!input.type){
       throw new Error('type is required')
   }
 
   if(input.type !== 'graphql'){
       throw new Error('type must be graphql')
+  }
+
+
+  if(!input.method){
+    throw new Error('method is required')
   }
 
   if(input.method !== 'query' && input.method !== 'mutation'){
