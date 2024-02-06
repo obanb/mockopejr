@@ -2,7 +2,11 @@ import { charts } from '../core/charts.js';
 import { isGraphqlMirrorRequest, isHttpMirrorRequest, RouterTable } from './types.js';
 import { json } from '../core/json.js';
 import { Chart, ChartType } from '../core/types.js';
-import { validateCmd, validateGraphqlMirrorRequest } from './validations.js';
+import {
+  assertIsGraphqlMirrorRequest, assertIsHttpMirrorRequest,
+  assertIsMirrorRequest,
+  validateCmd,
+} from './validations.js';
 
 
 const appController = (
@@ -20,32 +24,46 @@ const appController = (
   },
   http: {
     'post/mirror': async (req, res, args, params) => {
-       res.end(JSON.stringify({ params }));
+      try {
+        assertIsMirrorRequest(params)
 
-       if(isGraphqlMirrorRequest(params)){
-         switch(params.method){
-            case 'query':
-            case 'mutation':
-            default:
-              res.writeHead(400);
-              res.end(JSON.stringify({ error:`unknown method:${params.method}} for API type:${params.type}`}));
-              return
-         }
-       }
+        // graphql segment
+        if(params.type === 'graphql'){
+          assertIsGraphqlMirrorRequest(params)
 
-       else if(isHttpMirrorRequest(params)){
-         switch(params.method){
-            case 'get':
-            case 'post':
-            default:
-              res.writeHead(400);
-              res.end(JSON.stringify({ error:`unknown method:${params.method} for API type:${params.method}}`}));
-              return
-         }
+          if(params.method === 'query'){
+            res.writeHead(200);
+            res.end(JSON.stringify({ graphqlquery:true }));
+            return
+          }
 
-       }
-       res.writeHead(400);
-       res.end(JSON.stringify({ error:`unknown apiType`}));
+          if(params.method === 'mutation'){
+            res.writeHead(200);
+            res.end(JSON.stringify({ graphqlmutation:true }));
+            return
+          }
+        }
+
+        // http segment
+        if(params.type === 'http'){
+          assertIsHttpMirrorRequest(params)
+
+          if(params.method === 'get'){
+            res.writeHead(200);
+            res.end(JSON.stringify({ httpget:true }));
+            return
+          }
+
+          if(params.method === 'post'){
+            res.writeHead(200);
+            res.end(JSON.stringify({ httppost:true }));
+            return
+          }
+        }
+      } catch (e) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: e.message }));
+      }
     },
     'post/graphql': async(_, res, args) => {
       console.log("BODY", JSON.stringify(args))

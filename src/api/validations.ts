@@ -1,4 +1,13 @@
-import { Cmd, CmdType, GraphqlMirrorRequest, KillCmd, PauseCmd, RunCmd, RunCmdOptions } from './types.js';
+import {
+  Cmd,
+  CmdType,
+  GraphqlMirrorRequest,
+  HttpMirrorRequest,
+  KillCmd, MirrorRequest,
+  PauseCmd,
+  RunCmd,
+  RunCmdOptions
+} from './types.js';
 
 
 // TypeScript cannot use arrowFunctions for assertions.
@@ -107,7 +116,7 @@ export function validateCmd(input: any): asserts input is Cmd  {
   }
 }
 
-export function validateGraphqlMirrorRequest(input: any): asserts input is GraphqlMirrorRequest {
+export function assertIsMirrorRequest(input: any): asserts input is MirrorRequest {
   if (typeof input !== 'object' || input === null) {
     throw new Error('mirror request must be non-empty object');
   }
@@ -116,16 +125,31 @@ export function validateGraphqlMirrorRequest(input: any): asserts input is Graph
       throw new Error('type is required')
   }
 
+  if(!input.method){
+      throw new Error('method is required')
+  }
+
+  if(input.type !== 'graphql' && input.type !== 'http'){
+      throw new Error('type must be graphql or http')
+  }
+}
+
+export function assertIsGraphqlMirrorRequest(input: MirrorRequest): asserts input is GraphqlMirrorRequest {
   if(input.type !== 'graphql'){
       throw new Error('type must be graphql')
   }
 
-
-  if(!input.method){
-    throw new Error('method is required')
-  }
-
   if(input.method !== 'query' && input.method !== 'mutation'){
       throw new Error('method must be query or mutation')
+  }
+}
+
+export function assertIsHttpMirrorRequest(input: MirrorRequest): asserts input is HttpMirrorRequest {
+  if(input.type !== 'http'){
+      throw new Error('type must be http')
+  }
+
+  if(input.method !== 'get' && input.method !== 'post'){
+      throw new Error('method must be get or post')
   }
 }
