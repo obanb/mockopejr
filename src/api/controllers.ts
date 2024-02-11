@@ -55,8 +55,10 @@ const appController = (
           }
 
           if(params.method === 'post'){
-            res.writeHead(200);
-            res.end(JSON.stringify({ httppost:true }));
+            await charts.fromRequest(chartGroup)(req, args, ChartType.HTTP_DISPATCH);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(''));
             return
           }
         }
