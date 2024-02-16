@@ -35,7 +35,7 @@ export type RouterTable =
       graphql: {
         'post/graphqlDispatch': (req: http.IncomingMessage, res: http.ServerResponse, originalQuery: string, schema: Record<string,unknown>, keys: string[], params?: Record<string, unknown>) => Promise<unknown>,
       }
-      http:  Record<string,(req: http.IncomingMessage, res: http.ServerResponse, body: Record<string, unknown>, params?: Record<string, unknown>) => Promise<unknown>>
+      http:  Record<string,(req: http.IncomingMessage, res: http.ServerResponse, bodySchema: Record<string, unknown>, params?: Record<string, unknown>, graphqlOriginalQuery?: string, graphqlKeys?: string[]) => Promise<unknown>>
     }
 
 
@@ -61,6 +61,16 @@ export type MirrorRequest = {
 export type GraphqlMirrorRequest = MirrorRequest & {
   type: 'graphql';
   method: MirrorGraphqlMethod;
+  keys?: [];
+}
+
+export type GraphqlDispatchRequest = GraphqlMirrorRequest & {
+  method: 'mutation';
+}
+
+export type GraphqlHookRequest = GraphqlMirrorRequest & {
+  method: 'query';
+  keys: string[];
 }
 
 export type HttpMirrorRequest = MirrorRequest & {

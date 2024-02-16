@@ -50,7 +50,7 @@ const _new = (
           let body = '';
 
 
-          if(key === 'post/graphqlDispatch' || key === 'get/graphqlDispatch'){
+          if(key === 'post/mirror' && paramsPairs.type === 'graphql'){
             parseRequestParams(req, res).then((gqlRp) => {
              const ast = parse(gqlRp.query)
 
@@ -64,7 +64,7 @@ const _new = (
 
 
               const keys = extractKeys(gqlRp.query)
-              routeState['post/graphqlDispatch'](req, res, gqlRp.query, jsonTree, keys, paramsPairs)
+              routeState['post/mirror'](req, res, gqlRp.query, jsonTree, keys, paramsPairs)
               return
             }).catch((e) => {console.log("error", JSON.stringify(e))})
             return

@@ -1,0 +1,22 @@
+{
+  "schema": {
+    "query": "mutation{\n  vyjadrovacky{\n    send(id:\"653564029a6f16e7324ba050\", prase: {b:1},\n      dog:{\n        hovado:{\n          skurvenec:{\n            hodnota: 2\n          }\n        }\n        les: null\n      \tpes: 2.52,\n      \tleporelao: [\"1\",\"2\",3,EN]\n      \tles2 : {\n        \tprase: \"ff\"\n      \t},\n        hovado3: GEG\n      \thovado2:true\n    }, \n    mock: {a:1})\n  }\n}",
+    "variables": {},
+    "operationName": null
+  },
+  "headers": {
+    "host": "localhost:8092",
+    "connection": "keep-alive",
+    "content-length": "445",
+    "accept": "application/json",
+    "accept-encoding": "gzip, deflate, br",
+    "accept-language": "cs",
+    "content-type": "application/json",
+    "origin": "electron://altair",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) AltairGraphQLClient/4.0.7 Chrome/89.0.4389.82 Electron/12.0.1 Safari/537.36"
+  },
+  "type": "GRAPHQL_HOOK"
+}

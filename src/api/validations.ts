@@ -144,6 +144,16 @@ export function assertIsGraphqlMirrorRequest(input: MirrorRequest): asserts inpu
   }
 }
 
+export function assertIsGraphqlHookRequest(input: GraphqlMirrorRequest): asserts input is GraphqlMirrorRequest {
+  if(input.method !== 'query'){
+      throw new Error('method must be query')
+  }
+
+  if(!input.keys || !Array.isArray(input.keys) || input.keys.length === 0){
+      throw new Error('keys must be a non-empty array')
+  }
+}
+
 export function assertIsHttpMirrorRequest(input: MirrorRequest): asserts input is HttpMirrorRequest {
   if(input.type !== 'http'){
       throw new Error('type must be http')

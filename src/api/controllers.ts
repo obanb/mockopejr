@@ -3,6 +3,7 @@ import { isGraphqlMirrorRequest, isHttpMirrorRequest, RouterTable } from './type
 import { json } from '../core/json.js';
 import { Chart, ChartType } from '../core/types.js';
 import {
+  assertIsGraphqlHookRequest,
   assertIsGraphqlMirrorRequest, assertIsHttpMirrorRequest,
   assertIsMirrorRequest,
   validateCmd,
@@ -13,7 +14,7 @@ const appController = (
   chartGroup: ReturnType<typeof charts.group>,
 ): RouterTable => ({
   graphql: {
-    'post/graphqlDispatch': async(req, res, originalQuery, jsonTree, keys, params) => {
+    'post/graphqlDispatch': async(req, res, originalQuery,jsonTree,keys) => {
       console.log("GRAPHQL INNER POST KEYS", keys)
 
       await charts.fromGraphqlRequest(chartGroup)(req, originalQuery, jsonTree, keys, ChartType.HTTP_DISPATCH);
@@ -23,7 +24,7 @@ const appController = (
     },
   },
   http: {
-    'post/mirror': async (req, res, args, params) => {
+    'post/mirror': async (req, res, bodySchema, params, graphqlQuery, graphqlKeys) => {
       try {
         assertIsMirrorRequest(params)
 
@@ -32,14 +33,19 @@ const appController = (
           assertIsGraphqlMirrorRequest(params)
 
           if(params.method === 'query'){
-            res.writeHead(200);
-            res.end(JSON.stringify({ graphqlquery:true }));
+            assertIsGraphqlHookRequest(params)
+            await charts.fromRequest(chartGroup)(req, bodySchema, ChartType.GRAPHQL_HOOK)
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(''));
             return
           }
 
           if(params.method === 'mutation'){
-            res.writeHead(200);
-            res.end(JSON.stringify({ graphqlmutation:true }));
+            await charts.fromRequest(chartGroup)(req, bodySchema, ChartType.GRAPHQL_DISPATCH)
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(''));
             return
           }
         }
@@ -49,13 +55,15 @@ const appController = (
           assertIsHttpMirrorRequest(params)
 
           if(params.method === 'get'){
-            res.writeHead(200);
-            res.end(JSON.stringify({ httpget:true }));
+            await charts.fromRequest(chartGroup)(req, bodySchema, ChartType.HTTP_HOOK);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(''));
             return
           }
 
           if(params.method === 'post'){
-            await charts.fromRequest(chartGroup)(req, args, ChartType.HTTP_DISPATCH);
+            await charts.fromRequest(chartGroup)(req, bodySchema, ChartType.HTTP_DISPATCH);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(''));
