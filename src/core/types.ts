@@ -14,6 +14,7 @@ export type HTTP_REQUEST = ChartType.HTTP_HOOK | ChartType.HTTP_DISPATCH;
 
 export type Chart<ChartType = unknown> = {
   originalQuery?: ChartType extends GRAPHQL_REQUEST ? string : never;
+  keys?: ChartType extends ChartType.GRAPHQL_HOOK ? string[] : never;
   schema: Record<string, unknown>;
   headers: IncomingHttpHeaders;
   type: ChartType;

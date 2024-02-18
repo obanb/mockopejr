@@ -75,16 +75,28 @@ const fromRequest =
     req: IncomingMessage,
     parsedBody: Record<string, unknown>,
     type: ChartType,
+    graphqlOriginalQuery?: string,
+    graphqlKeys?: string[],
+
   ) => {
     const { chartName: fileName } = await computeIdentifiers(type);
 
-    const chart: Chart = {
+    const jsonChart = {
       schema: parsedBody,
       headers: req.headers,
       type,
     };
 
-    await json.writeChart(fileName, chart);
+    if(type === ChartType.GRAPHQL_HOOK) {
+      jsonChart["originalQuery"] = graphqlOriginalQuery;
+      jsonChart["keys"] = graphqlKeys;
+    }
+
+    if(type === ChartType.GRAPHQL_DISPATCH) {
+      jsonChart["originalQuery"] = graphqlOriginalQuery;
+    }
+
+    await json.writeChart(fileName, jsonChart);
 
     switch (type) {
       case ChartType.HTTP_HOOK:
@@ -116,13 +128,15 @@ const fromRequest =
 
         await chartGroup.add(postChart, fileName);
 
-        return chart;
+        return postChart;
 
 
       case ChartType.GRAPHQL_HOOK:
         const graphqlChart: Chart<ChartType.GRAPHQL_HOOK> = {
           headers: req.headers,
-          schema: ["pes"] as any,
+          schema: parsedBody,
+          originalQuery: graphqlOriginalQuery,
+          keys: graphqlKeys,
           type,
           options: {
             keys: [],
@@ -132,12 +146,13 @@ const fromRequest =
 
         await chartGroup.add(graphqlChart, fileName);
 
-        return chart;
+        return graphqlChart;
 
 
       case ChartType.GRAPHQL_DISPATCH:
         const graphqlDispatchChart: Chart<ChartType.GRAPHQL_DISPATCH> = {
           headers: req.headers,
+          originalQuery: graphqlOriginalQuery,
           schema: ["pes"] as any,
           type,
           options: {
@@ -148,12 +163,12 @@ const fromRequest =
 
         await chartGroup.add(graphqlDispatchChart, fileName);
 
-        return chart;
+        return graphqlDispatchChart;
 
 
 
       case ChartType.UNKNOWN:
-        return chart;
+        return jsonChart;
       default:
         // absurd helper for static exhaustive switch
         return commonUtils.absurd<Chart>(type);

@@ -64,7 +64,7 @@ const _new = (
 
 
               const keys = extractKeys(gqlRp.query)
-              routeState['post/mirror'](req, res, gqlRp.query, jsonTree, keys, paramsPairs)
+              routeState['post/mirror'](req, res, jsonTree, gqlRp.query, paramsPairs, keys)
               return
             }).catch((e) => {console.log("error", JSON.stringify(e))})
             return
