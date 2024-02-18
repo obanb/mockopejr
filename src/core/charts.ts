@@ -153,7 +153,7 @@ const fromRequest =
         const graphqlDispatchChart: Chart<ChartType.GRAPHQL_DISPATCH> = {
           headers: req.headers,
           originalQuery: graphqlOriginalQuery,
-          schema: ["pes"] as any,
+          schema: parsedBody,
           type,
           options: {
             perSec: 1,
