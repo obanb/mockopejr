@@ -93,29 +93,6 @@ const appController = (
       await json.readCharts();
       res.end('ok');
     },
-    'post/mirror/get': async (req, res, args) => {
-      const date = new Date();
-      const fileName = `mirror_${date.getFullYear()}${
-        date.getMonth() + 1
-      }${date.getDate()}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
-
-      const chart: Chart = {
-        schema: args,
-        headers: req.headers,
-        type: ChartType.UNKNOWN,
-      };
-
-      await json.writeChart(fileName, chart);
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(''));
-    },
-    'post/mirror/post': async (req, res, args) => {
-      await charts.fromRequest(chartGroup)(req, args, ChartType.HTTP_DISPATCH);
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(''));
-    },
     'post/mirror/proxy/get': async (req, res, args) => {
       await charts.fromRequest(chartGroup)(req, args, ChartType.HTTP_HOOK);
 

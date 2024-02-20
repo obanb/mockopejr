@@ -165,17 +165,13 @@ const fromRequest =
 
         return graphqlDispatchChart;
 
-
-
-      case ChartType.UNKNOWN:
-        return jsonChart;
       default:
         // absurd helper for static exhaustive switch
         return commonUtils.absurd<Chart>(type);
     }
   };
 
-const hookGetChart =
+const hookHttpGetChart =
   (chartServer: ReturnType<typeof plugableServer.new>) =>
   async (chart: Chart<ChartType.HTTP_HOOK>): Promise<void> => {
     const url =
@@ -198,8 +194,77 @@ const hookGetChart =
     });
   };
 
-const hookPostChart = async (
+const hookHttpPostChart = async (
   chart: Chart<ChartType.HTTP_DISPATCH>,
+): Promise<{ chan: ReturnType<typeof channel.new> }> => {
+
+  const chan = channel.new({
+    callbackFn: async (opts?: RunCmdOptions) => {
+      const mergedOpts = { ...chart.options, ...opts };
+
+      if (!mergedOpts.url || !mergedOpts.perSec) {
+        throw new Error('The options ["url","perSec"] are mandatory, please define them in the JSON file of the corresponding charter or as part of a command.');
+      }
+
+      const reflected = Array.from({ length: mergedOpts?.buffer || 1 }, () =>
+        reflection.reflectAndGenerate(chart.schema),
+      );
+      return httpUtils
+        .post(
+          mergedOpts.url,
+          reflected,
+        )
+        .catch((e: AxiosError) => {
+          console.log(e?.message);
+          console.log(e?.response?.status);
+          console.log(e?.response?.statusText);
+        });
+    },
+  });
+  await chan.init();
+
+  return {
+    chan,
+  };
+};
+
+
+const hookGraphqlQueryChart = async (
+  chart: Chart<ChartType.GRAPHQL_HOOK>,
+): Promise<{ chan: ReturnType<typeof channel.new> }> => {
+
+  const chan = channel.new({
+    callbackFn: async (opts?: RunCmdOptions) => {
+      const mergedOpts = { ...chart.options, ...opts };
+
+      if (!mergedOpts.url || !mergedOpts.perSec) {
+        throw new Error('The options ["url","perSec"] are mandatory, please define them in the JSON file of the corresponding charter or as part of a command.');
+      }
+
+      const reflected = Array.from({ length: mergedOpts?.buffer || 1 }, () =>
+        reflection.reflectAndGenerate(chart.schema),
+      );
+      return httpUtils
+        .post(
+          mergedOpts.url,
+          reflected,
+        )
+        .catch((e: AxiosError) => {
+          console.log(e?.message);
+          console.log(e?.response?.status);
+          console.log(e?.response?.statusText);
+        });
+    },
+  });
+  await chan.init();
+
+  return {
+    chan,
+  };
+};
+
+const hookGraphqlMutationChart = async (
+  chart: Chart<ChartType.GRAPHQL_DISPATCH>,
 ): Promise<{ chan: ReturnType<typeof channel.new> }> => {
 
   const chan = channel.new({
@@ -254,29 +319,35 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
     add: async (chart: Chart, chartName?: string) => {
       console.log(`(re)creating chart "${chartName}"`);
 
+
+      const name =
+        chartName ?? (await computeIdentifiers(chart.type as ChartType)).chartName;
+
       // the chart is linked to the defined URL of the local server
       if (isHttpHookChart(chart)) {
-        const name =
-          chartName ?? (await computeIdentifiers(ChartType.HTTP_HOOK)).chartName;
-        hookGetChart(chartServer)(chart);
+        console.log('http hook chart')
+        hookHttpGetChart(chartServer)(chart);
         charts[name] = { chart };
       }
 
       // channel creation for active dispatching to target URL
       if (isHttpDispatchChart(chart)) {
-        const name =
-          chartName ?? (await computeIdentifiers(ChartType.HTTP_DISPATCH)).chartName;
-        const { chan } = await hookPostChart(chart);
+        console.log('http dispatch chart')
+        const { chan } = await hookHttpPostChart(chart);
         charts[name] = { chart, channel: chan };
       }
 
-      if(isGraphqlHookChart(chart)) {
-        console.log('graphql hook chart')
+      if(isGraphqlDispatchChart(chart)) {
+        console.log('graphql dispatch chart')
+        const { chan } = await hookGraphqlMutationChart(chart);
+        charts[name] = { chart, channel: chan };
       }
 
       // channel creation for active dispatching to target URL
-      if (isGraphqlDispatchChart(chart)) {
-        console.log('graphql dispatch chart')
+      if (isGraphqlHookChart(chart)) {
+        console.log('graphql hook chart')
+        const { chan } = await hookGraphqlQueryChart(chart);
+        charts[name] = { chart, channel: chan };
       }
     },
     purge: async () => {
@@ -391,7 +462,7 @@ const group = (chartServer: ReturnType<typeof plugableServer.new>) => {
                 ],
               };
             }
-            await hookGetChart(chartServer)(chart.chart);
+            await hookHttpGetChart(chartServer)(chart.chart);
 
             return { state: 'executed', msgs: [`creating route {${uri}}`] };
         }
@@ -419,7 +490,8 @@ export const charts = {
   reload,
   fromRequest,
   fromGraphqlRequest,
-  hookGetChart,
-  hookPostChart,
+  hookHttpGetChart,
+  hookHttpPostChart,
+  hookGraphqlMutationChart,
   group,
 };
