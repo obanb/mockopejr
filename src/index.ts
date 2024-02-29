@@ -1,3 +1,3 @@
-import { main } from './main.js';
+import { startServer } from './api/server.js';
 
-main();
+void startServer();

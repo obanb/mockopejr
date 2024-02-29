@@ -6,7 +6,7 @@ type JsonPrimitive = string | number | boolean | null;
 
 // the order depends
 
-const reflectAndGenerate = (schema: unknown) => {
+const reflectAndGenerate = (schema: Record<string, JsonPrimitive>) => {
   Object.entries(schema).map(([key, elem]) => {
     if (isNotEmptyPrimitiveArray(elem)) {
       console.log('primitivni pole')
@@ -16,11 +16,11 @@ const reflectAndGenerate = (schema: unknown) => {
       return elem;
     } else if (isNotEmptyObjectArray(elem)) {
       return elem.forEach(reflectAndGenerate);
-    } else if (isNotNullableObject(elem)) {
-      return reflectAndGenerate(elem);
-    } else if (isPrimitive(elem)) {
+    } else if (isNonNullableObject(elem)) {
+      return reflectAndGenerate(elem as any);
+    } else if (isJsonPrimitive(elem)) {
       if (isExpression(elem)) {
-        schema[key] = expressionParser.proceed(elem)
+        schema[key] = expressionParser.proceed(elem) as any
       } else {
         schema[key] = generator.generateFromJsonPrimitive(elem);
       }
@@ -36,14 +36,14 @@ const isExpression = (elem: unknown): elem is Expression => {
   return false
 }
 
-const isPrimitive = (elem: unknown) =>
+const isJsonPrimitive = (elem: unknown): elem is JsonPrimitive =>
   isNumber(elem) || isString(elem) || isBoolean(elem) || elem === null;
 
 const isNotEmptyPrimitiveArray = (elem: unknown): elem is JsonPrimitive[] => {
   if (Array.isArray(elem)) {
     const elem0 = elem[0];
 
-    if (isPrimitive(elem0)) {
+    if (isJsonPrimitive(elem0)) {
       return true;
     }
   }
@@ -57,7 +57,7 @@ const isNotEmptyObjectArray = (
   if (Array.isArray(elem)) {
     const elem0 = elem[0];
 
-    if (elem0 && !Array.isArray(elem0) && isNotNullableObject(elem0)) {
+    if (elem0 && !Array.isArray(elem0) && isNonNullableObject(elem0)) {
       return true;
     }
   }
@@ -77,7 +77,7 @@ const isBoolean = (val: unknown): val is 'boolean' => typeof val === 'boolean';
 const isObject = (val: unknown): val is Record<string, unknown> =>
   typeof val === 'object';
 
-const isNotNullableObject = (val: unknown): val is Record<string, unknown> =>
+const isNonNullableObject = (val: unknown): val is Record<string, JsonPrimitive> =>
   typeof val === 'object' && val !== null;
 
 export const reflection = {
@@ -89,5 +89,6 @@ export const reflection = {
   isNull,
   isBoolean,
   isObject,
-  isNotNullableObject
+  isNonNullableObject,
+  isNotEmptyObjectArray
 };
