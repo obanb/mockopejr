@@ -35,7 +35,6 @@ const router = async() => {
       }
     }
   }
-
   return expressRouter
 }
 
