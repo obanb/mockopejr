@@ -1,6 +1,6 @@
 import { readdir, readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { JsonChart } from './types';
+import { ChartType, JsonChart, JsonGraphQLChart, JsonHttpChart } from './types';
 
 
 /**
@@ -46,8 +46,76 @@ const count = async () => {
   return files.length;
 };
 
+/**
+ * Get the next unique filename based on the current date and next file count in schemaPath
+ * @param type - ChartType
+ * @returns Promise<string>
+ */
+const getFileName = async(type: ChartType = 'http') => {
+  const date = new Date();
+  const next = await count();
+
+  const fileName = `${next}_${type}_${date.getFullYear()}${
+    date.getMonth() + 1
+  }${date.getDate()}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
+
+  return fileName;
+}
+
+/**
+ * Creates a new JSON file with a template based on the ChartType
+ * @param type - ChartType
+ * @returns Promise<void>
+ */
+const template = async (type: ChartType = 'http') => {
+  let template;
+  const fileName = await getFileName(type);
+  if(type === 'graphql'){
+    template = graphqlTemplate()
+  } else {
+    template = httpTemplate()
+  }
+  await write(fileName, template);
+}
+
+
+/**
+ * Template for HTTP Chart
+ * @returns JsonHttpChart
+ */
+const httpTemplate =  (): JsonHttpChart => {
+  return {
+    type: 'http',
+    schema: {},
+    url: '',
+    config:{
+      arrayify: 0,
+      mimicMode: 'exact',
+    },
+    method: 'GET',
+  }
+}
+
+
+/**
+ * Template for GraphQL Chart
+ * @returns JsonGraphQLChart
+ */
+const graphqlTemplate = (): JsonGraphQLChart => {
+  return {
+    type: 'graphql',
+    schema: {},
+    keys: [],
+    config:{
+      arrayify: 0,
+      mimicMode: 'exact',
+    }
+  }
+}
+
 export const json = {
   write,
   read,
   count,
+  template
 };

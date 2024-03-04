@@ -1,3 +1,4 @@
+export type ChartType = 'http' | 'graphql'
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonSchema = Record<string, JsonPrimitive>
 export type MimicMode = 'randomize' | 'exact'
@@ -8,7 +9,7 @@ export type ChartCfg = {
 export type JsonChart = JsonHttpChart | JsonGraphQLChart
 
 export type JsonHttpChart = {
-  type: 'http',
+  type: ChartType,
   schema: JsonSchema,
   url: string,
   // http method, runtime will check if it is a valid HTTP server method
