@@ -1,4 +1,4 @@
-import { ChartCfg, isGraphQLChart, isHttpChart, JsonChart } from './types';
+import { ChartCfg, isGraphQLChart, isHttpChart, JsonChart } from './types.js';
 
 const serve = (cfg: ChartCfg, jsonChart: JsonChart) => {
   if(isHttpChart(jsonChart)) {
@@ -8,6 +8,8 @@ const serve = (cfg: ChartCfg, jsonChart: JsonChart) => {
   if(isGraphQLChart(jsonChart)) {
     return 'graphql'
   }
+
+  return 'unknown'
 }
 
 export const chart = {

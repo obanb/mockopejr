@@ -1,6 +1,6 @@
 import { readdir, readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { ChartType, JsonChart, JsonGraphQLChart, JsonHttpChart } from './types';
+import { ChartType, JsonChart, JsonGraphQLChart, JsonHttpChart } from './types.js';
 
 
 /**
@@ -68,6 +68,7 @@ const getFileName = async(type: ChartType = 'http') => {
  * @returns Promise<void>
  */
 const template = async (type: ChartType = 'http') => {
+  console.log("TEMPLATE")
   let template;
   const fileName = await getFileName(type);
   if(type === 'graphql'){

@@ -1,8 +1,7 @@
 import {Server} from 'node:http';
-import express, { Router } from 'express';
-import {Router, Request, Response} from 'express';
-import { json } from '../core/json';
-import { RequestCfg } from '../core/types';
+import express, {Router, Request, Response} from 'express';
+import { RequestCfg } from '../core/types.js';
+import { json } from '../core/json.js';
 
 const app = express();
 const port = process.env.APP_PORT;
@@ -23,14 +22,14 @@ const router = async() => {
   })
   // load all JSON charts from folder
   const charts = await json.read()
-  for (const chart of charts) {
+  for (const [_, v] of Object.entries(charts)) {
     // if chart is http then hook it up to the express router
     // if chart is graphql then ignore it, graphql charts are computed online from file via different mechanism
-    if(chart.type === 'http') {
-      const method = chart.method.toLowerCase();
+    if(v.type === 'http') {
+      const method = v.method.toLowerCase();
       if (typeof expressRouter[method] === 'function') {
-        expressRouter[method](chart.url, async (req: Request, res: Response) => {
-          res.send(chart.url);
+        expressRouter[method](v.url, async (req: Request, res: Response) => {
+          res.send(v.url);
         });
       }
     }

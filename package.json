@@ -21,10 +21,12 @@
     "typescript": "5.3.3"
   },
   "scripts": {
+    "cli": "node build/src/cli.js",
     "start": "tsc && node --inspect -r dotenv/config build/src/index.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run lint",
     "build": "tsc -p tsconfig.json",
+    "vec": "tsc && node build/src/core/json.js json:template",
     "build:watch": "tsc -w -p tsconfig.json",
     "build:release": "npm run clean && tsc -p tsconfig.release.json",
     "lint": "eslint . --ext .ts --ext .mts",
@@ -40,7 +42,8 @@
     "express": "^4.18.3",
     "graphql-http": "^1.22.0",
     "openai": "^3.3.0",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "commander": "^9.4.0"
   },
   "volta": {
     "node": "16.13.0"
