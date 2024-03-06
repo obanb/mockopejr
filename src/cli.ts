@@ -5,7 +5,7 @@ import { ChartType } from './core/types.js';
 
 const program = new Command();
 
-program.name('Logr CLI').description('Logr CLI').version('0.0.1');
+program.name('Mockopejr CLI').description('Mockopejr CLI').version('0.0.1');
 
 program
   .hook('preAction', (_, actionCommand) => {
@@ -18,9 +18,9 @@ program
   });
 
 program
-  .command('run')
+  .command('template')
   .description(
-    'The command starts running the active call of the selected chart.',
+    'The command creates a new JSON file with a template based on the ChartType.',
   )
   .option(
     '--t, --type <string>',
@@ -39,8 +39,7 @@ program
 
         await json.template(options.type)
       } catch (error) {
-        console.log(JSON.stringify(error, null, 2))
-        colourfulUnicorn.error(`Error making HTTP POST request: ${error.response.data}`);
+        colourfulUnicorn.error(`Error while creating template: ${JSON.stringify(error)}`);
       }
     },
   );

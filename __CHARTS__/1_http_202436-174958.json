@@ -1,0 +1,10 @@
+{
+  "type": "http",
+  "schema": {},
+  "url": "",
+  "config": {
+    "arrayify": 0,
+    "mimicMode": "exact"
+  },
+  "method": "GET"
+}
