@@ -2,6 +2,7 @@ import {Server} from 'node:http';
 import express, {Router, Request, Response} from 'express';
 import { RequestCfg } from '../core/types.js';
 import { json } from '../core/json.js';
+import { chart } from '../core/chart';
 
 const app = express();
 const port = process.env.APP_PORT;
@@ -29,7 +30,8 @@ const router = async() => {
       const method = v.method.toLowerCase();
       if (typeof expressRouter[method] === 'function') {
         expressRouter[method](v.url, async (req: Request, res: Response) => {
-          res.send(v.url);
+          const body = await chart.serverHttpChart(v)
+          res.send(body);
         });
       }
     }

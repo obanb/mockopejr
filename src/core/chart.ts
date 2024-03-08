@@ -1,6 +1,7 @@
-import { ChartCfg, isGraphQLChart, isHttpChart, JsonChart } from './types.js';
+import { ChartCfg, isGraphQLChart, isHttpChart, JsonChart, JsonGraphQLChart, JsonHttpChart } from './types.js';
+import { reflection } from '../parsing/reflection';
 
-const serve = (cfg: ChartCfg, jsonChart: JsonChart) => {
+const serve = async(jsonChart: JsonChart) => {
   if(isHttpChart(jsonChart)) {
     return 'http'
   }
@@ -12,6 +13,22 @@ const serve = (cfg: ChartCfg, jsonChart: JsonChart) => {
   return 'unknown'
 }
 
+const serverHttpChart = async(chart: JsonHttpChart) => {
+  const arrayify = chart.config.arrayify;
+  if (arrayify > 1) {
+    return Array.from({ length: arrayify }, () =>
+      reflection.reflectAndGenerate(chart.schema),
+    );
+  }
+  return reflection.reflectAndGenerate(chart.schema);
+}
+
+const serverGraphQLChart = async(chart: JsonGraphQLChart) => {
+
+}
+
 export const chart = {
-  serve
+  serve,
+  serverHttpChart,
+  serverGraphQLChart
 }
