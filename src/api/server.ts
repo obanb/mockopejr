@@ -15,7 +15,8 @@ const GRAPHQL_ROUTE = RESERVED_ROUTES.GRAPHQL;
 
 const router = async() => {
   const expressRouter = Router();
-  expressRouter.get(RESERVED_ROUTES[0],(req: Request, res: Response) => {
+  const reservedUrls = Object.values(RESERVED_ROUTES);
+  expressRouter.get(RESERVED_ROUTES.HEALTHZ,(req: Request, res: Response) => {
     res.sendStatus(200)
   });
   expressRouter.all(GRAPHQL_ROUTE, (req: Request, res: Response) => {
@@ -28,7 +29,7 @@ const router = async() => {
     // if chart is graphql then ignore it, graphql charts are computed online from file via different mechanism
     if(v.type === 'http') {
       const method = v.method.toLowerCase();
-      if (typeof expressRouter[method] === 'function') {
+      if (typeof expressRouter[method] === 'function' && !reservedUrls.includes(v.url)) {
         expressRouter[method](v.url, async (req: Request, res: Response) => {
           const body = await chart.serverHttpChart(v)
           res.send(body);
