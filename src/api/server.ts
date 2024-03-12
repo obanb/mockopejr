@@ -2,7 +2,7 @@ import {Server} from 'node:http';
 import express, {Router, Request, Response} from 'express';
 import { RequestCfg } from '../core/types.js';
 import { json } from '../core/json.js';
-import { chart } from '../core/chart';
+import { chart } from '../core/chart.js';
 
 const app = express();
 const port = process.env.APP_PORT;
@@ -31,6 +31,12 @@ const router = async() => {
       const method = v.method.toLowerCase();
       if (typeof expressRouter[method] === 'function' && !reservedUrls.includes(v.url)) {
         expressRouter[method](v.url, async (req: Request, res: Response) => {
+          const onlineQueries = readCfgQueries(req)
+          await applyOnlineQueries(onlineQueries, res);
+          if(res.statusCode >= 400){
+            res.sendStatus(res.statusCode)
+            return;
+          }
           const body = await chart.serverHttpChart(v)
           res.send(body);
         });
@@ -40,7 +46,23 @@ const router = async() => {
   return expressRouter
 }
 
-const readSpecialRequestQueries = (req: Request): RequestCfg => {
+const applyOnlineQueries = (cfg: RequestCfg, res: Response) => {
+  if(cfg.errorCode){
+    res.status(cfg.errorCode);
+  }
+
+  if(cfg.delayMs){
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(void 0);
+      }, cfg.delayMs);
+    });
+  }
+
+  return Promise.resolve();
+}
+
+const readCfgQueries = (req: Request): RequestCfg => {
   const query = req.query;
   let cfg: RequestCfg = {}
   if(query.errorCode && typeof query.errorCode === 'string'){

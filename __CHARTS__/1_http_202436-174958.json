@@ -1,10 +1,13 @@
 {
   "type": "http",
-  "schema": {},
-  "url": "",
+  "schema": {
+    "ahoj": "string",
+    "vagon": 22
+  },
+  "url": "/api/reservations/:id_reservation/guests/:id_guest",
   "config": {
     "arrayify": 0,
     "mimicMode": "exact"
   },
-  "method": "GET"
+  "method": "POST"
 }

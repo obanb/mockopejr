@@ -1,5 +1,5 @@
 import { isGraphQLChart, isHttpChart, JsonChart, JsonGraphQLChart, JsonHttpChart } from './types.js';
-import { reflection } from '../parsing/reflection';
+import { reflection } from '../parsing/reflection.js';
 
 const serve = async(jsonChart: JsonChart) => {
   if(isHttpChart(jsonChart)) {
