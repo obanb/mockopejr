@@ -1,0 +1,21 @@
+{
+  "type": "graphql",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "me": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "keys": ["me","email"],
+  "config": {
+    "arrayify": 0,
+    "mimicMode": "exact"
+  }
+}

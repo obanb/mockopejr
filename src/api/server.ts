@@ -1,8 +1,9 @@
 import {Server} from 'node:http';
 import express, {Router, Request, Response} from 'express';
-import { RequestCfg } from '../core/types.js';
+import { JsonGraphQLChart, RequestCfg } from '../core/types.js';
 import { json } from '../core/json.js';
 import { chart } from '../core/chart.js';
+import { parseRequestParams } from 'graphql-http/lib/use/express';
 
 const app = express();
 const port = process.env.APP_PORT;
@@ -19,11 +20,16 @@ const router = async() => {
   expressRouter.get(RESERVED_ROUTES.HEALTHZ,(req: Request, res: Response) => {
     res.sendStatus(200)
   });
-  expressRouter.all(GRAPHQL_ROUTE, (req: Request, res: Response) => {
-
+  const charts = await json.read()
+  const graphlCharts = Object.values(charts).filter((c): c is JsonGraphQLChart => c.type === 'graphql');
+  expressRouter.all(GRAPHQL_ROUTE, async(req: Request, res: Response) => {
+     const gqlParams = await parseRequestParams(req, res)
+    console.log(gqlParams)
+     const gqlKeys = extractGqlKeys(gqlParams.query);
+     const body = await chart.resolveGraphqlChart(gqlKeys, graphlCharts);
+     res.send(body);
   })
   // load all JSON charts from folder
-  const charts = await json.read()
   for (const [_, v] of Object.entries(charts)) {
     // if chart is http then hook it up to the express router
     // if chart is graphql then ignore it, graphql charts are computed online from file via different mechanism
@@ -44,6 +50,17 @@ const router = async() => {
     }
   }
   return expressRouter
+}
+
+
+const extractGqlKeys = (queryString: string): string[] => {
+  // Remove all line breaks and extra spaces
+  const cleanedQuery = queryString.replace(/\s+/g, ' ');
+
+  // Find all words in the string that are not enclosed in parentheses
+  const matches = cleanedQuery.match(/([a-zA-Z_]\w*)(?![^\(]*\))/g);
+
+  return matches;
 }
 
 const applyOnlineQueries = (cfg: RequestCfg, res: Response) => {
