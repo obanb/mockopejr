@@ -1,5 +1,5 @@
 import {Server} from 'node:http';
-import express, {Router, Request, Response} from 'express';
+import express, { Router, Request, Response, NextFunction } from 'express';
 import { JsonGraphQLChart, RequestCfg } from '../core/types.js';
 import { json } from '../core/json.js';
 import { chart } from '../core/chart.js';
@@ -17,13 +17,29 @@ const GRAPHQL_ROUTE = RESERVED_ROUTES.GRAPHQL;
 const router = async() => {
   const expressRouter = Router();
   const reservedUrls = Object.values(RESERVED_ROUTES);
+  const charts = await json.read()
+  const graphlCharts = Object.values(charts).filter((c): c is JsonGraphQLChart => c.type === 'graphql');
+
+  // apply online wildcards on each response per request params
+  expressRouter.all("*",async(req: Request, res: Response, next: NextFunction) => {
+    const wildcards = getQueryWildcards(req)
+    await applyWildcards(wildcards, res);
+    if(res.statusCode >= 400){
+      res.sendStatus(res.statusCode)
+      return;
+    }
+    next()
+  })
   expressRouter.get(RESERVED_ROUTES.HEALTHZ,(req: Request, res: Response) => {
     res.sendStatus(200)
   });
-  const charts = await json.read()
-  const graphlCharts = Object.values(charts).filter((c): c is JsonGraphQLChart => c.type === 'graphql');
   expressRouter.all(GRAPHQL_ROUTE, async(req: Request, res: Response) => {
      const gqlParams = await parseRequestParams(req, res)
+    // fuck'em
+    if(gqlParams.operationName === 'IntrospectionQuery'){
+      res.sendStatus(200)
+      return;
+    }
     console.log(gqlParams)
      const gqlKeys = extractGqlKeys(gqlParams.query);
      const body = await chart.resolveGraphqlChart(gqlKeys, graphlCharts);
@@ -37,12 +53,6 @@ const router = async() => {
       const method = v.method.toLowerCase();
       if (typeof expressRouter[method] === 'function' && !reservedUrls.includes(v.url)) {
         expressRouter[method](v.url, async (req: Request, res: Response) => {
-          const onlineQueries = readCfgQueries(req)
-          await applyOnlineQueries(onlineQueries, res);
-          if(res.statusCode >= 400){
-            res.sendStatus(res.statusCode)
-            return;
-          }
           const body = await chart.serverHttpChart(v)
           res.send(body);
         });
@@ -63,23 +73,23 @@ const extractGqlKeys = (queryString: string): string[] => {
   return matches;
 }
 
-const applyOnlineQueries = (cfg: RequestCfg, res: Response) => {
-  if(cfg.errorCode){
-    res.status(cfg.errorCode);
+const applyWildcards = (wilrdcards: RequestCfg, res: Response) => {
+  if(wilrdcards.errorCode){
+    res.status(wilrdcards.errorCode);
   }
 
-  if(cfg.delayMs){
+  if(wilrdcards.delayMs){
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(void 0);
-      }, cfg.delayMs);
+      }, wilrdcards.delayMs);
     });
   }
 
   return Promise.resolve();
 }
 
-const readCfgQueries = (req: Request): RequestCfg => {
+const getQueryWildcards = (req: Request): RequestCfg => {
   const query = req.query;
   let cfg: RequestCfg = {}
   if(query.errorCode && typeof query.errorCode === 'string'){
