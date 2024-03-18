@@ -4,6 +4,7 @@ import { JsonGraphQLChart, RequestCfg } from '../core/types.js';
 import { json } from '../core/json.js';
 import { chart } from '../core/chart.js';
 import { parseRequestParams } from 'graphql-http/lib/use/express';
+import { expressionParser } from '../parsing/expression_parser';
 
 const app = express();
 const port = process.env.APP_PORT;
@@ -33,6 +34,18 @@ const router = async() => {
   expressRouter.get(RESERVED_ROUTES.HEALTHZ,(req: Request, res: Response) => {
     res.sendStatus(200)
   });
+  const _expressionParser = expressionParser.parser({leftParen: {
+      type: 'SYMBOL',
+      subtype: 'LEFT_PAREN',
+      match: /\(/,
+      value: '(',
+    },
+    rightParen: {
+      type: 'SYMBOL',
+      subtype: 'RIGHT_PAREN',
+      match: /\)/,
+      value: ')',
+    }})
   expressRouter.all(GRAPHQL_ROUTE, async(req: Request, res: Response) => {
      const gqlParams = await parseRequestParams(req, res)
     // fuck'em

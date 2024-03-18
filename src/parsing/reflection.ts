@@ -5,11 +5,9 @@ import { expressionParser } from './expression_parser.js';
 type JsonPrimitive = string | number | boolean | null;
 
 // the order depends
-
-const reflectAndGenerate = (schema: Record<string, JsonPrimitive>) => {
+const reflectAndGenerate = (expressionParseFn: (input: string) => unknown) => (schema: Record<string, JsonPrimitive>) => {
   Object.entries(schema).map(([key, elem]) => {
     if (isNotEmptyPrimitiveArray(elem)) {
-      console.log('primitivni pole')
       elem.forEach((item, i) => {
          elem[i] = generator.generateFromJsonPrimitive(item)
       });
@@ -20,7 +18,7 @@ const reflectAndGenerate = (schema: Record<string, JsonPrimitive>) => {
       return reflectAndGenerate(elem as any);
     } else if (isJsonPrimitive(elem)) {
       if (isExpression(elem)) {
-        schema[key] = expressionParser.proceed(elem) as any
+        schema[key] = expressionParseFn(elem) as any
       } else {
         schema[key] = generator.generateFromJsonPrimitive(elem);
       }

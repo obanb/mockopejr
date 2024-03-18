@@ -229,7 +229,7 @@ const grammar: Dictionary = {
 };
 
 
-function tokenizer(input: string): Token[] {
+const tokenizer = (dictionary: Dictionary) => (input: string): Token[] => {
   const dictionary: Grammer[] = Object.values(grammar);
 
   const grammarRegex = /(#\w+|\(|,|\))/;
@@ -318,15 +318,20 @@ const traverser = (ast: AST): unknown => {
   throw new Error(`Unknown AST node type: ${ast.type}`);
 };
 
-const proceed = (input: string) => {
-  const tokens = tokenizer(input);
-  const ast = expression_parser(tokens);
-  return traverser(ast);
+const parser = (dictionary: Dictionary) => {
+  const tokenizer = tokenizer(dictionary);
+  return {
+    proceed: (input: string) => {
+      const tokens = tokenizer(input);
+      const ast = expression_parser(tokens);
+      return traverser(ast);
+    }
+  }
 }
 
 export const expressionParser = {
   tokenizer,
-  parser: expression_parser,
+  expression_parser,
   traverser,
-  proceed
+  parser
 }
