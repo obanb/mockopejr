@@ -34,7 +34,8 @@ const router = async() => {
   expressRouter.get(RESERVED_ROUTES.HEALTHZ,(req: Request, res: Response) => {
     res.sendStatus(200)
   });
-  const _expressionParser = expressionParser.parser({leftParen: {
+  // HOF of expression parser
+  const parser = expressionParser._new({leftParen: {
       type: 'SYMBOL',
       subtype: 'LEFT_PAREN',
       match: /\(/,
@@ -55,7 +56,7 @@ const router = async() => {
     }
     console.log(gqlParams)
      const gqlKeys = extractGqlKeys(gqlParams.query);
-     const body = await chart.resolveGraphqlChart(gqlKeys, graphlCharts);
+     const body = await chart.resolveGraphqlChart(parser.proceed, gqlKeys, graphlCharts);
      res.send(body);
   })
   // load all JSON charts from folder
@@ -66,7 +67,7 @@ const router = async() => {
       const method = v.method.toLowerCase();
       if (typeof expressRouter[method] === 'function' && !reservedUrls.includes(v.url)) {
         expressRouter[method](v.url, async (req: Request, res: Response) => {
-          const body = await chart.serverHttpChart(v)
+          const body = await chart.serverHttpChart(parser.proceed, v)
           res.send(body);
         });
       }

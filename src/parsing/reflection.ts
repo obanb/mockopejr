@@ -1,11 +1,10 @@
 import { generator } from './generator.js';
 import { Expression } from './types.js';
-import { expressionParser } from './expression_parser.js';
 
 type JsonPrimitive = string | number | boolean | null;
 
 // the order depends
-const reflectAndGenerate = (expressionParseFn: (input: string) => unknown) => (schema: Record<string, JsonPrimitive>) => {
+const reflectAndGenerate = (expressionParseFn: (input: string) => unknown, schema: Record<string, unknown>) => {
   Object.entries(schema).map(([key, elem]) => {
     if (isNotEmptyPrimitiveArray(elem)) {
       elem.forEach((item, i) => {
@@ -13,12 +12,12 @@ const reflectAndGenerate = (expressionParseFn: (input: string) => unknown) => (s
       });
       return elem;
     } else if (isNotEmptyObjectArray(elem)) {
-      return elem.forEach(reflectAndGenerate);
+      return elem.forEach((el) => reflectAndGenerate(expressionParseFn, el));
     } else if (isNonNullableObject(elem)) {
-      return reflectAndGenerate(elem as any);
+      return reflectAndGenerate(expressionParseFn, elem);
     } else if (isJsonPrimitive(elem)) {
       if (isExpression(elem)) {
-        schema[key] = expressionParseFn(elem) as any
+        schema[key] = expressionParseFn(elem);
       } else {
         schema[key] = generator.generateFromJsonPrimitive(elem);
       }
@@ -77,6 +76,7 @@ const isObject = (val: unknown): val is Record<string, unknown> =>
 
 const isNonNullableObject = (val: unknown): val is Record<string, JsonPrimitive> =>
   typeof val === 'object' && val !== null;
+
 
 export const reflection = {
   reflectAndGenerate,

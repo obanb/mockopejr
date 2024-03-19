@@ -2,34 +2,34 @@ import { JsonGraphQLChart, JsonHttpChart } from './types.js';
 import { reflection } from '../parsing/reflection.js';
 
 
-const resolveGraphqlChart = (keys: string[], charts: JsonGraphQLChart[]) => {
+const resolveGraphqlChart = (expressionParseFn: (input: string) => unknown, keys: string[], charts: JsonGraphQLChart[]) => {
     const chartsKeys = charts.map((chart) => chart.keys);
     const similarArrMatch = getMostSimilarArrayMatch(chartsKeys, keys);
     if(similarArrMatch.index === -1){
       return null
     }
     const chart = charts[similarArrMatch.index];
-    return serverGraphQLChart(chart);
+    return serverGraphQLChart(expressionParseFn, chart);
 }
 
-const serverHttpChart = (chart: JsonHttpChart) => {
+const serverHttpChart = (expressionParseFn: (input: string) => unknown,chart: JsonHttpChart) => {
   const arrayify = chart.config.arrayify;
   if (arrayify > 1) {
     return Array.from({ length: arrayify }, () =>
-      reflection.reflectAndGenerate(chart.schema),
+      reflection.reflectAndGenerate(expressionParseFn, chart.schema),
     );
   }
-  return reflection.reflectAndGenerate(chart.schema);
+  return reflection.reflectAndGenerate(expressionParseFn, chart.schema);
 }
 
-const serverGraphQLChart = async(chart: JsonGraphQLChart) => {
+const serverGraphQLChart = async(expressionParseFn: (input: string) => unknown, chart: JsonGraphQLChart) => {
   const arrayify = chart.config.arrayify;
   if (arrayify > 1) {
     return Array.from({ length: arrayify }, () =>
-      reflection.reflectAndGenerate(chart.schema),
+      reflection.reflectAndGenerate(expressionParseFn, chart.schema),
     );
   }
-  return reflection.reflectAndGenerate(chart.schema);
+  return reflection.reflectAndGenerate(expressionParseFn, chart.schema);
 }
 
 // gets most similar array match based
