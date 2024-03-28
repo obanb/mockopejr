@@ -1,4 +1,3 @@
-import { Dictionary } from './types';
 
 const defaultDictionary = {
   '#EXACT': {
@@ -31,16 +30,19 @@ const defaultBindings = (expression: keyof typeof defaultDictionary) => {
   switch (expression) {
     case '#RANGE':
       return (x: string, y: string) => {
+          // place for your custom logic or validation fn
           const n1 = parseInt(x);
           const n2 = parseInt(y);
           return Math.floor(Math.random() * (n2 - n1) + n1);
         }
     case '#STRINGIFY':
+      // place for your custom logic or validation fn
       return JSON.stringify;
     case '#EXACT':
       return (value: unknown) => value
     case '#INSERT':
       return (...args: any[]) => {
+        // place for your custom logic or validation fn
         return `${args[0] || ''}${args[2] || ''}${args[1] || ''}`;
       };
     default: {

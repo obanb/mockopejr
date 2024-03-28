@@ -1,6 +1,6 @@
 import { AST, Dictionary, Expression, Grammer, Token } from './types.js';
 import { bindings } from './bindings.js';
-import { dictionary } from './__DICTIONARY__';
+import { dictionary } from './__DICTIONARY__.js';
 
 
 /**
@@ -171,6 +171,7 @@ const AST = {
 TRAVERSER
 ---------
 recursively traverses the parents and their children and evaluates the result in the composition style (a(b(c(value))) according to the assigned function
+final step - each node execution transformation
 
 input =  "#INSERT(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))"
 const result = SOME_PREFIX-2.2161299227719167-SOME_SUFFIX
@@ -178,7 +179,7 @@ const result = SOME_PREFIX-2.2161299227719167-SOME_SUFFIX
 */
 
 const tokenizer = (dictionary: Dictionary) => (input: string): Token[] => {
-  const dictionary: Grammer[] = Object.values(dictionary);
+  const grammer: Grammer[] = Object.values(dictionary);
 
   const grammarRegex = /(#\w+|\(|,|\))/;
 
@@ -189,7 +190,7 @@ const tokenizer = (dictionary: Dictionary) => (input: string): Token[] => {
 
   // map each token to an dictionary regulars and recognize it
   return tokens.map((token) => {
-    const match = dictionary.find((d) => token.match(d.match));
+    const match = grammer.find((d) => token.match(d.match));
     if (match) {
       return {
         type: match.type,
@@ -270,10 +271,10 @@ const _new = () => {
   // probably must be asserted because of imported dictionary has dynamic type, because of inner dictionary typeguard
   // it's more comfortable to use at __DICTIONARY__.ts file
   const __dictionary: Dictionary = dictionary.defaultDictionary as Dictionary
-  const tokenizer = tokenizer(__dictionary);
+  const __tokenizer = tokenizer(__dictionary);
   return {
     proceed: (input: string) => {
-      const tokens = tokenizer(input);
+      const tokens = __tokenizer(input);
       const ast = parser(tokens);
       return traverser(ast);
     }
