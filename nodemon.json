@@ -1,0 +1,5 @@
+{
+  "watch": ["./__CHARTS__"],
+  "ext": "json",
+  "exec": "tsc && node --inspect -r dotenv/config build/src/index.js"
+}

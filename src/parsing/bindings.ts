@@ -7,7 +7,9 @@ const bind = (exp: Expression) => {
         if (isWholeNumber(x) && isWholeNumber(y)) {
           const n1 = parseInt(x);
           const n2 = parseInt(y);
+          console.log('b')
           return Math.floor(Math.random() * (n2 - n1) + n1);
+
         }
         throw new Error('shit');
       };

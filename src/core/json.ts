@@ -87,8 +87,10 @@ const template = async (type: ChartType = 'http') => {
 const httpTemplate =  (): JsonHttpChart => {
   return {
     type: 'http',
-    schema: {},
-    url: '',
+    schema: {
+      template: true
+    },
+    url: 'temporary/url/from/template',
     config:{
       arrayify: 0,
       mimicMode: 'exact',
@@ -105,8 +107,10 @@ const httpTemplate =  (): JsonHttpChart => {
 const graphqlTemplate = (): JsonGraphQLChart => {
   return {
     type: 'graphql',
-    schema: {},
-    keys: [],
+    schema: {
+      template: true
+    },
+    keys: ["temporary","keys","from","template"],
     config:{
       arrayify: 0,
       mimicMode: 'exact',
