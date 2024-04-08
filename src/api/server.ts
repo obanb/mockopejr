@@ -39,12 +39,13 @@ const router = async() => {
   expressRouter.all(GRAPHQL_ROUTE, async(req: Request, res: Response) => {
      const gqlParams = await parseRequestParams(req, res)
     // fuck'em
-    if(gqlParams.operationName === 'IntrospectionQuery'){
+    if(!gqlParams || gqlParams.operationName === 'IntrospectionQuery'){
       res.sendStatus(200)
       return;
     }
     console.log(gqlParams)
      const gqlKeys = extractGqlKeys(gqlParams.query);
+    // deep array clone here because of property randomization into original structure
      const body = await chart.resolveGraphqlChart(parser.proceed, gqlKeys, graphlCharts);
      res.send(body);
   })

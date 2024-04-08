@@ -19,7 +19,7 @@
     "prettier": "~2.6",
     "rimraf": "~3.0",
     "ts-jest": "~28.0",
-    "typescript": "5.3.3"
+    "typescript": "5.4.4"
   },
   "scripts": {
     "cli": "node build/src/cli.js",
@@ -32,13 +32,13 @@
   "author": "Ondřej Bašista",
   "license": "Apache-2.0",
   "dependencies": {
-    "axios": "^0.27.2",
-    "commander": "^9.4.0",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.3",
-    "graphql": "^16.8.1",
-    "graphql-http": "^1.22.0",
-    "openai": "^3.3.0",
-    "uuidv4": "^6.2.13"
+    "axios": "0.27.2",
+    "commander": "9.4.0",
+    "dotenv": "16.0.3",
+    "express": "4.18.3",
+    "graphql": "16.8.1",
+    "graphql-http": "1.22.0",
+    "openai": "4.33.0",
+    "uuidv4": "6.2.13"
   }
 }

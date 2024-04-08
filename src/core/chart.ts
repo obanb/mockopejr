@@ -8,7 +8,8 @@ const resolveGraphqlChart = (expressionParseFn: (input: string) => unknown, keys
     if(similarArrMatch.index === -1){
       return null
     }
-    const chart = charts[similarArrMatch.index];
+    // deep clone to avoid array mutation on original structure at next steps
+    const chart = structuredClone(charts[similarArrMatch.index]);
     return serverGraphQLChart(expressionParseFn, chart);
 }
 

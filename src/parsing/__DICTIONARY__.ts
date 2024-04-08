@@ -1,3 +1,34 @@
+import { templates } from '../gpt/templates.js';
+
+const defaultValues = {
+  sequence: {
+    type: 'VALUE',
+    subtype: 'SEQUENCE',
+    match: /\w+/,
+    value: 'SEQUENCE',
+  },
+}
+
+const defaultSymbols = {
+  leftParen: {
+    type: 'SYMBOL',
+    subtype: 'LEFT_PAREN',
+    match: /\(/,
+    value: '(',
+  },
+  rightParen: {
+    type: 'SYMBOL',
+    subtype: 'RIGHT_PAREN',
+    match: /\)/,
+    value: ')',
+  },
+  comma: {
+    type: 'SYMBOL',
+    subtype: 'COMMA',
+    match: /\,/,
+    value: ',',
+  },
+}
 
 const defaultDictionary = {
   '#EXACT': {
@@ -38,21 +69,27 @@ const defaultDictionary = {
   },
   '#DATETIME_RANGE_ISO': {
     type: 'EXPRESSION',
-    subtype: '#DATE_RANGE_ISO',
-    match: /\#DATE_RANGE_ISO/,
-    value: '#DATE_RANGE_ISO',
+    subtype: '#DATETIME_RANGE_ISO',
+    match: /\#DATETIME_RANGE_ISO/,
+    value: '#DATETIME_RANGE_ISO',
   },
   '#DATE_RANGE': {
     type: 'EXPRESSION',
-    subtype: '#DATE_RANGE_ISO',
-    match: /\#DATE_RANGE_ISO/,
-    value: '#DATE_RANGE_ISO',
+    subtype: '#DATE_RANGE',
+    match: /\#DATE_RANGE/,
+    value: '#DATE_RANGE',
   },
-  '#USE_GPT': {
+  '#USE_GPT_VALUE': {
     type: 'EXPRESSION',
-    subtype: '#USE_GPT',
-    match: /\#USE_GPT/,
-    value: '#USE_GPT',
+    subtype: '#USE_GPT_VALUE',
+    match: /\#USE_GPT_VALUE/,
+    value: '#USE_GPT_VALUE',
+  },
+  '#USE_GPT_JSON': {
+    type: 'EXPRESSION',
+    subtype: '#USE_GPT_JSON',
+    match: /\#USE_GPT_JSON/,
+    value: '#USE_GPT_JSON',
   },
   // add your custom expressions here
   '#EXAMPLE_CUSTOM_EXPRESSION': {
@@ -119,9 +156,15 @@ const defaultBindings = (expression: keyof typeof defaultDictionary) => {
         const randomDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
         return randomDate.toISOString().split('T')[0];
       }
-    case '#USE_GPT':
-      return (prompt: string, formatSpecs: string) => {
-        return prompt
+    case '#USE_GPT_VALUE':
+      return async(prompt: string, formatSpecs: string) => {
+        const val = await templates.createValue(prompt, formatSpecs)
+        return val
+      }
+    case '#USE_GPT_JSON':
+      return async(jsonPattern: unknown, additionalPrompt: string) => {
+        const val = await templates.similirizeJson(jsonPattern, additionalPrompt)
+        return val
       }
       // PLACE FOR YOUR CUSTOM BINDINGS
       case '#EXAMPLE_CUSTOM_EXPRESSION':
@@ -139,6 +182,8 @@ const defaultBindings = (expression: keyof typeof defaultDictionary) => {
 
 
 export const dictionary = {
+  defaultValues,
   defaultDictionary,
+  defaultSymbols,
   defaultBindings
 }

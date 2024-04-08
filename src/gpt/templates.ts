@@ -1,51 +1,93 @@
-import { Configuration, OpenAIApi, CreateCompletionRequest } from 'openai';
+import {OpenAI} from 'openai';
+
 import { commonUtils } from '../utils/commonUtils.js';
 
-const configuration = new Configuration({
+const configuration = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
   organization: ""
 });
 
-const openai = new OpenAIApi(configuration);
 
-
-const templateSettings: Record<string, CreateCompletionRequest> = {
-  determenisticCompletion: {
-    model: "text-davinci-003",
+const templateSettings: Record<string, Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'>> = {
+  jsonCompletion: {
+    stream: false,
+    model:"gpt-3.5-turbo",
+    // lower temperature means greater determinism
+    temperature: 0,
+    max_tokens: 1000,
+    // lower top_p means greater determinism, also lower determinism may lead to more time to generate response
+    top_p: 0,
+    // increasing frequency penalty will make the model less likely to repeat itself
+    frequency_penalty: 0,
+    // increasing presence penalty will make the model less likely to generate new topic branches
+    presence_penalty: 0,
+    response_format: { type: "json_object" },
+  },
+  valueCompletion: {
+    stream: false,
+    model:"gpt-3.5-turbo",
     temperature: 1,
     max_tokens: 1000,
     top_p: 0.3,
     frequency_penalty: 0.5,
     presence_penalty: 0.0,
+    response_format: { type: "json_object" },
+    seed: 0,
   }
 }
 
 
-const generateJSON = async(jsonPattern: unknown, additionalPrompt: string | null = null, cfg: Omit<CreateCompletionRequest, 'prompt'> | null = null) => {
-  const defaultCfg = templateSettings.determenisticCompletion;
+const similirizeJson = async(jsonPattern: unknown, additionalPrompt: string | null = null, cfg: Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'> | null = null): Promise<Record<string, unknown>> => {
+  const defaultCfg = templateSettings.jsonCompletion;
 
   const mergedCfg =  commonUtils.mergeObjects(defaultCfg, cfg || {});
 
-  let prompt =  `
-    1. JSON structure pattern: ${JSON.stringify(jsonPattern)}
-    2. generate JSON with same structure, randomize content of each field
-    3. make generated data similar  to the original data
-    4. keep same natural language and datatype for each field as original field content (e.g. "Letadlo > Auto", "Car" > "Plane")
-    5. return only JSON object, without any other text
-  `
+  const prompts: OpenAI.Chat.ChatCompletionCreateParams["messages"] = [
+    {"role": "system", "content": "you will get a JSON pattern from the user"},
+    {"role": "user", "content": `JSON pattern: ${JSON.stringify(jsonPattern)}`},
+    {"role": "system", "content": "generate JSON with same structure, randomize content of each field (keep structure and format), keep same natural language of each property (čeština, english, ...)"},
+  ]
+
   if(additionalPrompt) {
-    prompt += `6. apply additional prompt: ${additionalPrompt}`
+     prompts.push({"role": "system", "content": `apply additional requirements for the JSON: ${additionalPrompt}`})
   }
 
-  mergedCfg.prompt = prompt
+  mergedCfg.messages = prompts;
 
-  const {data} = await openai.createCompletion(mergedCfg);
+  // simple completion is legacy at OpenAI now, using chat completions
+  const completion = await configuration.chat.completions.create(<OpenAI.Chat.ChatCompletionCreateParams>mergedCfg);
 
-  return JSON.parse(data.choices[0].text);
+
+  return JSON.parse(completion["choices"][0]?.message?.content)
+}
+
+const createValue = async(prompt: string, exampleFormat: string | null = null, cfg: Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'> | null = null): Promise<{value: unknown}> => {
+  const defaultCfg = templateSettings.valueCompletion;
+
+  const mergedCfg =  commonUtils.mergeObjects(defaultCfg, cfg || {});
+
+  const prompts: OpenAI.Chat.ChatCompletionCreateParams["messages"] = [
+    {"role": "user", "content": prompt},
+    {"role": "system", "content": "return only single value suitable for JSON primitive types based on the prompt"},
+    {"role": "system", "content": "JSON result will be always at property: 'value'"},
+  ]
+
+
+  if(exampleFormat) {
+    prompts.push({"role": "system", "content": `apply example format for result: ${exampleFormat}`})
+  }
+
+  mergedCfg.messages = prompts;
+
+  // simple completion is legacy at OpenAI now, using chat completions
+  const completion = await configuration.chat.completions.create(<OpenAI.Chat.ChatCompletionCreateParams>mergedCfg);
+
+  return JSON.parse(completion["choices"][0]?.message?.content)["value"]
 }
 
 export const templates = {
-  generateJSON
+  similirizeJson,
+  createValue
 }
 
 

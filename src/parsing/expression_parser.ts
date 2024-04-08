@@ -249,14 +249,11 @@ const traverser = (ast: AST): unknown => {
   }
   if (ast.type === 'EXPRESSION') {
     // find a match between the expression and the implementation of the assigned function
-    const expHook = bindings.bind(ast.value as Expression);
+    const expHook = dictionary.defaultBindings(ast.value as Expression);
     // recursively traverses the descendants of each parent (nodes) for each descendant (node) of the expression type
     // if the args type is found, the recursion terminates and proceeds to the next descendant
     const expArgs = ast.children.map((child) => traverser(child));
     console.log(expArgs);
-
-    // @ts-ignore
-    bindings.validate(ast.value as Expression)(...expArgs)
 
     // @ts-ignore
     return expHook(...expArgs);
@@ -270,8 +267,12 @@ const traverser = (ast: AST): unknown => {
 const _new = () => {
   // probably must be asserted because of imported dictionary has dynamic type, because of inner dictionary typeguard
   // it's more comfortable to use at __DICTIONARY__.ts file
+  const __symbols: Dictionary = dictionary.defaultSymbols as Dictionary
   const __dictionary: Dictionary = dictionary.defaultDictionary as Dictionary
-  const __tokenizer = tokenizer(__dictionary);
+  const __values: Dictionary = dictionary.defaultValues as Dictionary
+  // order matters
+  const __tokenizer = tokenizer({...__symbols,...__dictionary, ...__values});
+
   return {
     proceed: (input: string) => {
       const tokens = __tokenizer(input);
