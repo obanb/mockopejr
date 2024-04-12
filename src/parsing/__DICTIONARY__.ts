@@ -205,7 +205,6 @@ const defaultBindings = (expression: keyof typeof defaultDictionary, counters: R
   }
 }
 
-
 export const dictionary = {
   defaultValues,
   defaultDictionary,

@@ -72,10 +72,8 @@ const router = async() => {
 const extractGqlKeys = (queryString: string): string[] => {
   // Remove all line breaks and extra spaces
   const cleanedQuery = queryString.replace(/\s+/g, ' ');
-
   // Find all words in the string that are not enclosed in parentheses
   const matches = cleanedQuery.match(/([a-zA-Z_]\w*)(?![^\(]*\))/g);
-
   return matches;
 }
 

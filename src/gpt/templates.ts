@@ -6,7 +6,6 @@ const configuration = new OpenAI({
   apiKey: process.env.OPEN_AI_KEY || ""
 });
 
-
 const templateSettings: Record<string, Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'>> = {
   jsonCompletion: {
     stream: false,
@@ -37,25 +36,18 @@ const templateSettings: Record<string, Omit<OpenAI.Chat.ChatCompletionCreatePara
 
 const useGPT = async(prompt: string, exampleFormat: string | null = null, cfg: Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'> | null = null): Promise<{value: unknown}> => {
   const defaultCfg = templateSettings.valueCompletion;
-
   const mergedCfg =  commonUtils.mergeObjects(defaultCfg, cfg || {});
-
   const prompts: OpenAI.Chat.ChatCompletionCreateParams["messages"] = [
     {"role": "user", "content": prompt},
     {"role": "system", "content": "return only single value suitable for JSON primitive types based on the prompt"},
     {"role": "system", "content": "JSON result will be always at property: 'value'"},
   ]
-
-
   if(exampleFormat) {
     prompts.push({"role": "system", "content": `apply example format for result: ${exampleFormat}`})
   }
-
   mergedCfg.messages = prompts;
-
   // simple completion is legacy at OpenAI now, using chat completions
   const completion = await configuration.chat.completions.create(<OpenAI.Chat.ChatCompletionCreateParams>mergedCfg);
-
   return JSON.parse(completion["choices"][0]?.message?.content)["value"]
 }
 

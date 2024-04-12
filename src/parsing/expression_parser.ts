@@ -176,14 +176,11 @@ const result = SOME_PREFIX-2.2161299227719167-SOME_SUFFIX
 */
 const tokenizer = (dictionary: Dictionary) => (input: string): Token[] => {
   const grammer: Grammer[] = Object.values(dictionary);
-
   const grammarRegex = /(#\w+|\(|,|\))/;
-
   // define a regular expression to split input string into array of matches
   const tokens = input
     .split(grammarRegex)
     .filter((token) => token.trim() !== '');
-
   // map each token to an dictionary regulars and recognize it
   return tokens.map((token) => {
     const match = grammer.find((d) => token.match(d.match));
@@ -266,7 +263,6 @@ const _new = (counters: ReturnType<Counter["counters"]>) => {
   const __values: Dictionary = dictionary.defaultValues as Dictionary
   // order matters
   const __tokenizer = tokenizer({...__symbols,...__dictionary, ...__values});
-
   return {
     proceed: async(input: string) => {
       const tokens = __tokenizer(input);

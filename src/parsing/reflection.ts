@@ -54,12 +54,10 @@ const isJsonPrimitive = (elem: unknown): elem is JsonPrimitive =>
 const isNotEmptyPrimitiveArray = (elem: unknown): elem is JsonPrimitive[] => {
   if (Array.isArray(elem)) {
     const elem0 = elem[0];
-
     if (isJsonPrimitive(elem0)) {
       return true;
     }
   }
-
   return false;
 };
 
@@ -68,12 +66,10 @@ const isNotEmptyObjectArray = (
 ): elem is Record<string, unknown>[] => {
   if (Array.isArray(elem)) {
     const elem0 = elem[0];
-
     if (elem0 && !Array.isArray(elem0) && isNonNullableObject(elem0)) {
       return true;
     }
   }
-
   return false;
 };
 
