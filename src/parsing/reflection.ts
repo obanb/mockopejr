@@ -12,7 +12,7 @@ const reflectAndGenerate = async (expressionParseFn, schema, mimicMode: MimicMod
           if(isJsonPrimitive(elem[1])){
             const count = Number(elem[0]["#REPEAT"])
             for (let i = 0; i < count; i++) {
-              elem[i] = keepOriginalPrimitive ? elem[1]: generator.generateFromJsonPrimitive(elem[1]);
+              elem[i] = keepOriginalPrimitive ? elem[1]: generator.fromJsonPrimitive(elem[1]);
             }
           }else if(typeof elem[1] === 'object' && elem !== null){
             const count = Number(elem[0]["#REPEAT"])
@@ -34,7 +34,7 @@ const reflectAndGenerate = async (expressionParseFn, schema, mimicMode: MimicMod
       if (isExpression(elem)) {
         schema[key] = await expressionParseFn(elem);
       } else {
-        schema[key] = keepOriginalPrimitive ? elem : generator.generateFromJsonPrimitive(elem);
+        schema[key] = keepOriginalPrimitive ? elem : generator.fromJsonPrimitive(elem);
       }
     }
   };
