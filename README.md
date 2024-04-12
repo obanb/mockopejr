@@ -166,8 +166,10 @@ GraphQL query called on route /graphql
 }
 ```
 
-Mockopejr returns data/mock from `GraphQL chart 2` because it evaluates the keys in the schema as more similar
+Mockopejr returns data/mock from `GraphQL chart 2` because it evaluates the keys in the schema as more similar because 
+of ```address``` key
 
+example on 3 arrays and sample input:
 ```
  const graphqlSchemaKeys = [['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'b', 'c', 'd']]
  const graphqlInputQuery = ['a', 'b', 'c']
