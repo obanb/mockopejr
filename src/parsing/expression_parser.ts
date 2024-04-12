@@ -108,7 +108,6 @@ const tokens = [
 
  */
 
-
 /**
  ---------
  PARSER
@@ -174,30 +173,32 @@ input =  "#INSERT(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))"
 const result = SOME_PREFIX-2.2161299227719167-SOME_SUFFIX
 
 */
-const tokenizer = (dictionary: Dictionary) => (input: string): Token[] => {
-  const grammer: Grammer[] = Object.values(dictionary);
-  const grammarRegex = /(#\w+|\(|,|\))/;
-  // define a regular expression to split input string into array of matches
-  const tokens = input
-    .split(grammarRegex)
-    .filter((token) => token.trim() !== '');
-  // map each token to an dictionary regulars and recognize it
-  return tokens.map((token) => {
-    const match = grammer.find((d) => token.match(d.match));
-    if (match) {
+const tokenizer =
+  (dictionary: Dictionary) =>
+  (input: string): Token[] => {
+    const grammer: Grammer[] = Object.values(dictionary);
+    const grammarRegex = /(#\w+|\(|,|\))/;
+    // define a regular expression to split input string into array of matches
+    const tokens = input
+      .split(grammarRegex)
+      .filter((token) => token.trim() !== '');
+    // map each token to an dictionary regulars and recognize it
+    return tokens.map((token) => {
+      const match = grammer.find((d) => token.match(d.match));
+      if (match) {
+        return {
+          type: match.type,
+          subtype: match.subtype,
+          value: token,
+        };
+      }
       return {
-        type: match.type,
-        subtype: match.subtype,
+        type: 'UNKNOWN',
+        subtype: 'UNKNOWN',
         value: token,
       };
-    }
-    return {
-      type: 'UNKNOWN',
-      subtype: 'UNKNOWN',
-      value: token,
-    };
-  });
-}
+    });
+  };
 
 // PARSER
 // traverses the token array and serializes it into a hierarchy of parents, children and splits into types
@@ -233,21 +234,27 @@ const parser = (tokens: Token[]): AST => {
 
 // TRAVERSER
 // recursively traverses the parents and their children and evaluates the result in the composition style (a(b(c(value))) according to the assigned function
-const traverser = async(ast: AST, counters: ReturnType<Counter["counters"]>): Promise<unknown> => {
+const traverser = async (
+  ast: AST,
+  counters: ReturnType<Counter['counters']>,
+): Promise<unknown> => {
   if (ast.type === 'PROGRAM') {
     return traverser(ast.children[0], counters);
   }
   if (ast.type === 'EXPRESSION') {
     // find a match between the expression and the implementation of the assigned function
-    const expHook = dictionary.defaultBindings(ast.value as Expression, counters);
+    const expHook = dictionary.defaultBindings(
+      ast.value as Expression,
+      counters,
+    );
     // recursively traverses the descendants of each parent (nodes) for each descendant (node) of the expression type
     // if the args type is found, the recursion terminates and proceeds to the next descendant
     const expArgs = ast.children.map((child) => traverser(child, counters));
-    const resolved = await Promise.all(expArgs)
-    console.log('RES',resolved)
+    const resolved = await Promise.all(expArgs);
+    console.log('RES', resolved);
     // @ts-ignore
-    const hooked = await expHook(...resolved)
-    return hooked
+    const hooked = await expHook(...resolved);
+    return hooked;
   }
   if (ast.type === 'ARGS') {
     return ast.value;
@@ -255,26 +262,26 @@ const traverser = async(ast: AST, counters: ReturnType<Counter["counters"]>): Pr
   throw new Error(`Unknown AST node type: ${ast.type}`);
 };
 
-const _new = (counters: ReturnType<Counter["counters"]>) => {
+const _new = (counters: ReturnType<Counter['counters']>) => {
   // probably must be asserted because of imported dictionary has dynamic type, because of inner dictionary typeguard
   // it's more comfortable to use at __DICTIONARY__.ts file
-  const __symbols: Dictionary = dictionary.defaultSymbols as Dictionary
-  const __dictionary: Dictionary = dictionary.defaultDictionary as Dictionary
-  const __values: Dictionary = dictionary.defaultValues as Dictionary
+  const __symbols: Dictionary = dictionary.defaultSymbols as Dictionary;
+  const __dictionary: Dictionary = dictionary.defaultDictionary as Dictionary;
+  const __values: Dictionary = dictionary.defaultValues as Dictionary;
   // order matters
-  const __tokenizer = tokenizer({...__symbols,...__dictionary, ...__values});
+  const __tokenizer = tokenizer({ ...__symbols, ...__dictionary, ...__values });
   return {
-    proceed: async(input: string) => {
+    proceed: async (input: string) => {
       const tokens = __tokenizer(input);
       const ast = parser(tokens);
       return traverser(ast, counters);
-    }
-  }
-}
+    },
+  };
+};
 
 export const expressionParser = {
   tokenizer,
   traverser,
   parser,
-  _new
-}
+  _new,
+};

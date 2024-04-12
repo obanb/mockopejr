@@ -3,50 +3,70 @@ import { Expression, JsonPrimitive } from './types.js';
 import { MimicMode } from '../core/types.js';
 
 // the order depends
-const reflectAndGenerate = async (expressionParseFn, schema, mimicMode: MimicMode) => {
+const reflectAndGenerate = async (
+  expressionParseFn,
+  schema,
+  mimicMode: MimicMode,
+) => {
   const keepOriginalPrimitive = mimicMode !== 'randomize';
   for (const [key, elem] of Object.entries(schema)) {
-    if(Array.isArray(elem)) {
-      if(typeof elem[0] === 'object' && elem !== null){
-        if(elem[0] && elem[0]["#REPEAT"] && elem[1]){
-          if(isJsonPrimitive(elem[1])){
-            const count = Number(elem[0]["#REPEAT"])
+    if (Array.isArray(elem)) {
+      if (typeof elem[0] === 'object' && elem !== null) {
+        if (elem[0] && elem[0]['#REPEAT'] && elem[1]) {
+          if (isJsonPrimitive(elem[1])) {
+            const count = Number(elem[0]['#REPEAT']);
             for (let i = 0; i < count; i++) {
-              elem[i] = keepOriginalPrimitive ? elem[1]: generator.fromJsonPrimitive(elem[1]);
+              elem[i] = keepOriginalPrimitive
+                ? elem[1]
+                : generator.fromJsonPrimitive(elem[1]);
             }
-          }else if(typeof elem[1] === 'object' && elem !== null){
-            const count = Number(elem[0]["#REPEAT"])
+          } else if (typeof elem[1] === 'object' && elem !== null) {
+            const count = Number(elem[0]['#REPEAT']);
             // deep clone jam
-            const clone = structuredClone(elem[1])
+            const clone = structuredClone(elem[1]);
             for (let i = 0; i < count; i++) {
-              elem[i] = await reflectAndGenerate(expressionParseFn, structuredClone(clone), mimicMode);
+              elem[i] = await reflectAndGenerate(
+                expressionParseFn,
+                structuredClone(clone),
+                mimicMode,
+              );
             }
           }
         }
-      }else {
-        for (let i = 0; i < (elem as Record<string,unknown>[]).length; i++) {
-          elem[i] = await reflectAndGenerate(expressionParseFn, elem[i], mimicMode);
+      } else {
+        for (let i = 0; i < (elem as Record<string, unknown>[]).length; i++) {
+          elem[i] = await reflectAndGenerate(
+            expressionParseFn,
+            elem[i],
+            mimicMode,
+          );
         }
       }
     } else if (isNonNullableObject(elem)) {
-      schema[key] = await reflectAndGenerate(expressionParseFn, elem, mimicMode);
+      schema[key] = await reflectAndGenerate(
+        expressionParseFn,
+        elem,
+        mimicMode,
+      );
     } else if (isJsonPrimitive(elem)) {
       if (isExpression(elem)) {
         schema[key] = await expressionParseFn(elem);
       } else {
-        schema[key] = keepOriginalPrimitive ? elem : generator.fromJsonPrimitive(elem);
+        schema[key] = keepOriginalPrimitive
+          ? elem
+          : generator.fromJsonPrimitive(elem);
       }
     }
-  };
+  }
   return schema;
 };
 
 const isExpression = (elem: unknown): elem is Expression => {
-  if(isString(elem)) {
-    return elem.startsWith('#')
+  if (isString(elem)) {
+    return elem.startsWith('#');
   }
-  return false
-}
+  return false;
+};
 
 const isJsonPrimitive = (elem: unknown): elem is JsonPrimitive =>
   isNumber(elem) || isString(elem) || isBoolean(elem) || elem === null;
@@ -85,9 +105,10 @@ const isBoolean = (val: unknown): val is 'boolean' => typeof val === 'boolean';
 const isObject = (val: unknown): val is Record<string, unknown> =>
   typeof val === 'object';
 
-const isNonNullableObject = (val: unknown): val is Record<string, JsonPrimitive> =>
+const isNonNullableObject = (
+  val: unknown,
+): val is Record<string, JsonPrimitive> =>
   typeof val === 'object' && val !== null;
-
 
 export const reflection = {
   reflectAndGenerate,
@@ -99,5 +120,5 @@ export const reflection = {
   isBoolean,
   isObject,
   isNonNullableObject,
-  isNotEmptyObjectArray
+  isNotEmptyObjectArray,
 };

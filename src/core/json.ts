@@ -1,6 +1,11 @@
 import { readdir, readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { ChartType, JsonChart, JsonGraphQLChart, JsonHttpChart } from './types.js';
+import {
+  ChartType,
+  JsonChart,
+  JsonGraphQLChart,
+  JsonHttpChart,
+} from './types.js';
 
 const schemaPath = './__CHARTS__/';
 
@@ -28,7 +33,7 @@ const count = async () => {
   return files.length;
 };
 
-const getFileName = async(type: ChartType = 'http') => {
+const getFileName = async (type: ChartType = 'http') => {
   const date = new Date();
   const next = await count();
 
@@ -37,52 +42,52 @@ const getFileName = async(type: ChartType = 'http') => {
   }${date.getDate()}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
 
   return fileName;
-}
+};
 
 const template = async (type: ChartType = 'http') => {
-  console.log("TEMPLATE")
+  console.log('TEMPLATE');
   let template;
   const fileName = await getFileName(type);
-  if(type === 'graphql'){
-    template = graphqlTemplate()
+  if (type === 'graphql') {
+    template = graphqlTemplate();
   } else {
-    template = httpTemplate()
+    template = httpTemplate();
   }
   await write(fileName, template);
-}
+};
 
-const httpTemplate =  (): JsonHttpChart => {
+const httpTemplate = (): JsonHttpChart => {
   return {
     type: 'http',
     schema: {
-      template: true
+      template: true,
     },
     url: 'temporary/url/from/template',
-    config:{
+    config: {
       arrayify: 0,
       mimicMode: 'exact',
     },
     method: 'GET',
-  }
-}
+  };
+};
 
 const graphqlTemplate = (): JsonGraphQLChart => {
   return {
     type: 'graphql',
     schema: {
-      template: true
+      template: true,
     },
-    keys: ["temporary","keys","from","template"],
-    config:{
+    keys: ['temporary', 'keys', 'from', 'template'],
+    config: {
       arrayify: 0,
       mimicMode: 'exact',
-    }
-  }
-}
+    },
+  };
+};
 
 export const json = {
   write,
   read,
   count,
-  template
+  template,
 };

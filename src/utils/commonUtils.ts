@@ -8,14 +8,15 @@ const absurd = <T>(_: never): T => {
   throw new Error('absurd');
 };
 
-const mergeObjects = <A,B>(a: A, b: B) => {
-  const cleaned = Object.fromEntries(Object.entries(b).filter(([_, v]) => v !== null))
-  return {...a, ...cleaned}
+const mergeObjects = <A, B>(a: A, b: B) => {
+  const cleaned = Object.fromEntries(
+    Object.entries(b).filter(([_, v]) => v !== null),
+  );
+  return { ...a, ...cleaned };
 };
 
 export const commonUtils = {
   structuredClone,
   absurd,
-  mergeObjects
+  mergeObjects,
 };
-

@@ -12,29 +12,30 @@
           },
           "some": null,
           "arr": [
-            {"#REPEAT": 3},
+            { "#REPEAT": 3 },
             {
-            "range": "#RANGE(1,6)",
-            "floatRange": "#RANGE_FLOAT(1.12,1.22,3)",
-            "exact": "#EXACT(EXACT_VALUE)",
-            "stringify": "#EXACT({prop:value})",
-            "stringEnum": "#ENUM(1,2,3,4,5)",
-            "insert": "#INSERT(prefix,suffix,-INSERTED-)",
-            "insertTurbo": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
-            "randomBoolean": "#BOOLEAN()",
-             "normalArr": [1,2,3,4,5],
-             "normalArr": [{"#REPEAT": 10},"pes"],
-             "prop": "ahoj",
+              "range": "#RANGE(1,6)",
+              "floatRange": "#RANGE_FLOAT(1.12,1.22,3)",
+              "exact": "#EXACT(EXACT_VALUE)",
+              "stringify": "#EXACT({prop:value})",
+              "stringEnum": "#ENUM(1,2,3,4,5)",
+              "insert": "#INSERT(prefix,suffix,-INSERTED-)",
+              "insertTurbo": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
+              "randomBoolean": "#BOOLEAN()",
+              "normalArr": [1, 2, 3, 4, 5],
+              "normalArr": [{ "#REPEAT": 10 }, "pes"],
+              "prop": "ahoj",
               "counter": "#COUNTER(nakej,55)",
               "counter2": "#COUNTER(nakej2,12)",
               "superCounter": "#INSERT(prefix,suffix,#COUNTER(nakej4,1220))",
               "uuid": "#UUID()"
-            }]
+            }
+          ]
         }
       }
     }
   },
-  "keys": ["me","email"],
+  "keys": ["me", "email"],
   "config": {
     "arrayify": 0,
     "mimicMode": "randomize"

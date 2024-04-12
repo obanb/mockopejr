@@ -1,4 +1,3 @@
-
 const _new = (start: number) => {
   let count = start;
   return {
@@ -11,21 +10,21 @@ const _new = (start: number) => {
       return count;
     },
     get: () => count,
-    clear: () => count = start,
-  }
-}
+    clear: () => (count = start),
+  };
+};
 
 const counters = () => {
   let holder: Record<string, ReturnType<typeof _new>> = {};
   return {
-    add: (id: string, start: number) => holder[id] = _new(start),
+    add: (id: string, start: number) => (holder[id] = _new(start)),
     get: (id: string) => holder[id],
-    clear: () => holder = {},
+    clear: () => (holder = {}),
     delete: (id: string) => delete holder[id],
-  }
-}
+  };
+};
 
 export const counter = {
   counters,
-}
-export type Counter = typeof counter
+};
+export type Counter = typeof counter;

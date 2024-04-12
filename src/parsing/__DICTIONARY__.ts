@@ -9,7 +9,7 @@ const defaultValues = {
     match: /\w+/,
     value: 'SEQUENCE',
   },
-}
+};
 
 const defaultSymbols = {
   leftParen: {
@@ -30,7 +30,7 @@ const defaultSymbols = {
     match: /\,/,
     value: ',',
   },
-}
+};
 
 const defaultDictionary = {
   '#EXACT': {
@@ -111,18 +111,21 @@ const defaultDictionary = {
     subtype: '#EXAMPLE_CUSTOM_EXPRESSION',
     match: /\#EXAMPLE_CUSTOM_EXPRESSION/,
     value: '#EXAMPLE_CUSTOM_EXPRESSION',
-  }
-}
+  },
+};
 
-const defaultBindings = (expression: keyof typeof defaultDictionary, counters: ReturnType<Counter["counters"]>) => {
+const defaultBindings = (
+  expression: keyof typeof defaultDictionary,
+  counters: ReturnType<Counter['counters']>,
+) => {
   switch (expression) {
     case '#RANGE':
       return (x: string, y: string) => {
-          // place for your custom logic or validation fn
-          const n1 = parseInt(x);
-          const n2 = parseInt(y);
-          return Math.floor(Math.random() * (n2 - n1) + n1);
-        }
+        // place for your custom logic or validation fn
+        const n1 = parseInt(x);
+        const n2 = parseInt(y);
+        return Math.floor(Math.random() * (n2 - n1) + n1);
+      };
     case '#RANGE_FLOAT':
       return (x: string, y: string, decimalPlaces: string) => {
         // place for your custom logic or validation fn
@@ -131,12 +134,12 @@ const defaultBindings = (expression: keyof typeof defaultDictionary, counters: R
         const n2 = parseFloat(y);
         const r = Math.random() * (n2 - n1) + n1;
         return parseFloat(r.toFixed(decimals));
-      }
+      };
     case '#STRINGIFY':
       // place for your custom logic or validation fn
       return JSON.stringify;
     case '#EXACT':
-      return (value: unknown) => value
+      return (value: unknown) => value;
     case '#INSERT':
       return (...args: [unknown, unknown, unknown]) => {
         // place for your custom logic or validation fn
@@ -145,8 +148,8 @@ const defaultBindings = (expression: keyof typeof defaultDictionary, counters: R
     case '#ENUM':
       return (...en: string[]) => {
         // place for your custom logic or validation fn
-        return en[Math.floor(Math.random() * en.length)]
-      }
+        return en[Math.floor(Math.random() * en.length)];
+      };
     case '#DATETIME_RANGE_ISO':
       // start/end YYYY-MM-DDTHH:MM:SS
       // return YYYY-MM-DDTHH:MM:SS
@@ -154,8 +157,11 @@ const defaultBindings = (expression: keyof typeof defaultDictionary, counters: R
         // place for your custom logic or validation fn
         const startDate = new Date(start);
         const endDate = new Date(end);
-        return new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime())).toISOString();
-      }
+        return new Date(
+          startDate.getTime() +
+            Math.random() * (endDate.getTime() - startDate.getTime()),
+        ).toISOString();
+      };
     case '#DATE_RANGE':
       // start/end YYYY-MM-DDTHH:MM:SS
       // return YYYY-MM-DD
@@ -165,49 +171,52 @@ const defaultBindings = (expression: keyof typeof defaultDictionary, counters: R
         const endDate = new Date(end);
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(0, 0, 0, 0);
-        const randomDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
+        const randomDate = new Date(
+          startDate.getTime() +
+            Math.random() * (endDate.getTime() - startDate.getTime()),
+        );
         return randomDate.toISOString().split('T')[0];
-      }
+      };
     case '#BOOLEAN':
-      return async() => {
+      return async () => {
         return Math.random() >= 0.5;
-      }
+      };
     case '#UUID':
       return () => {
         return uuidv4();
-      }
+      };
     case '#COUNTER':
       return (id: string, start: string) => {
-          if(counters.get(id)) {
-            return counters.get(id).inc()
-          }else{
-            counters.add(id, parseInt(start))
-            return counters.get(id).get()
-          }
-      }
-    case '#USE_GPT':
-      return async(prompt: string, formatSpecs: string) => {
-        const val = await templates.useGPT(prompt, formatSpecs)
-        console.log(val)
-        return val
-      }
-      // PLACE FOR YOUR CUSTOM BINDINGS
-      case '#EXAMPLE_CUSTOM_EXPRESSION':
-        return (value: unknown) => {
-          // place for your custom logic or validation fn
-          // your whatever logic here
-          return 'example custom binding'
+        if (counters.get(id)) {
+          return counters.get(id).inc();
+        } else {
+          counters.add(id, parseInt(start));
+          return counters.get(id).get();
         }
+      };
+    case '#USE_GPT':
+      return async (prompt: string, formatSpecs: string) => {
+        const val = await templates.useGPT(prompt, formatSpecs);
+        console.log(val);
+        return val;
+      };
+    // PLACE FOR YOUR CUSTOM BINDINGS
+    case '#EXAMPLE_CUSTOM_EXPRESSION':
+      return (value: unknown) => {
+        // place for your custom logic or validation fn
+        // your whatever logic here
+        return 'example custom binding';
+      };
     default: {
-      const exhaustive: never = expression
+      const exhaustive: never = expression;
       throw new Error(exhaustive);
     }
   }
-}
+};
 
 export const dictionary = {
   defaultValues,
   defaultDictionary,
   defaultSymbols,
-  defaultBindings
-}
+  defaultBindings,
+};

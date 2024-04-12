@@ -13,7 +13,7 @@
       }
     }
   },
-  "keys": ["me","email","test"],
+  "keys": ["me", "email", "test"],
   "config": {
     "arrayify": 0,
     "mimicMode": "exact"
