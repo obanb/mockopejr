@@ -3,7 +3,7 @@
 > HTTP & GraphQL response mock and data generator
 
 - **HTTP:** HTTP mocks based on dynamimic URLs
-- **GraphQL:** GraphQL mocks without GQL schema definition, with simplified flow based on the similarity of GQL keys
+- **GraphQL:** GraphQL mocks without GQL schema definition, with simplified flow based on the similarity of GQL query and mock sample data
 - **Custom JSON schemas**: custom schema definitions with JSON charts
 - **Expression parser:** minimalistic JSON expression parser for dynamic properties/objects
 - **Random data generator:** generation of random data of similar type and structure
