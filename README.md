@@ -107,7 +107,7 @@ example:
 ### GraphQL execution
 
 - there is no "true" GraphQL server like Apollo etc.
-- all calls to url `/graphql` are evaluated online by an algorithm looking for the closest similarity between the keys defined in the JSON chart definition and the sample data
+- all calls to url `/graphql` are evaluated online by an algorithm looking for the closest similarity between the keys/nodes defined in the JSON chart definition and the sample data
 
 GraphQL chart 1:
 
@@ -166,7 +166,7 @@ GraphQL query called on route /graphql
 }
 ```
 
-Mockopejr returns data/mock from `GraphQL chart 2` because it evaluates the keys in the schema as more similar because 
+Mockopejr returns data/mock from `GraphQL chart 2` because it evaluates the keys/nodes in the schema as more similar because 
 of ```address``` key
 
 example on 3 arrays and sample input:
