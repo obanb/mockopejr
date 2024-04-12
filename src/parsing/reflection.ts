@@ -1,8 +1,6 @@
 import { generator } from './generator.js';
-import { Expression } from './types.js';
+import { Expression, JsonPrimitive } from './types.js';
 import { MimicMode } from '../core/types.js';
-
-type JsonPrimitive = string | number | boolean | null;
 
 // the order depends
 const reflectAndGenerate = async (expressionParseFn, schema, mimicMode: MimicMode) => {
@@ -30,33 +28,6 @@ const reflectAndGenerate = async (expressionParseFn, schema, mimicMode: MimicMod
           elem[i] = await reflectAndGenerate(expressionParseFn, elem[i], mimicMode);
         }
       }
-
-    // if (isNotEmptyPrimitiveArray(elem)) {
-    //   if(elem[0] && elem[0]["#REPEAT"] && elem[1]) {
-    //     const count = Number(elem[0]["#REPEAT"])
-    //     // deep clone jam
-    //     for (let i = 0; i < count; i++) {
-    //       elem[i] = keepOriginalPrimitive ? elem[i]: generator.generateFromJsonPrimitive(elem[i]);
-    //     }
-    //   }else {
-    //     for (let i = 0; i < (elem as JsonPrimitive[]).length; i++) {
-    //       elem[i] = keepOriginalPrimitive ? elem[i] : generator.generateFromJsonPrimitive(elem[i] as JsonPrimitive);
-    //     };
-    //   }
-    // } else if (isNotEmptyObjectArray(elem)) {
-    //   if(elem[0] && elem[0]["#REPEAT"] && elem[1]) {
-    //     const count = Number(elem[0]["#REPEAT"])
-    //     // deep clone jam
-    //     const clone = structuredClone(elem[1])
-    //     for (let i = 0; i < count; i++) {
-    //       elem[i] = await reflectAndGenerate(expressionParseFn, structuredClone(clone), mimicMode);
-    //     }
-    //   }
-    //   else {
-    //     for (let i = 0; i < (elem as Record<string,unknown>[]).length; i++) {
-    //       elem[i] = await reflectAndGenerate(expressionParseFn, elem[i], mimicMode);
-    //     }
-    //   }
     } else if (isNonNullableObject(elem)) {
       schema[key] = await reflectAndGenerate(expressionParseFn, elem, mimicMode);
     } else if (isJsonPrimitive(elem)) {
@@ -69,16 +40,6 @@ const reflectAndGenerate = async (expressionParseFn, schema, mimicMode: MimicMod
   };
   return schema;
 };
-
-// // if element 0 is #REPEAT flag object, then
-// const arrayDeepJam = async(arr: unknown[], parseFn: (input: string) => Promise<unknown>) => {
-//     const count = Number(arr[0]["#REPEAT"])
-//     // deep clone jam
-//     const clone = structuredClone(arr[1])
-//     for (let i = 0; i < count; i++) {
-//       arr[i] = await reflectAndGenerate(parseFn, structuredClone(clone));
-//     }
-// }
 
 const isExpression = (elem: unknown): elem is Expression => {
   if(isString(elem)) {

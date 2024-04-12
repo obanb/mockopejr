@@ -2,7 +2,6 @@ import { AST, Dictionary, Expression, Grammer, Token } from './types.js';
 import { dictionary } from './__DICTIONARY__.js';
 import { Counter } from './counter.js';
 
-
 /**
 -----------------
 EXPRESSION PARSER
@@ -13,8 +12,6 @@ minimalistic expression parser based on expression composition
 input > tokenizer > tokens >  parser > AST > traverser > output
 
 */
-
-
 
 /**
 ---------
@@ -177,7 +174,6 @@ input =  "#INSERT(SOME_PREFIX-,-SOME_SUFFIX,#STRINGIFY(#RANGE(1,3)))"
 const result = SOME_PREFIX-2.2161299227719167-SOME_SUFFIX
 
 */
-
 const tokenizer = (dictionary: Dictionary) => (input: string): Token[] => {
   const grammer: Grammer[] = Object.values(dictionary);
 
@@ -208,7 +204,6 @@ const tokenizer = (dictionary: Dictionary) => (input: string): Token[] => {
 
 // PARSER
 // traverses the token array and serializes it into a hierarchy of parents, children and splits into types
-
 const parser = (tokens: Token[]): AST => {
   const relevantTokens = tokens.filter(
     (t) => t.type === 'EXPRESSION' || t.type === 'VALUE',
@@ -239,10 +234,8 @@ const parser = (tokens: Token[]): AST => {
   return ast;
 };
 
-
 // TRAVERSER
 // recursively traverses the parents and their children and evaluates the result in the composition style (a(b(c(value))) according to the assigned function
-
 const traverser = async(ast: AST, counters: ReturnType<Counter["counters"]>): Promise<unknown> => {
   if (ast.type === 'PROGRAM') {
     return traverser(ast.children[0], counters);

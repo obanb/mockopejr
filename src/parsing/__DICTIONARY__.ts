@@ -163,12 +163,8 @@ const defaultBindings = (expression: keyof typeof defaultDictionary, counters: R
         // place for your custom logic or validation fn
         const startDate = new Date(start);
         const endDate = new Date(end);
-
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(0, 0, 0, 0);
-
-        console.log("start", start)
-
         const randomDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
         return randomDate.toISOString().split('T')[0];
       }

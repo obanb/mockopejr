@@ -45,7 +45,6 @@ const router = async() => {
       res.sendStatus(200)
       return;
     }
-    console.log(gqlParams)
      const gqlKeys = extractGqlKeys(gqlParams.query);
     // deep array clone here because of property randomization into original structure
      const body = await chart.resolveGraphqlChart(parser.proceed, gqlKeys, graphlCharts);

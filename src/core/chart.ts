@@ -1,7 +1,6 @@
 import { JsonGraphQLChart, JsonHttpChart } from './types.js';
 import { reflection } from '../parsing/reflection.js';
 
-
 const resolveGraphqlChart = (expressionParseFn: (input: string) => Promise<unknown>, keys: string[], charts: JsonGraphQLChart[]) => {
     const chartsKeys = charts.map((chart) => chart.keys);
     const similarArrMatch = getMostSimilarArrayMatch(chartsKeys, keys);

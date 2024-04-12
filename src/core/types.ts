@@ -7,7 +7,6 @@ export type ChartCfg = {
   mimicMode: MimicMode,
 }
 export type JsonChart = JsonHttpChart | JsonGraphQLChart
-
 export type JsonHttpChart = {
   type: ChartType,
   schema: JsonSchema,
@@ -16,17 +15,12 @@ export type JsonHttpChart = {
   method: string,
   config: ChartCfg
 }
-
 export type JsonGraphQLChart = {
   type: 'graphql',
   schema: JsonSchema,
   keys: string[],
   config: ChartCfg
 }
-
-export const isHttpChart = (chart: JsonChart): chart is JsonHttpChart => chart.type === 'http'
-export const isGraphQLChart = (chart: JsonChart): chart is JsonGraphQLChart => chart.type === 'graphql'
-
 export type RequestCfg = {
   delayMs?: number,
   errorCode?: number,
