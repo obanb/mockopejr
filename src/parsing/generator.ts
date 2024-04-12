@@ -45,7 +45,6 @@ const generateFromJsonPrimitive = (value: JsonPrimitive) => {
   } else if (reflection.isBoolean(value)) {
     return !Math.round(Math.random());
   } else if (reflection.isDateString(value)) {
-    // TODO
     return new Date().toISOString();
   } else {
     return value;
