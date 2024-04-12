@@ -9,6 +9,21 @@
 - **Random data generator:** generation of random data of similar type and structure
 - **CLI:** CLI for template pre-generation
 
+```     
+         (\_/)   
+      M--(O.C)--K
+    / `;=/ M \=;` \
+    \__| \___/ |__/
+        \(_|_)/
+         "   "
+```      
+
+### Showcase
+
+```
+ TODO 
+```
+
 ### Installation
 
 Package install:
