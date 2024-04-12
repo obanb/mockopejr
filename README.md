@@ -168,6 +168,14 @@ GraphQL query called on route /graphql
 
 Mockopejr returns data/mock from `GraphQL chart 2` because it evaluates the keys in the schema as more similar
 
+```
+ const graphqlSchemaKeys = [['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'b', 'c', 'd']]
+ const graphqlInputQuery = ['a', 'b', 'c']
+ const result = ['a', 'b', 'c']
+```
+
+in case of the same number of hits, the chart with the lower total number of keys is preferred
+
 ### Chart configs
 
 ```
