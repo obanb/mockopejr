@@ -3,8 +3,7 @@ import {OpenAI} from 'openai';
 import { commonUtils } from '../utils/commonUtils.js';
 
 const configuration = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-  organization: ""
+  apiKey: process.env.OPEN_AI_KEY || ""
 });
 
 
@@ -36,32 +35,7 @@ const templateSettings: Record<string, Omit<OpenAI.Chat.ChatCompletionCreatePara
   }
 }
 
-
-const similirizeJson = async(jsonPattern: unknown, additionalPrompt: string | null = null, cfg: Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'> | null = null): Promise<Record<string, unknown>> => {
-  const defaultCfg = templateSettings.jsonCompletion;
-
-  const mergedCfg =  commonUtils.mergeObjects(defaultCfg, cfg || {});
-
-  const prompts: OpenAI.Chat.ChatCompletionCreateParams["messages"] = [
-    {"role": "system", "content": "you will get a JSON pattern from the user"},
-    {"role": "user", "content": `JSON pattern: ${JSON.stringify(jsonPattern)}`},
-    {"role": "system", "content": "generate JSON with same structure, randomize content of each field (keep structure and format), keep same natural language of each property (čeština, english, ...)"},
-  ]
-
-  if(additionalPrompt) {
-     prompts.push({"role": "system", "content": `apply additional requirements for the JSON: ${additionalPrompt}`})
-  }
-
-  mergedCfg.messages = prompts;
-
-  // simple completion is legacy at OpenAI now, using chat completions
-  const completion = await configuration.chat.completions.create(<OpenAI.Chat.ChatCompletionCreateParams>mergedCfg);
-
-
-  return JSON.parse(completion["choices"][0]?.message?.content)
-}
-
-const createValue = async(prompt: string, exampleFormat: string | null = null, cfg: Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'> | null = null): Promise<{value: unknown}> => {
+const useGPT = async(prompt: string, exampleFormat: string | null = null, cfg: Omit<OpenAI.Chat.ChatCompletionCreateParams, 'messages'> | null = null): Promise<{value: unknown}> => {
   const defaultCfg = templateSettings.valueCompletion;
 
   const mergedCfg =  commonUtils.mergeObjects(defaultCfg, cfg || {});
@@ -86,8 +60,7 @@ const createValue = async(prompt: string, exampleFormat: string | null = null, c
 }
 
 export const templates = {
-  similirizeJson,
-  createValue
+  useGPT,
 }
 
 

@@ -13,11 +13,8 @@
     "@typescript-eslint/parser": "~5.26",
     "eslint": "~8.16",
     "eslint-config-prettier": "~8.5",
-    "eslint-plugin-jest": "~26.2",
-    "jest": "~28.1",
     "nodemon": "^3.1.0",
     "prettier": "~2.6",
-    "rimraf": "~3.0",
     "ts-jest": "~28.0",
     "typescript": "5.4.4"
   },
@@ -26,10 +23,9 @@
     "start": "nodemon",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint . --ext .ts",
-    "test": "jest --coverage",
     "prettier": "prettier --config .prettierrc --write ."
   },
-  "author": "Ondřej Bašista",
+  "author": "obanb",
   "license": "Apache-2.0",
   "dependencies": {
     "axios": "0.27.2",

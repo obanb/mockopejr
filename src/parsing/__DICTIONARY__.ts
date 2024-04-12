@@ -1,4 +1,6 @@
 import { templates } from '../gpt/templates.js';
+import { Counter } from './counter.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const defaultValues = {
   sequence: {
@@ -51,9 +53,9 @@ const defaultDictionary = {
   },
   '#RANGE_FLOAT': {
     type: 'EXPRESSION',
-    subtype: '#RANGE',
-    match: /\#RANGE/,
-    value: '#RANGE',
+    subtype: '#RANGE_FLOAT',
+    match: /\#RANGE_FLOAT/,
+    value: '#RANGE_FLOAT',
   },
   '#INSERT': {
     type: 'EXPRESSION',
@@ -79,17 +81,29 @@ const defaultDictionary = {
     match: /\#DATE_RANGE/,
     value: '#DATE_RANGE',
   },
-  '#USE_GPT_VALUE': {
+  '#BOOLEAN': {
     type: 'EXPRESSION',
-    subtype: '#USE_GPT_VALUE',
-    match: /\#USE_GPT_VALUE/,
-    value: '#USE_GPT_VALUE',
+    subtype: '#BOOLEAN',
+    match: /\#BOOLEAN/,
+    value: '#BOOLEAN',
   },
-  '#USE_GPT_JSON': {
+  '#UUID': {
     type: 'EXPRESSION',
-    subtype: '#USE_GPT_JSON',
-    match: /\#USE_GPT_JSON/,
-    value: '#USE_GPT_JSON',
+    subtype: '#UUID',
+    match: /\#UUID/,
+    value: '#UUID',
+  },
+  '#COUNTER': {
+    type: 'EXPRESSION',
+    subtype: '#COUNTER',
+    match: /\#COUNTER/,
+    value: '#COUNTER',
+  },
+  '#USE_GPT': {
+    type: 'EXPRESSION',
+    subtype: '#USE_GPT',
+    match: /\#USE_GPT/,
+    value: '#USE_GPT',
   },
   // add your custom expressions here
   '#EXAMPLE_CUSTOM_EXPRESSION': {
@@ -100,7 +114,7 @@ const defaultDictionary = {
   }
 }
 
-const defaultBindings = (expression: keyof typeof defaultDictionary) => {
+const defaultBindings = (expression: keyof typeof defaultDictionary, counters: ReturnType<Counter["counters"]>) => {
   switch (expression) {
     case '#RANGE':
       return (x: string, y: string) => {
@@ -113,8 +127,8 @@ const defaultBindings = (expression: keyof typeof defaultDictionary) => {
       return (x: string, y: string, decimalPlaces: string) => {
         // place for your custom logic or validation fn
         const decimals = parseInt(decimalPlaces);
-        const n1 = parseInt(x);
-        const n2 = parseInt(y);
+        const n1 = parseFloat(x);
+        const n2 = parseFloat(y);
         const r = Math.random() * (n2 - n1) + n1;
         return parseFloat(r.toFixed(decimals));
       }
@@ -124,12 +138,12 @@ const defaultBindings = (expression: keyof typeof defaultDictionary) => {
     case '#EXACT':
       return (value: unknown) => value
     case '#INSERT':
-      return (args: [unknown, unknown, unknown]) => {
+      return (...args: [unknown, unknown, unknown]) => {
         // place for your custom logic or validation fn
         return `${args[0] || ''}${args[2] || ''}${args[1] || ''}`;
       };
     case '#ENUM':
-      return (en: string[]) => {
+      return (...en: string[]) => {
         // place for your custom logic or validation fn
         return en[Math.floor(Math.random() * en.length)]
       }
@@ -153,17 +167,32 @@ const defaultBindings = (expression: keyof typeof defaultDictionary) => {
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(0, 0, 0, 0);
 
+        console.log("start", start)
+
         const randomDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
         return randomDate.toISOString().split('T')[0];
       }
-    case '#USE_GPT_VALUE':
-      return async(prompt: string, formatSpecs: string) => {
-        const val = await templates.createValue(prompt, formatSpecs)
-        return val
+    case '#BOOLEAN':
+      return async() => {
+        return Math.random() >= 0.5;
       }
-    case '#USE_GPT_JSON':
-      return async(jsonPattern: unknown, additionalPrompt: string) => {
-        const val = await templates.similirizeJson(jsonPattern, additionalPrompt)
+    case '#UUID':
+      return () => {
+        return uuidv4();
+      }
+    case '#COUNTER':
+      return (id: string, start: string) => {
+          if(counters.get(id)) {
+            return counters.get(id).inc()
+          }else{
+            counters.add(id, parseInt(start))
+            return counters.get(id).get()
+          }
+      }
+    case '#USE_GPT':
+      return async(prompt: string, formatSpecs: string) => {
+        const val = await templates.useGPT(prompt, formatSpecs)
+        console.log(val)
         return val
       }
       // PLACE FOR YOUR CUSTOM BINDINGS

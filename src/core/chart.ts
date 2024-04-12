@@ -2,7 +2,7 @@ import { JsonGraphQLChart, JsonHttpChart } from './types.js';
 import { reflection } from '../parsing/reflection.js';
 
 
-const resolveGraphqlChart = (expressionParseFn: (input: string) => unknown, keys: string[], charts: JsonGraphQLChart[]) => {
+const resolveGraphqlChart = (expressionParseFn: (input: string) => Promise<unknown>, keys: string[], charts: JsonGraphQLChart[]) => {
     const chartsKeys = charts.map((chart) => chart.keys);
     const similarArrMatch = getMostSimilarArrayMatch(chartsKeys, keys);
     if(similarArrMatch.index === -1){
@@ -13,24 +13,26 @@ const resolveGraphqlChart = (expressionParseFn: (input: string) => unknown, keys
     return serverGraphQLChart(expressionParseFn, chart);
 }
 
-const serverHttpChart = (expressionParseFn: (input: string) => unknown,chart: JsonHttpChart) => {
+const serverHttpChart = async(expressionParseFn: (input: string) => Promise<unknown>,chart: JsonHttpChart) => {
   const arrayify = chart.config.arrayify;
   if (arrayify > 1) {
-    return Array.from({ length: arrayify }, () =>
-      reflection.reflectAndGenerate(expressionParseFn, chart.schema),
+    const promises = Array.from({ length: arrayify }, () =>
+       reflection.reflectAndGenerate(expressionParseFn, chart.schema, chart.config.mimicMode),
     );
+    const results = await Promise.all(promises);
+    return results
   }
-  return reflection.reflectAndGenerate(expressionParseFn, chart.schema);
+  return await reflection.reflectAndGenerate(expressionParseFn, chart.schema, chart.config.mimicMode);
 }
 
-const serverGraphQLChart = async(expressionParseFn: (input: string) => unknown, chart: JsonGraphQLChart) => {
+const serverGraphQLChart = async(expressionParseFn: (input: string) => Promise<unknown>, chart: JsonGraphQLChart) => {
   const arrayify = chart.config.arrayify;
   if (arrayify > 1) {
-    return Array.from({ length: arrayify }, () =>
-      reflection.reflectAndGenerate(expressionParseFn, chart.schema),
+    return Array.from({ length: arrayify }, async() =>
+      await reflection.reflectAndGenerate(expressionParseFn, chart.schema, chart.config.mimicMode),
     );
   }
-  return reflection.reflectAndGenerate(expressionParseFn, chart.schema);
+  return await reflection.reflectAndGenerate(expressionParseFn, chart.schema, chart.config.mimicMode);
 }
 
 // gets most similar array match based

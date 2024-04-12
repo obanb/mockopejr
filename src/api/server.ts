@@ -5,9 +5,10 @@ import { json } from '../core/json.js';
 import { chart } from '../core/chart.js';
 import { parseRequestParams } from 'graphql-http/lib/use/express';
 import { expressionParser } from '../parsing/expression_parser.js';
+import { counter } from '../parsing/counter.js';
 
 const app = express();
-const port = process.env.APP_PORT;
+const port = process.env.PORT;
 
 const RESERVED_ROUTES = {
   GRAPHQL: '/graphql',
@@ -35,7 +36,8 @@ const router = async() => {
     res.sendStatus(200)
   });
   // HOF of expression parser
-  const parser = expressionParser._new()
+  const counters = counter.counters()
+  const parser = expressionParser._new(counters)
   expressRouter.all(GRAPHQL_ROUTE, async(req: Request, res: Response) => {
      const gqlParams = await parseRequestParams(req, res)
     // fuck'em
@@ -57,7 +59,8 @@ const router = async() => {
       const method = v.method.toLowerCase();
       if (typeof expressRouter[method] === 'function' && !reservedUrls.includes(v.url)) {
         expressRouter[method](v.url, async (req: Request, res: Response) => {
-          const body = await chart.serverHttpChart(parser.proceed, v)
+          // deep clone here because of property randomization into original structure
+          const body = await chart.serverHttpChart(parser.proceed, structuredClone(v))
           res.send(body);
         });
       }

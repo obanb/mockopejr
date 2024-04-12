@@ -1,0 +1,16 @@
+{
+  "type": "graphql",
+  "schema": {
+    "template": true
+  },
+  "keys": [
+    "temporary",
+    "keys",
+    "from",
+    "template"
+  ],
+  "config": {
+    "arrayify": 0,
+    "mimicMode": "exact"
+  }
+}

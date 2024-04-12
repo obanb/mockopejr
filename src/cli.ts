@@ -9,12 +9,10 @@ program.name('Mockopejr CLI').description('Mockopejr CLI').version('0.0.1');
 
 program
   .hook('preAction', (_, actionCommand) => {
-    console.log(`running command: ${actionCommand.name().toUpperCase()}`);
-    console.log('args: %O', actionCommand.args);
-    console.log('options: %o', actionCommand.opts());
+    colourfulUnicorn.info(`running command: ${actionCommand.name().toUpperCase()}, options: ${JSON.stringify(actionCommand.opts())}`);
   })
   .hook('postAction', (_, actionCommand) => {
-    console.log(`command ${actionCommand.name().toUpperCase()} executed`);
+    colourfulUnicorn.info(`command ${actionCommand.name().toUpperCase()} executed`);
   });
 
 program
@@ -33,18 +31,13 @@ program
         type?: ChartType;
       },
     ) => {
-
       try {
-
-
         await json.template(options.type)
       } catch (error) {
         colourfulUnicorn.error(`Error while creating template: ${JSON.stringify(error)}`);
       }
     },
   );
-
-
 
 program.parse();
 

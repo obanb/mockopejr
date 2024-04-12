@@ -1,6 +1,6 @@
 import { AST, Dictionary, Expression, Grammer, Token } from './types.js';
-import { bindings } from './bindings.js';
 import { dictionary } from './__DICTIONARY__.js';
+import { Counter } from './counter.js';
 
 
 /**
@@ -243,20 +243,21 @@ const parser = (tokens: Token[]): AST => {
 // TRAVERSER
 // recursively traverses the parents and their children and evaluates the result in the composition style (a(b(c(value))) according to the assigned function
 
-const traverser = (ast: AST): unknown => {
+const traverser = async(ast: AST, counters: ReturnType<Counter["counters"]>): Promise<unknown> => {
   if (ast.type === 'PROGRAM') {
-    return traverser(ast.children[0]);
+    return traverser(ast.children[0], counters);
   }
   if (ast.type === 'EXPRESSION') {
     // find a match between the expression and the implementation of the assigned function
-    const expHook = dictionary.defaultBindings(ast.value as Expression);
+    const expHook = dictionary.defaultBindings(ast.value as Expression, counters);
     // recursively traverses the descendants of each parent (nodes) for each descendant (node) of the expression type
     // if the args type is found, the recursion terminates and proceeds to the next descendant
-    const expArgs = ast.children.map((child) => traverser(child));
-    console.log(expArgs);
-
+    const expArgs = ast.children.map((child) => traverser(child, counters));
+    const resolved = await Promise.all(expArgs)
+    console.log('RES',resolved)
     // @ts-ignore
-    return expHook(...expArgs);
+    const hooked = await expHook(...resolved)
+    return hooked
   }
   if (ast.type === 'ARGS') {
     return ast.value;
@@ -264,7 +265,7 @@ const traverser = (ast: AST): unknown => {
   throw new Error(`Unknown AST node type: ${ast.type}`);
 };
 
-const _new = () => {
+const _new = (counters: ReturnType<Counter["counters"]>) => {
   // probably must be asserted because of imported dictionary has dynamic type, because of inner dictionary typeguard
   // it's more comfortable to use at __DICTIONARY__.ts file
   const __symbols: Dictionary = dictionary.defaultSymbols as Dictionary
@@ -274,10 +275,10 @@ const _new = () => {
   const __tokenizer = tokenizer({...__symbols,...__dictionary, ...__values});
 
   return {
-    proceed: (input: string) => {
+    proceed: async(input: string) => {
       const tokens = __tokenizer(input);
       const ast = parser(tokens);
-      return traverser(ast);
+      return traverser(ast, counters);
     }
   }
 }

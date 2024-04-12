@@ -1,30 +1,84 @@
 import { generator } from './generator.js';
 import { Expression } from './types.js';
+import { MimicMode } from '../core/types.js';
 
 type JsonPrimitive = string | number | boolean | null;
 
 // the order depends
-const reflectAndGenerate = (expressionParseFn: (input: string) => unknown, schema: Record<string, unknown>) => {
-  Object.entries(schema).map(([key, elem]) => {
-    if (isNotEmptyPrimitiveArray(elem)) {
-      elem.forEach((item, i) => {
-         elem[i] = generator.generateFromJsonPrimitive(item)
-      });
-      return elem;
-    } else if (isNotEmptyObjectArray(elem)) {
-      return elem.forEach((el) => reflectAndGenerate(expressionParseFn, el));
+const reflectAndGenerate = async (expressionParseFn, schema, mimicMode: MimicMode) => {
+  const keepOriginalPrimitive = mimicMode !== 'randomize';
+  for (const [key, elem] of Object.entries(schema)) {
+    if(Array.isArray(elem)) {
+      if(typeof elem[0] === 'object' && elem !== null){
+        if(elem[0] && elem[0]["#REPEAT"] && elem[1]){
+          if(isJsonPrimitive(elem[1])){
+            const count = Number(elem[0]["#REPEAT"])
+            for (let i = 0; i < count; i++) {
+              elem[i] = keepOriginalPrimitive ? elem[1]: generator.generateFromJsonPrimitive(elem[1]);
+            }
+          }else if(typeof elem[1] === 'object' && elem !== null){
+            const count = Number(elem[0]["#REPEAT"])
+            // deep clone jam
+            const clone = structuredClone(elem[1])
+            for (let i = 0; i < count; i++) {
+              elem[i] = await reflectAndGenerate(expressionParseFn, structuredClone(clone), mimicMode);
+            }
+          }
+        }
+      }else {
+        for (let i = 0; i < (elem as Record<string,unknown>[]).length; i++) {
+          elem[i] = await reflectAndGenerate(expressionParseFn, elem[i], mimicMode);
+        }
+      }
+
+    // if (isNotEmptyPrimitiveArray(elem)) {
+    //   if(elem[0] && elem[0]["#REPEAT"] && elem[1]) {
+    //     const count = Number(elem[0]["#REPEAT"])
+    //     // deep clone jam
+    //     for (let i = 0; i < count; i++) {
+    //       elem[i] = keepOriginalPrimitive ? elem[i]: generator.generateFromJsonPrimitive(elem[i]);
+    //     }
+    //   }else {
+    //     for (let i = 0; i < (elem as JsonPrimitive[]).length; i++) {
+    //       elem[i] = keepOriginalPrimitive ? elem[i] : generator.generateFromJsonPrimitive(elem[i] as JsonPrimitive);
+    //     };
+    //   }
+    // } else if (isNotEmptyObjectArray(elem)) {
+    //   if(elem[0] && elem[0]["#REPEAT"] && elem[1]) {
+    //     const count = Number(elem[0]["#REPEAT"])
+    //     // deep clone jam
+    //     const clone = structuredClone(elem[1])
+    //     for (let i = 0; i < count; i++) {
+    //       elem[i] = await reflectAndGenerate(expressionParseFn, structuredClone(clone), mimicMode);
+    //     }
+    //   }
+    //   else {
+    //     for (let i = 0; i < (elem as Record<string,unknown>[]).length; i++) {
+    //       elem[i] = await reflectAndGenerate(expressionParseFn, elem[i], mimicMode);
+    //     }
+    //   }
     } else if (isNonNullableObject(elem)) {
-      return reflectAndGenerate(expressionParseFn, elem);
+      schema[key] = await reflectAndGenerate(expressionParseFn, elem, mimicMode);
     } else if (isJsonPrimitive(elem)) {
       if (isExpression(elem)) {
-        schema[key] = expressionParseFn(elem);
+        schema[key] = await expressionParseFn(elem);
       } else {
-        schema[key] = generator.generateFromJsonPrimitive(elem);
+        schema[key] = keepOriginalPrimitive ? elem : generator.generateFromJsonPrimitive(elem);
       }
     }
-  });
+  };
   return schema;
 };
+
+// // if element 0 is #REPEAT flag object, then
+// const arrayDeepJam = async(arr: unknown[], parseFn: (input: string) => Promise<unknown>) => {
+//     const count = Number(arr[0]["#REPEAT"])
+//     // deep clone jam
+//     const clone = structuredClone(arr[1])
+//     for (let i = 0; i < count; i++) {
+//       arr[i] = await reflectAndGenerate(parseFn, structuredClone(clone));
+//     }
+// }
 
 const isExpression = (elem: unknown): elem is Expression => {
   if(isString(elem)) {

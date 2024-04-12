@@ -2,12 +2,12 @@
   "type": "http",
   "schema": {
     "ahoj": "string",
-    "vagon": 22
+    "vagon": "#DATE_RANGE(2016-01-01,2016-12-31)"
   },
   "url": "/api/reservations/:id_reservation/guests/:id_guest",
   "config": {
     "arrayify": 0,
     "mimicMode": "exact"
   },
-  "method": "POST"
+  "method": "GET"
 }
