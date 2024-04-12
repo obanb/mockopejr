@@ -1,43 +1,36 @@
 {
   "type": "graphql",
   "schema": {
-    "type": "object",
-    "properties": {
       "me": {
-        "type": "ggg",
-        "properties": {
-          "email": {
+        "name": "John",
+        "surname": "Doe",
+        "dates": {
             "dateRange": "#DATE_RANGE(2016-01-01,2016-12-31)",
             "dateTimeRange": "#DATETIME_RANGE_ISO(2016-01-01T12:14:10,2016-01-01T12:15:10)"
-          },
-          "some": null,
-          "arr": [
+        },
+          "items": [
             { "#REPEAT": 3 },
             {
-              "range": "#RANGE(1,6)",
+              "intRange": "#RANGE(1,6)",
               "floatRange": "#RANGE_FLOAT(1.12,1.22,3)",
-              "exact": "#EXACT(EXACT_VALUE)",
               "stringify": "#EXACT({prop:value})",
-              "stringEnum": "#ENUM(1,2,3,4,5)",
+              "enum": "#ENUM(value1,value2,value3)",
               "insert": "#INSERT(prefix,suffix,-INSERTED-)",
-              "insertTurbo": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
+              "compoundInsert": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
               "randomBoolean": "#BOOLEAN()",
-              "normalArr": [1, 2, 3, 4, 5],
-              "normalArr": [{ "#REPEAT": 10 }, "pes"],
-              "prop": "ahoj",
-              "counter": "#COUNTER(nakej,55)",
-              "counter2": "#COUNTER(nakej2,12)",
-              "superCounter": "#INSERT(prefix,suffix,#COUNTER(nakej4,1220))",
+              "arr": [1, 2, 3, 4, 5],
+              "repeatArr": [{ "#REPEAT": 10 }, "pes"],
+              "counter1": "#COUNTER(someCounterId,55)",
+              "counter2": "#COUNTER(someOtherCounterId,12)",
+              "compoundCounter": "#INSERT(prefix,suffix,#someOtherOtherCounterId(some,1220))",
               "uuid": "#UUID()"
             }
           ]
         }
-      }
-    }
   },
-  "keys": ["me", "email"],
+  "keys": ["name", "items"],
   "config": {
     "arrayify": 0,
-    "mimicMode": "randomize"
+    "mimicMode": "exact"
   }
 }
