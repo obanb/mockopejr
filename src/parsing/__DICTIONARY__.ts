@@ -197,7 +197,6 @@ const defaultBindings = (
     case '#USE_GPT':
       return async (prompt: string, formatSpecs: string) => {
         const val = await templates.useGPT(prompt, formatSpecs);
-        console.log(val);
         return val;
       };
     // PLACE FOR YOUR CUSTOM BINDINGS

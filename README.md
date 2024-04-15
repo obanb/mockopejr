@@ -8,6 +8,7 @@
 - **Expression parser:** minimalistic JSON expression parser for dynamic properties/objects
 - **Random data generator:** generation of random data of similar type and structure
 - **CLI:** CLI for template pre-generation
+- **OpenAI support:** Just for fun, use OpenAI language models for expression based data generation
 
 ```     
          (\_/)   
@@ -18,10 +19,102 @@
          "   "
 ```      
 
-### Showcase
+### Example
+
+Create your data sample schema with Mockopejr expression language
+```
+{
+  "type": "graphql",
+  "schema": {
+      "example": {
+        "intRange": "#RANGE(1,6)",
+        "floatRange": "#RANGE_FLOAT(1.12,1.22,3)",
+        "dateRange": "#DATE_RANGE(2016-01-01,2016-12-31)",
+        "dateTimeRange": "#DATETIME_RANGE_ISO(2016-01-01T12:14:10,2016-01-01T12:15:10)",
+        "stringify": "#EXACT({prop:value})",
+        "enum": "#ENUM(value1,value2,value3)",
+        "insert": "#INSERT(prefix,suffix,-INSERTED-)",
+        "compoundInsert": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
+        "randomBoolean": "#BOOLEAN()",
+        "counter1": "#COUNTER(someCounterId,1)",
+        "counter2": "#COUNTER(someOtherCounterId,2)",
+        "compoundCounter": "#INSERT(prefix,suffix,#COUNTER(someOtherOtherCounterId,3))",
+        "uuid": "#UUID()",
+        "czechGirlFirstname": "#USE_GPT(czech girl firstname, format like :::name:::)",
+        "JoeBidenBorn": "#USE_GPT(the year joe biden was born, number)",
+        "arrayProp": [
+           { "#REPEAT": 5 },
+            {
+              "arrayCounter": "#COUNTER(someArrayCounterId,1)"
+            }
+          ]
+        }
+  },
+  "keys": ["example", "arrayProp"],
+  "config": {
+    "arrayify": 0,
+    "mimicMode": "exact"
+  }
+}
+```
+
+Call GraphQL or HTTP:
 
 ```
- TODO 
+{
+  example{
+    intRange
+    floatRange
+    dateRange
+    dateTimeRange
+    stringify
+    enum
+    insert
+    compoundInsert
+    .....
+  }
+}
+```
+
+Get your data response:
+
+```
+{
+  "example": {
+    "intRange": 5,
+    "floatRange": 1.175,
+    "dateRange": "2016-02-04",
+    "dateTimeRange": "2016-01-01T11:14:21.647Z",
+    "stringify": "{prop:value}",
+    "enum": "value1",
+    "insert": "prefix-INSERTED-suffix",
+    "compoundInsert": "prefixinsert2suffix",
+    "randomBoolean": true,
+    "counter1": 1,
+    "counter2": 2,
+    "compoundCounter": "prefix3suffix",
+    "uuid": "b600adfd-4e64-4486-b0be-e7ef63be786f",
+    "czechGirlFirstname": "Eva",
+    "JoeBidenBorn": 1942,
+    "arrayProp": [
+      {
+        "arrayCounter": 1
+      },
+      {
+        "arrayCounter": 2
+      },
+      {
+        "arrayCounter": 3
+      },
+      {
+        "arrayCounter": 4
+      },
+      {
+        "arrayCounter": 5
+      }
+    ]
+  }
+}
 ```
 
 ### Installation
@@ -192,6 +285,13 @@ example on 3 arrays and sample input:
 ```
 
 in case of the same number of hits, the chart with the lower total number of keys is preferred
+
+
+### Expression parser
+
+Expressions can be found in the ```src/parsing``` folder in the ```__DICTIONARY__.ts``` file, where it is possible to expand them at will
+
+Default supported expressions and binding here: [__DICTIONARY__.ts](./src/parsing/__DICTIONARY__.ts)
 
 ### Chart configs
 

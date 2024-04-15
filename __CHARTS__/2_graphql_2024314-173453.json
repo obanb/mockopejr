@@ -1,34 +1,31 @@
 {
   "type": "graphql",
   "schema": {
-      "me": {
-        "name": "John",
-        "surname": "Doe",
-        "dates": {
-            "dateRange": "#DATE_RANGE(2016-01-01,2016-12-31)",
-            "dateTimeRange": "#DATETIME_RANGE_ISO(2016-01-01T12:14:10,2016-01-01T12:15:10)"
-        },
-          "items": [
-            { "#REPEAT": 3 },
+      "example": {
+        "intRange": "#RANGE(1,6)",
+        "floatRange": "#RANGE_FLOAT(1.12,1.22,3)",
+        "dateRange": "#DATE_RANGE(2016-01-01,2016-12-31)",
+        "dateTimeRange": "#DATETIME_RANGE_ISO(2016-01-01T12:14:10,2016-01-01T12:15:10)",
+        "stringify": "#EXACT({prop:value})",
+        "enum": "#ENUM(value1,value2,value3)",
+        "insert": "#INSERT(prefix,suffix,-INSERTED-)",
+        "compoundInsert": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
+        "randomBoolean": "#BOOLEAN()",
+        "counter1": "#COUNTER(someCounterId,1)",
+        "counter2": "#COUNTER(someOtherCounterId,2)",
+        "compoundCounter": "#INSERT(prefix,suffix,#COUNTER(someOtherOtherCounterId,3))",
+        "uuid": "#UUID()",
+        "czechGirlFirstname": "#USE_GPT(czech girl firstname, format like :::name:::)",
+        "JoeBidenBorn": "#USE_GPT(the year joe biden was born, number)",
+        "arrayProp": [
+           { "#REPEAT": 5 },
             {
-              "intRange": "#RANGE(1,6)",
-              "floatRange": "#RANGE_FLOAT(1.12,1.22,3)",
-              "stringify": "#EXACT({prop:value})",
-              "enum": "#ENUM(value1,value2,value3)",
-              "insert": "#INSERT(prefix,suffix,-INSERTED-)",
-              "compoundInsert": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
-              "randomBoolean": "#BOOLEAN()",
-              "arr": [1, 2, 3, 4, 5],
-              "repeatArr": [{ "#REPEAT": 10 }, "pes"],
-              "counter1": "#COUNTER(someCounterId,55)",
-              "counter2": "#COUNTER(someOtherCounterId,12)",
-              "compoundCounter": "#INSERT(prefix,suffix,#someOtherOtherCounterId(some,1220))",
-              "uuid": "#UUID()"
+              "arrayCounter": "#COUNTER(someArrayCounterId,1)"
             }
           ]
         }
   },
-  "keys": ["name", "items"],
+  "keys": ["example", "arrayProp"],
   "config": {
     "arrayify": 0,
     "mimicMode": "exact"
