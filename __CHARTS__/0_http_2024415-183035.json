@@ -1,7 +1,9 @@
 {
   "type": "http",
-  "schema": {},
-  "url": "",
+  "schema": {
+    "template": true
+  },
+  "url": "temporary/url/from/template",
   "config": {
     "arrayify": 0,
     "mimicMode": "exact"
