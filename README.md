@@ -31,7 +31,7 @@ Create your data sample schema with Mockopejr expression language
         "floatRange": "#RANGE_FLOAT(1.12,1.22,3)",
         "dateRange": "#DATE_RANGE(2016-01-01,2016-12-31)",
         "dateTimeRange": "#DATETIME_RANGE_ISO(2016-01-01T12:14:10,2016-01-01T12:15:10)",
-        "stringify": "#EXACT({prop:value})",
+        "stringify": "#STRINGIFY({prop:value})",
         "enum": "#ENUM(value1,value2,value3)",
         "insert": "#INSERT(prefix,suffix,-INSERTED-)",
         "compoundInsert": "#INSERT(prefix,suffix,#ENUM(insert1,insert2))",
