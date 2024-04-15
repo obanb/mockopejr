@@ -8,7 +8,7 @@
 - **Expression parser:** minimalistic JSON expression parser for dynamic properties/objects
 - **Random data generator:** generation of random data of similar type and structure
 - **CLI:** CLI for template pre-generation
-- **OpenAI support:** Just for fun, use OpenAI language models for expression based data generation
+- **OpenAI support:** Just for fun, use OpenAI language models for expression based data generation (```{"JoeBidenBorn": "#USE_GPT(the year joe biden was born, number)}```)
 
 ```     
          (\_/)   
