@@ -1,6 +1,6 @@
 ## Mockopejr
 
-> HTTP & GraphQL response mock and data generator
+> HTTP & GraphQL response mock and data generator & responder
 
 - **HTTP:** HTTP mocks based on dynamimic URLs
 - **GraphQL:** GraphQL mocks without GQL schema definition, with simplified flow based on the similarity of GQL query and mock sample data
